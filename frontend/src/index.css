@@ -1,0 +1,150 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --surface-base: #ffffff;
+  --surface-white: #ffffff;
+  --surface-elevation-base: #ffffff;
+  --surface-elevation-1: #ffffff;
+  --surface-elevation-2: #ffffff;
+  --surface-elevation-3: #f4f5f6;
+
+  --surface-gray-1: #fbfbfb;
+  --surface-gray-2: #f4f5f6;
+  --surface-gray-3: #eeeff1;
+  --surface-gray-4: #e2e4e7;
+  --surface-gray-5: #d2d5da;
+  --surface-gray-6: #9ea3ae;
+  --surface-gray-7: #646a78;
+  --surface-gray-9: #1f2937;
+  --surface-black: #111827;
+  --surface-sidebar: #f8f9fa;
+
+  --ink-white: #ffffff;
+  --ink-gray-1: #f9fafb;
+  --ink-gray-2: #f3f4f6;
+  --ink-gray-3: #e5e7eb;
+  --ink-gray-4: #9ca3af;
+  --ink-gray-5: #6b7280;
+  --ink-gray-6: #4b5563;
+  --ink-gray-7: #374151;
+  --ink-gray-8: #1f2937;
+  --ink-gray-9: #111827;
+  --ink-black: #000000;
+
+  --outline-base: #e5e7eb;
+  --outline-gray-1: #e5e7eb;
+  --outline-gray-2: #d1d5db;
+  --outline-gray-3: #9ca3af;
+  --outline-gray-4: #6b7280;
+  --outline-elevation-1: #e5e7eb;
+  --outline-elevation-2: #d1d5db;
+
+  --black-overlay-200: rgba(0, 0, 0, 0.45);
+  --black-overlay-700: rgba(0, 0, 0, 0.75);
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  background-color: var(--surface-base);
+  color: var(--ink-gray-9);
+  margin: 0;
+  padding: 0;
+}
+
+/* Ensure all Frappe UI dropdowns, popups, palettes, and menus have solid white background and proper shadow */
+.bg-surface-white,
+.bg-surface-base,
+.bg-white {
+  background-color: #ffffff !important;
+}
+
+/* Sidebar matching Frappe Helpdesk - light grey canvas with pure white active pill */
+.helpdesk-sidebar,
+[data-slot="sidebar"],
+aside.helpdesk-sidebar {
+  background-color: #f8f9fa !important;
+}
+
+[data-slot="sidebar-header"] button:hover {
+  background-color: #eeeff1 !important;
+}
+
+[data-slot="sidebar-item"][data-state="active"],
+.group\/sidebar-item[data-state="active"] {
+  background-color: #ffffff !important;
+  color: #111827 !important;
+  font-weight: 500 !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.07), 0 1px 2px -1px rgba(0, 0, 0, 0.04) !important;
+  border: 1px solid rgba(209, 213, 219, 0.7) !important;
+}
+
+[data-slot="sidebar-item"]:hover:not([data-state="active"]),
+.group\/sidebar-item:hover:not([data-state="active"]) {
+  background-color: #eeeff1 !important;
+}
+
+.palette-content,
+.palette-content > div {
+  background-color: #ffffff !important;
+}
+
+.menu-content,
+[data-slot="content"],
+[role="menu"],
+[role="dialog"],
+[role="listbox"],
+.palette-content,
+.command-palette-content,
+.popover-content,
+.dialog-content,
+.modal-content,
+[data-radix-popper-content-wrapper] > div,
+[data-radix-popover-content] {
+  background-color: #ffffff !important;
+  color: var(--ink-gray-9, #111827);
+  border: 1px solid var(--outline-gray-2);
+  border-radius: 18px !important;
+  overflow: hidden;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+[role="menuitem"],
+.menu-item,
+[role="option"] {
+  border-radius: 10px !important;
+}
+
+/* Global radius for all filters, form inputs, selects, and typing spaces */
+input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+select,
+textarea {
+  border-radius: 12px !important;
+}
+
+/* Ensure modal backdrops have visible dark translucent overlay */
+.dialog-overlay,
+.modal-backdrop,
+.palette-overlay,
+.backdrop-blur-overlay {
+  background-color: rgba(0, 0, 0, 0.45) !important;
+  backdrop-filter: blur(2px);
+}
+
+/* Custom subtle scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}

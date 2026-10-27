@@ -1,0 +1,28 @@
+<!doctype html>
+<html class="h-full bg-surface-white" lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover maximum-scale=1.0, user-scalable=no"
+    />
+    <title>ERPNext Implementation & Project Management</title>
+    <meta name="mobile-web-app-capable" content="yes" />
+    <link rel="icon" type="image/svg+xml" href="/assets/projects/logo.svg" />
+  </head>
+  <body class="h-full text-ink-gray-9 antialiased">
+    <div id="app" class="h-full"></div>
+    <div id="modals"></div>
+    <div id="popovers"></div>
+    <script>
+      window.site_name = "{{ site_name }}";
+    </script>
+    <script>
+      {% for key in boot %}
+      window["{{ key }}"] = {{ boot[key] | tojson }};
+      {% endfor %}
+    </script>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
+

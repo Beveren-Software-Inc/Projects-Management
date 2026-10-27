@@ -1,0 +1,12 @@
+{
+  "name": "projects-ui",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build --base=/assets/projects/frontend/ && yarn copy-html-entry",
+    "copy-html-entry": "mkdir -p ../projects/www && cp ../projects/public/frontend/index.html ../projects/www/projects.html"
+  }
+}
+

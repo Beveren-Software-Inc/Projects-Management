@@ -1,0 +1,128 @@
+<template>
+  <FrappeUIProvider>
+    <div class="h-screen w-screen flex bg-surface-white text-ink-gray-9 overflow-hidden antialiased select-none">
+      <!-- Helpdesk-styled Sidebar -->
+      <Sidebar
+        :unread-count="unreadCount"
+        :is-search-open="showCommandPalette"
+        :is-notifications-open="showNotifications"
+        @open-search="showCommandPalette = true"
+        @open-notifications="showNotifications = !showNotifications"
+        @open-new-project="showNewProjectModal = true"
+        @open-new-task="openNewTaskModal(null)"
+        @open-settings="showAppSettings = true"
+      />
+
+      <!-- Notifications Slide-Over Panel -->
+      <NotificationPanel
+        :is-open="showNotifications"
+        :sidebar-width="220"
+        @close="showNotifications = false"
+        @count-changed="(count) => unreadCount = count"
+      />
+
+      <!-- Command Palette / Global Search Modal -->
+      <CommandPalette
+        :is-open="showCommandPalette"
+        @close="showCommandPalette = false"
+        @open="showCommandPalette = true"
+        @open-new-project="showNewProjectModal = true"
+        @open-new-task="openNewTaskModal(null)"
+        @open-settings="showAppSettings = true"
+      />
+
+      <!-- Main View Content Area -->
+      <div class="flex-1 flex flex-col h-full overflow-hidden min-w-0 bg-surface-white relative">
+        <router-view
+          :data="dashboardData"
+          @open-new-project="showNewProjectModal = true"
+          @open-new-task="openNewTaskModal"
+          @refresh="refreshData"
+        />
+      </div>
+
+      <!-- Modals -->
+      <NewProjectModal
+        :show="showNewProjectModal"
+        @close="showNewProjectModal = false"
+        @created="onProjectCreated"
+      />
+
+      <NewTaskModal
+        :show="showNewTaskModal"
+        :initial-project="selectedProjectForNewTask"
+        @close="showNewTaskModal = false"
+        @created="onTaskCreated"
+      />
+
+      <AppSettingsModal
+        :show="showAppSettings"
+        @close="showAppSettings = false"
+      />
+    </div>
+  </FrappeUIProvider>
+</template>
+
+<script setup>
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { FrappeUIProvider } from 'frappe-ui'
+import Sidebar from './components/Sidebar.vue'
+import NewProjectModal from './components/NewProjectModal.vue'
+import NewTaskModal from './components/NewTaskModal.vue'
+import CommandPalette from './components/CommandPalette.vue'
+import NotificationPanel from './components/NotificationPanel.vue'
+import AppSettingsModal from './components/AppSettingsModal.vue'
+import { getPortfolioDashboard, getNotifications } from './api'
+
+const router = useRouter()
+
+const showNewProjectModal = ref(false)
+const showNewTaskModal = ref(false)
+const showCommandPalette = ref(false)
+const showNotifications = ref(false)
+const showAppSettings = ref(false)
+const unreadCount = ref(0)
+const selectedProjectForNewTask = ref('')
+const dashboardData = ref({})
+
+onMounted(async () => {
+  await Promise.all([
+    refreshData(),
+    loadInitialNotifications(),
+  ])
+})
+
+async function loadInitialNotifications() {
+  try {
+    const res = await getNotifications(10)
+    unreadCount.value = res?.unread_count || 0
+  } catch (e) {
+    console.error('Failed to load initial notifications', e)
+  }
+}
+
+async function refreshData() {
+  try {
+    dashboardData.value = await getPortfolioDashboard()
+  } catch (e) {
+    console.error('Failed to load portfolio stats', e)
+  }
+}
+
+function openNewTaskModal(projectName = null) {
+  selectedProjectForNewTask.value = projectName || ''
+  showNewTaskModal.value = true
+}
+
+async function onProjectCreated(res) {
+  await refreshData()
+  if (res?.project_name) {
+    router.push('/projects/' + res.project_name)
+  }
+}
+
+async function onTaskCreated() {
+  await refreshData()
+}
+</script>

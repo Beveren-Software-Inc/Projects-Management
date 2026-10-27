@@ -1,0 +1,9 @@
+{
+  "name": "projects",
+  "private": true,
+  "scripts": {
+    "build": "cd frontend && /home/abidk/.nvm/versions/node/v20.20.2/bin/node ./node_modules/.bin/vite build --base=/assets/projects/frontend/",
+    "dev": "cd frontend && /home/abidk/.nvm/versions/node/v20.20.2/bin/node ./node_modules/.bin/vite"
+  }
+}
+

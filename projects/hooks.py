@@ -11,15 +11,19 @@ app_license = "mit"
 # required_apps = []
 
 # Each item in the list will be shown as an app in the apps page
-# add_to_apps_screen = [
-# 	{
-# 		"name": "projects",
-# 		"logo": "/assets/projects/logo.png",
-# 		"title": "Project Management",
-# 		"route": "/projects",
-# 		"has_permission": "projects.api.permission.has_app_permission",
-# 	}
-# ]
+add_to_apps_screen = [
+	{
+		"name": "projects",
+		"logo": "/assets/projects/logo.svg",
+		"title": "Projects",
+		"route": "/projects",
+		"has_permission": "projects.api.check_app_permission",
+	}
+]
+
+website_route_rules = [
+	{"from_route": "/projects/<path:app_path>", "to_route": "projects"},
+]
 
 # The dock, the rail down the left of the desk, is a document rather than a hook. Author it in
 # Manage Dock on a developer-mode site and press Export to App, and it is written to
@@ -95,8 +99,8 @@ app_license = "mit"
 # Installation
 # ------------
 
-# before_install = "projects.install.before_install"
-# after_install = "projects.install.after_install"
+after_install = "projects.setup.after_install"
+after_migrate = "projects.setup.after_migrate"
 
 # Uninstallation
 # ------------
