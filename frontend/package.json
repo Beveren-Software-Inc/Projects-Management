@@ -5,8 +5,20 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build --base=/assets/projects/frontend/ && yarn copy-html-entry",
-    "copy-html-entry": "mkdir -p ../projects/www && cp ../projects/public/frontend/index.html ../projects/www/projects.html"
+    "build": "vite build --base=/assets/projects/frontend/"
+  },
+  "dependencies": {
+    "@vueuse/core": "^14.1.0",
+    "frappe-ui": "1.0.0-rc.2",
+    "pinia": "^2.0.33",
+    "vue": "^3.5.13",
+    "vue-router": "^4.2.2"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^6.0.8",
+    "autoprefixer": "^10.4.14",
+    "postcss": "^8.4.5",
+    "tailwindcss": "^3.4.15",
+    "vite": "^8.2.0"
   }
 }
-
