@@ -58,6 +58,8 @@ ignore = [
     "UP040", # Use type aliases instead of type annotations
 ]
 typing-modules = ["frappe.types.DF"]
+[tool.bench.frappe-dependencies]
+frappe = ">=15.0.0-dev,<17.0.0"
 
 [tool.ruff.format]
 quote-style = "double"
