@@ -712,15 +712,15 @@
                 </div>
               </div>
 
-              <!-- 5. Team / Project Row (Interactive Dropdown) -->
+              <!-- 5. Project Row (Interactive Dropdown) -->
               <div class="flex items-center gap-2">
-                <span class="w-[106px] shrink-0 text-ink-gray-5">Team</span>
+                <span class="w-[106px] shrink-0 text-ink-gray-5">Project</span>
                 <div class="flex-1 min-w-0">
                   <Dropdown :options="projectDropdownOptions" align="start">
                     <template #default="{ open }">
                       <div class="flex items-center justify-between px-2.5 py-1.5 -ms-2 rounded-xl hover:bg-surface-gray-2 cursor-pointer transition select-none group">
                         <span class="font-medium text-ink-gray-8 truncate">
-                          {{ task.project_title || 'Implementation Team' }}
+                          {{ task.project_title || 'Select Project...' }}
                         </span>
                         <Icon name="chevron-down" size="12" class="text-ink-gray-4 group-hover:text-ink-gray-7 shrink-0 transition-transform" :class="{ 'rotate-180': open }" />
                       </div>
@@ -1129,7 +1129,7 @@ async function handleProjectSelect(p) {
     task.value.client_poc_name = p.client_poc_name
     emit('updated')
   } catch (e) {
-    alert('Failed to update team: ' + e.message)
+    alert('Failed to update project: ' + e.message)
   }
 }
 

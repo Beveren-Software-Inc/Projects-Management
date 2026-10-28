@@ -270,6 +270,48 @@ def get_task(task_id):
 	return task_data
 
 
+def _ensure_project_dates_accommodate_task(project, exp_start_date=None, exp_end_date=None):
+	"""Ensure parent Project start/end dates encompass the task's timeline to prevent ERPNext validation errors."""
+	if not project or not frappe.db.exists("Project", project):
+		return
+	try:
+		proj = frappe.db.get_value(
+			"Project",
+			project,
+			["name", "expected_start_date", "expected_end_date"],
+			as_dict=True,
+		)
+		if not proj:
+			return
+
+		updates = {}
+		if exp_start_date:
+			t_start = getdate(exp_start_date)
+			if proj.expected_start_date and t_start < getdate(proj.expected_start_date):
+				updates["expected_start_date"] = t_start
+			elif not proj.expected_start_date:
+				updates["expected_start_date"] = t_start
+
+		if exp_end_date:
+			t_end = getdate(exp_end_date)
+			if proj.expected_end_date and t_end > getdate(proj.expected_end_date):
+				updates["expected_end_date"] = t_end
+			elif not proj.expected_end_date:
+				updates["expected_end_date"] = t_end
+
+		if updates:
+			# Ensure expected_start_date <= expected_end_date on Project
+			cur_start = updates.get("expected_start_date", proj.expected_start_date)
+			cur_end = updates.get("expected_end_date", proj.expected_end_date)
+			if cur_start and cur_end and getdate(cur_start) > getdate(cur_end):
+				updates["expected_end_date"] = cur_start
+
+			frappe.db.set_value("Project", project, updates, update_modified=False)
+			frappe.db.commit()
+	except Exception as e:
+		frappe.log_error(f"Failed to adapt project dates for task: {str(e)}", "Projects App")
+
+
 @frappe.whitelist()
 def create_task(data):
 	"""Create a task and assign users."""
@@ -280,16 +322,28 @@ def create_task(data):
 	if not subject:
 		frappe.throw(_("Task subject is required"))
 
+	project = data.get("project")
+	exp_start_date = data.get("exp_start_date")
+	exp_end_date = data.get("exp_end_date")
+
+	# Ensure task exp_end_date >= exp_start_date
+	if exp_start_date and exp_end_date:
+		if getdate(exp_end_date) < getdate(exp_start_date):
+			exp_end_date = exp_start_date
+
+	if project:
+		_ensure_project_dates_accommodate_task(project, exp_start_date, exp_end_date)
+
 	doc = frappe.get_doc({
 		"doctype": "Task",
 		"subject": subject,
-		"project": data.get("project"),
+		"project": project,
 		"implementation_module": data.get("implementation_module"),
 		"priority": data.get("priority") or "Medium",
 		"status": data.get("status") or "Open",
 		"is_milestone": cint(data.get("is_milestone", 0)),
-		"exp_start_date": data.get("exp_start_date"),
-		"exp_end_date": data.get("exp_end_date"),
+		"exp_start_date": exp_start_date,
+		"exp_end_date": exp_end_date,
 		"expected_time": flt(data.get("expected_time", 8)),
 		"progress": flt(data.get("progress", 0)),
 		"description": data.get("description") or "",
@@ -319,7 +373,8 @@ def create_task(data):
 				add_tag(tag.strip(), "Task", doc.name)
 
 	frappe.db.commit()
-	_update_project_completion(doc.project)
+	if doc.project:
+		_update_project_completion(doc.project)
 
 	return get_task(doc.name)
 
@@ -332,6 +387,19 @@ def update_task(task_id, data):
 
 	doc = frappe.get_doc("Task", task_id)
 	old_status = doc.status
+
+	target_project = data.get("project") or doc.project
+	target_start = data.get("exp_start_date") or doc.exp_start_date
+	target_end = data.get("exp_end_date") or doc.exp_end_date
+
+	if target_start and target_end:
+		if getdate(target_end) < getdate(target_start):
+			target_end = target_start
+			if "exp_end_date" in data:
+				data["exp_end_date"] = target_end
+
+	if target_project and (data.get("exp_end_date") or data.get("exp_start_date") or data.get("project")):
+		_ensure_project_dates_accommodate_task(target_project, target_start, target_end)
 
 	allowed_fields = [
 		"subject", "status", "priority", "progress", "is_milestone",
@@ -405,6 +473,8 @@ def bulk_update_tasks(task_ids, data):
 
 			if "exp_end_date" in data and data["exp_end_date"]:
 				doc.exp_end_date = data["exp_end_date"]
+				if doc.project:
+					_ensure_project_dates_accommodate_task(doc.project, doc.exp_start_date, doc.exp_end_date)
 
 			if "implementation_module" in data and data["implementation_module"]:
 				doc.implementation_module = data["implementation_module"]

@@ -30,9 +30,41 @@ export async function request(method, endpoint, data = null) {
   const json = await response.json()
 
   if (!response.ok || json.exc) {
-    const errorMsg = json._server_messages
-      ? JSON.parse(json._server_messages).join('\n')
-      : (json.message || response.statusText || 'Unknown Server Error')
+    let errorMsg = 'Unknown Server Error'
+    if (json._server_messages) {
+      try {
+        const msgs = JSON.parse(json._server_messages)
+        const parsedMsgs = msgs
+          .map(m => {
+            try {
+              const parsed = JSON.parse(m)
+              const text = parsed.message || m
+              return text.replace(/<[^>]+>/g, '').trim()
+            } catch {
+              return String(m).replace(/<[^>]+>/g, '').trim()
+            }
+          })
+          .filter(Boolean)
+        if (parsedMsgs.length > 0) {
+          errorMsg = parsedMsgs.join('\n')
+        }
+      } catch {
+        errorMsg = String(json._server_messages).replace(/<[^>]+>/g, '').trim()
+      }
+    } else if (json.message) {
+      if (typeof json.message === 'string') {
+        try {
+          const parsed = JSON.parse(json.message)
+          errorMsg = (parsed.message || json.message).replace(/<[^>]+>/g, '').trim()
+        } catch {
+          errorMsg = json.message.replace(/<[^>]+>/g, '').trim()
+        }
+      } else if (typeof json.message === 'object' && json.message.message) {
+        errorMsg = String(json.message.message).replace(/<[^>]+>/g, '').trim()
+      }
+    } else if (response.statusText) {
+      errorMsg = response.statusText
+    }
     console.error('API Error:', errorMsg, json)
     throw new Error(errorMsg)
   }

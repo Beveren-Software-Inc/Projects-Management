@@ -72,6 +72,7 @@
             <input
               v-model="form.exp_start_date"
               type="date"
+              @change="onStartDateChange"
               class="w-full px-3 py-2 text-xs rounded-xl border border-outline-gray-2 bg-surface-gray-1 hover:bg-surface-gray-2 focus:bg-white focus:outline-none focus:border-outline-gray-4 transition shadow-2xs"
             />
           </div>
@@ -80,6 +81,7 @@
             <input
               v-model="form.exp_end_date"
               type="date"
+              :min="form.exp_start_date"
               class="w-full px-3 py-2 text-xs rounded-xl border border-outline-gray-2 bg-surface-gray-1 hover:bg-surface-gray-2 focus:bg-white focus:outline-none focus:border-outline-gray-4 transition shadow-2xs"
             />
           </div>
@@ -197,8 +199,22 @@ onMounted(async () => {
   }
 })
 
+function onStartDateChange() {
+  if (form.value.exp_start_date && form.value.exp_end_date) {
+    if (form.value.exp_end_date < form.value.exp_start_date) {
+      form.value.exp_end_date = form.value.exp_start_date
+    }
+  }
+}
+
 async function handleSubmit() {
   if (!form.value.subject || !form.value.project) return
+
+  if (form.value.exp_start_date && form.value.exp_end_date) {
+    if (form.value.exp_end_date < form.value.exp_start_date) {
+      form.value.exp_end_date = form.value.exp_start_date
+    }
+  }
 
   loading.value = true
   try {
@@ -210,7 +226,7 @@ async function handleSubmit() {
     emit('created', res)
     emit('close')
   } catch (e) {
-    alert('Error creating task: ' + e.message)
+    alert(e.message || 'Error creating task')
   } finally {
     loading.value = false
   }
