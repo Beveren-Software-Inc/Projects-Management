@@ -424,21 +424,21 @@
               <!-- KPI Metric Cards Grid -->
               <div class="grid grid-cols-2 md:grid-cols-4 gap-3.5">
                 <div class="bg-surface-white rounded-2xl border border-outline-gray-1 p-4 shadow-2xs">
-                  <div class="text-[11px] font-medium text-ink-gray-5">First Response</div>
+                  <div class="text-[11px] font-medium text-ink-gray-5">Target Response</div>
                   <div class="text-base font-bold text-emerald-600 mt-1">1h 38m</div>
                   <div class="text-[10px] text-emerald-700 mt-0.5">✓ Target fulfilled</div>
                 </div>
 
                 <div class="bg-surface-white rounded-2xl border border-outline-gray-1 p-4 shadow-2xs">
-                  <div class="text-[11px] font-medium text-ink-gray-5">Resolution SLA</div>
-                  <div class="text-base font-bold text-blue-600 mt-1">{{ task.status === 'Completed' ? 'Resolved' : 'On Hold' }}</div>
-                  <div class="text-[10px] text-ink-gray-4 mt-0.5">Paused pending client</div>
+                  <div class="text-[11px] font-medium text-ink-gray-5">Delivery Target</div>
+                  <div class="text-base font-bold text-blue-600 mt-1">{{ task.status === 'Completed' ? 'Delivered' : 'On Schedule' }}</div>
+                  <div class="text-[10px] text-ink-gray-4 mt-0.5">Active milestone track</div>
                 </div>
 
                 <div class="bg-surface-white rounded-2xl border border-outline-gray-1 p-4 shadow-2xs">
                   <div class="text-[11px] font-medium text-ink-gray-5">Total Emails</div>
                   <div class="text-base font-bold text-ink-gray-9 mt-1">{{ emailCount }}</div>
-                  <div class="text-[10px] text-ink-gray-4 mt-0.5">Customer communications</div>
+                  <div class="text-[10px] text-ink-gray-4 mt-0.5">Client communications</div>
                 </div>
 
                 <div class="bg-surface-white rounded-2xl border border-outline-gray-1 p-4 shadow-2xs">
@@ -450,7 +450,7 @@
 
               <!-- Lifecycle Details Card -->
               <div class="bg-surface-white rounded-2xl border border-outline-gray-1 p-5 shadow-2xs space-y-4">
-                <h3 class="text-xs font-semibold text-ink-gray-9">Task Lifecycle & SLA Timelines</h3>
+                <h3 class="text-xs font-semibold text-ink-gray-9">Task Lifecycle & Milestone Schedule</h3>
                 <div class="grid grid-cols-2 gap-4 text-xs">
                   <div class="space-y-2">
                     <div class="flex justify-between py-1 border-b border-outline-gray-1">
@@ -536,23 +536,28 @@
             </div>
           </div>
 
-          <!-- TicketSLA (matching Helpdesk TicketSLA.vue) -->
+          <!-- TaskSLA / Delivery Target -->
           <div class="space-y-1.5 text-xs pt-1">
-            <!-- First Response -->
+            <!-- Target Response -->
             <div class="flex items-center justify-between">
-              <span class="w-[106px] shrink-0 text-ink-gray-5">First Response</span>
+              <span class="w-[106px] shrink-0 text-ink-gray-5">Target Response</span>
               <div class="flex min-w-0 flex-1 items-center gap-1 ps-2">
                 <span class="text-emerald-600 font-medium truncate">Fulfilled in 1h 38m</span>
-                <span class="text-ink-gray-4 text-[11px] cursor-pointer" title="SLA Response Target Met">ⓘ</span>
+                <span class="text-ink-gray-4 text-[11px] cursor-pointer" title="Response Target Met">ⓘ</span>
               </div>
             </div>
 
-            <!-- Resolution -->
+            <!-- Delivery Status -->
             <div class="flex items-center justify-between">
-              <span class="w-[106px] shrink-0 text-ink-gray-5">Resolution</span>
+              <span class="w-[106px] shrink-0 text-ink-gray-5">Delivery Status</span>
               <div class="flex min-w-0 flex-1 items-center gap-1 ps-2">
-                <span class="text-blue-600 font-medium truncate">{{ task.status === 'Completed' ? 'Resolved' : 'On Hold' }}</span>
-                <span class="text-ink-gray-4 text-[11px] cursor-pointer" title="Resolution SLA on hold">ⓘ</span>
+                <span
+                  class="font-medium truncate"
+                  :class="task.status === 'Completed' ? 'text-emerald-600' : task.is_overdue ? 'text-red-600' : 'text-blue-600'"
+                >
+                  {{ task.status === 'Completed' ? 'Delivered' : task.is_overdue ? 'Overdue Deadline' : 'On Schedule' }}
+                </span>
+                <span class="text-ink-gray-4 text-[11px] cursor-pointer" title="Delivery Status">ⓘ</span>
               </div>
             </div>
           </div>
@@ -662,9 +667,9 @@
                 </div>
               </div>
 
-              <!-- 3. Ticket Type / Module Row (Interactive Dropdown) -->
+              <!-- 3. Module Row (Interactive Dropdown) -->
               <div class="flex items-center gap-2">
-                <span class="w-[106px] shrink-0 text-ink-gray-5">Ticket Type</span>
+                <span class="w-[106px] shrink-0 text-ink-gray-5">Module</span>
                 <div class="flex-1 min-w-0">
                   <Dropdown :options="moduleDropdownOptions" align="start">
                     <template #default="{ open }">
@@ -836,13 +841,13 @@
             </div>
           </div>
 
-          <!-- Section 3: Recent Tickets (Matching Screenshot 1) -->
+          <!-- Section 3: Recent Tasks -->
           <div class="p-4 space-y-3">
             <div
               class="flex items-center justify-between cursor-pointer select-none"
               @click="recentTicketsOpen = !recentTicketsOpen"
             >
-              <span class="text-xs font-semibold text-ink-gray-9">Recent Tickets</span>
+              <span class="text-xs font-semibold text-ink-gray-9">Recent Tasks</span>
               <Icon
                 name="chevron-down"
                 size="13"
@@ -1112,7 +1117,7 @@ async function handleModuleSelect(m) {
     task.value.module_color = m.color
     emit('updated')
   } catch (e) {
-    alert('Failed to update ticket type: ' + e.message)
+    alert('Failed to update module: ' + e.message)
   }
 }
 

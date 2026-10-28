@@ -376,6 +376,104 @@ def update_task(task_id, data):
 
 
 @frappe.whitelist()
+def bulk_update_tasks(task_ids, data):
+	"""Bulk update multiple tasks (status, priority, assignee, due date, module, milestone)."""
+	if isinstance(task_ids, str):
+		task_ids = json.loads(task_ids)
+	if isinstance(data, str):
+		data = json.loads(data)
+
+	if not task_ids:
+		return {"success": False, "message": "No tasks selected"}
+
+	affected_projects = set()
+
+	for task_id in task_ids:
+		try:
+			doc = frappe.get_doc("Task", task_id)
+			old_status = doc.status
+
+			if "status" in data and data["status"]:
+				doc.status = data["status"]
+				if doc.status == "Completed" and old_status != "Completed":
+					doc.progress = 100
+				elif doc.status == "Open" and doc.progress == 100:
+					doc.progress = 0
+
+			if "priority" in data and data["priority"]:
+				doc.priority = data["priority"]
+
+			if "exp_end_date" in data and data["exp_end_date"]:
+				doc.exp_end_date = data["exp_end_date"]
+
+			if "implementation_module" in data and data["implementation_module"]:
+				doc.implementation_module = data["implementation_module"]
+
+			if "is_milestone" in data and data["is_milestone"] is not None:
+				doc.is_milestone = int(data["is_milestone"])
+
+			if "assigned_to" in data and data["assigned_to"]:
+				assignee = data["assigned_to"].strip()
+				if assignee:
+					from frappe.desk.form.assign_to import add as add_assign
+					try:
+						add_assign({
+							"doctype": "Task",
+							"name": task_id,
+							"assign_to": [assignee],
+							"description": "Bulk assigned task",
+						})
+					except Exception:
+						pass
+
+			doc.save(ignore_permissions=True)
+			if doc.project:
+				affected_projects.add(doc.project)
+		except Exception as e:
+			frappe.log_error(f"Failed to bulk update task {task_id}: {str(e)}", "Bulk Update Tasks")
+
+	frappe.db.commit()
+
+	for proj in affected_projects:
+		_update_project_completion(proj)
+
+	return {
+		"success": True,
+		"updated_count": len(task_ids),
+	}
+
+
+@frappe.whitelist()
+def bulk_delete_tasks(task_ids):
+	"""Bulk delete multiple tasks."""
+	if isinstance(task_ids, str):
+		task_ids = json.loads(task_ids)
+
+	if not task_ids:
+		return {"success": False, "message": "No tasks selected"}
+
+	affected_projects = set()
+	for task_id in task_ids:
+		try:
+			doc = frappe.get_doc("Task", task_id)
+			if doc.project:
+				affected_projects.add(doc.project)
+			frappe.delete_doc("Task", task_id, ignore_permissions=True)
+		except Exception:
+			pass
+
+	frappe.db.commit()
+
+	for proj in affected_projects:
+		_update_project_completion(proj)
+
+	return {
+		"success": True,
+		"deleted_count": len(task_ids),
+	}
+
+
+@frappe.whitelist()
 def quick_update_status(task_id, status):
 	"""Quick status update e.g. for Kanban board column drag-and-drop."""
 	doc = frappe.get_doc("Task", task_id)

@@ -1,17 +1,17 @@
 <template>
   <div class="h-full flex flex-col overflow-hidden bg-surface-white">
     <!-- CASE 1: Individual Task Ticket Detail View (Helpdesk style) -->
-    <template v-if="currentTaskId">
+    <div v-if="currentTaskId" class="h-full flex flex-col overflow-hidden">
       <TaskTicketDetail
         :task-id="currentTaskId"
         :show-back="true"
         @back="handleBackToList"
         @updated="loadTasks"
       />
-    </template>
+    </div>
 
     <!-- CASE 2: Tasks Explorer (List, Kanban, Calendar) -->
-    <template v-else>
+    <div v-show="!currentTaskId" class="h-full flex flex-col overflow-hidden">
       <!-- Layout Header matching Frappe Helpdesk Tickets.vue 1:1 -->
       <LayoutHeader>
         <template #left-header>
@@ -50,8 +50,34 @@
         </template>
 
         <template #right-header>
-          <!-- Right Header matching Helpdesk: Solid Charcoal '+ Create' button only -->
+          <!-- Dynamic Action Button: When multiple or all selected, switches from Create to Actions -->
+          <Dropdown v-if="selectedTaskIds.length > 0" :options="bulkActionOptions" align="end">
+            <template #default="{ open }">
+              <Button
+                theme="gray"
+                variant="solid"
+                size="sm"
+                class="rounded-xl font-medium flex items-center gap-1.5 shadow-2xs"
+              >
+                <template #prefix>
+                  <Icon name="check-square" size="13" />
+                </template>
+                <span>Actions ({{ selectedTaskIds.length }})</span>
+                <template #suffix>
+                  <Icon
+                    name="chevron-down"
+                    size="12"
+                    class="transition-transform text-ink-gray-4"
+                    :class="{ 'rotate-180': open }"
+                  />
+                </template>
+              </Button>
+            </template>
+          </Dropdown>
+
+          <!-- Standard '+ Create' button when nothing selected -->
           <Button
+            v-else
             theme="gray"
             variant="solid"
             size="sm"
@@ -82,6 +108,8 @@
           :projects="projects"
           :modules="modules"
           :loading="loading"
+          :selected-task-ids="selectedTaskIds"
+          @update:selected-task-ids="selectedTaskIds = $event"
           @select-task="handleSelectTask"
           @update-status="handleQuickStatus"
           @reload="loadTasks"
@@ -106,7 +134,16 @@
           @filter-change="handleSubFilter"
         />
       </div>
-    </template>
+    </div>
+
+    <!-- Bulk Edit Modal -->
+    <BulkEditModal
+      :show="showBulkEditModal"
+      :task-ids="selectedTaskIds"
+      :modules="modules"
+      @close="showBulkEditModal = false"
+      @updated="onBulkUpdated"
+    />
   </div>
 </template>
 
@@ -120,11 +157,14 @@ import TaskListView from '../components/TaskListView.vue'
 import TaskKanbanView from '../components/TaskKanbanView.vue'
 import TaskCalendarView from '../components/TaskCalendarView.vue'
 import TaskTicketDetail from '../components/TaskTicketDetail.vue'
+import BulkEditModal from '../components/BulkEditModal.vue'
 import {
   getTasks,
   getProjects,
   getImplementationModules,
   quickUpdateStatus,
+  bulkUpdateTasks,
+  bulkDeleteTasks,
 } from '../api'
 
 defineEmits(['open-new-task'])
@@ -137,6 +177,10 @@ const loading = ref(true)
 const tasks = ref([])
 const projects = ref([])
 const modules = ref([])
+
+// Bulk Selection & Modal State
+const selectedTaskIds = ref([])
+const showBulkEditModal = ref(false)
 
 const currentTaskId = computed(() => {
   return route.params.taskId || route.query.select || null
@@ -172,6 +216,68 @@ const viewDropdownOptions = [
   },
 ]
 
+// Bulk Action Dropdown Options
+const bulkActionOptions = computed(() => [
+  {
+    label: 'Bulk Edit Fields...',
+    icon: 'lucide-edit-3',
+    onClick: () => { showBulkEditModal.value = true },
+  },
+  {
+    label: 'Mark as Completed',
+    icon: 'lucide-check-circle',
+    onClick: () => handleBulkStatus('Completed'),
+  },
+  {
+    label: 'Mark as Working',
+    icon: 'lucide-clock',
+    onClick: () => handleBulkStatus('Working'),
+  },
+  {
+    label: 'Mark as Open',
+    icon: 'lucide-rotate-ccw',
+    onClick: () => handleBulkStatus('Open'),
+  },
+  {
+    label: 'Delete Selected Tasks',
+    icon: 'lucide-trash-2',
+    onClick: handleBulkDelete,
+  },
+  {
+    label: 'Clear Selection',
+    icon: 'lucide-x',
+    onClick: () => { selectedTaskIds.value = [] },
+  },
+])
+
+async function handleBulkStatus(status) {
+  if (selectedTaskIds.value.length === 0) return
+  try {
+    await bulkUpdateTasks(selectedTaskIds.value, { status })
+    selectedTaskIds.value = []
+    await loadTasks()
+  } catch (e) {
+    alert('Failed to update tasks: ' + (e.message || e))
+  }
+}
+
+async function handleBulkDelete() {
+  if (selectedTaskIds.value.length === 0) return
+  if (!confirm(`Are you sure you want to delete ${selectedTaskIds.value.length} selected tasks?`)) return
+  try {
+    await bulkDeleteTasks(selectedTaskIds.value)
+    selectedTaskIds.value = []
+    await loadTasks()
+  } catch (e) {
+    alert('Failed to delete tasks: ' + (e.message || e))
+  }
+}
+
+async function onBulkUpdated() {
+  selectedTaskIds.value = []
+  await loadTasks()
+}
+
 const filters = ref({
   project: route.query.project || 'All',
   module: 'All',
@@ -187,12 +293,14 @@ onMounted(async () => {
 watch(() => route.query.view, (newView) => {
   if (newView && newView !== activeView.value) {
     activeView.value = newView
+    selectedTaskIds.value = []
   }
 })
 
 watch(activeView, (newView) => {
   if (!currentTaskId.value) {
     router.replace({ query: { ...route.query, view: newView } })
+    selectedTaskIds.value = []
   }
 })
 

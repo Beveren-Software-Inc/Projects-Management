@@ -254,13 +254,13 @@
             :key="task.name"
             @click="$emit('select-task', task.name)"
             class="hover:bg-surface-gray-1/80 cursor-pointer transition select-none group h-12"
-            :class="{ 'bg-surface-gray-1/40': selectedTaskIds.includes(task.name) }"
+            :class="{ 'bg-surface-gray-1/40': effectiveSelectedIds.includes(task.name) }"
           >
             <!-- Checkbox (Using Frappe UI Checkbox) -->
             <td class="py-3 px-4 text-center" @click.stop>
               <div class="flex items-center justify-center">
                 <Checkbox
-                  :model-value="selectedTaskIds.includes(task.name)"
+                  :model-value="effectiveSelectedIds.includes(task.name)"
                   @update:model-value="() => toggleSelectTask(task.name)"
                 />
               </div>
@@ -390,7 +390,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { Badge, Tooltip, Avatar, Dropdown, Button, Checkbox } from 'frappe-ui'
 import Icon from './Icon.vue'
 import TicketPriority from './TicketPriority.vue'
@@ -412,9 +412,22 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  selectedTaskIds: {
+    type: Array,
+    default: () => [],
+  },
 })
 
-const emit = defineEmits(['select-task', 'update-status', 'reload', 'filter-change'])
+const emit = defineEmits([
+  'select-task',
+  'update-status',
+  'reload',
+  'filter-change',
+  'update:selectedTaskIds',
+  'open-bulk-edit',
+])
+
+const SAVED_FILTERS_KEY = 'projects_task_list_saved_filters'
 
 // Quick filter states
 const searchId = ref('')
@@ -433,8 +446,81 @@ const advMilestone = ref('all')
 const advOverdue = ref('all')
 const advAssignee = ref('all')
 
-// Multi-select state
-const selectedTaskIds = ref([])
+// Local multi-select fallback if not bound from parent
+const localSelectedTaskIds = ref([])
+
+const effectiveSelectedIds = computed(() => {
+  return props.selectedTaskIds !== undefined && props.selectedTaskIds.length > 0
+    ? props.selectedTaskIds
+    : localSelectedTaskIds.value
+})
+
+onMounted(() => {
+  loadSavedFilters()
+})
+
+function loadSavedFilters() {
+  try {
+    const raw = sessionStorage.getItem(SAVED_FILTERS_KEY)
+    if (raw) {
+      const saved = JSON.parse(raw)
+      if (saved.searchId !== undefined) searchId.value = saved.searchId
+      if (saved.searchSubject !== undefined) searchSubject.value = saved.searchSubject
+      if (saved.selectedProject !== undefined) selectedProject.value = saved.selectedProject
+      if (saved.selectedModule !== undefined) selectedModule.value = saved.selectedModule
+      if (saved.selectedStatus !== undefined) selectedStatus.value = saved.selectedStatus
+      if (saved.selectedPriority !== undefined) selectedPriority.value = saved.selectedPriority
+      if (saved.advMilestone !== undefined) advMilestone.value = saved.advMilestone
+      if (saved.advOverdue !== undefined) advOverdue.value = saved.advOverdue
+      if (saved.advAssignee !== undefined) advAssignee.value = saved.advAssignee
+      if (saved.showAdvancedFilter !== undefined) showAdvancedFilter.value = saved.showAdvancedFilter
+      if (saved.sortKey !== undefined) sortKey.value = saved.sortKey
+      if (saved.sortOrder !== undefined) sortOrder.value = saved.sortOrder
+    }
+  } catch (e) {
+    console.warn('Failed to load saved task filters:', e)
+  }
+}
+
+function persistFilters() {
+  try {
+    const filters = {
+      searchId: searchId.value,
+      searchSubject: searchSubject.value,
+      selectedProject: selectedProject.value,
+      selectedModule: selectedModule.value,
+      selectedStatus: selectedStatus.value,
+      selectedPriority: selectedPriority.value,
+      advMilestone: advMilestone.value,
+      advOverdue: advOverdue.value,
+      advAssignee: advAssignee.value,
+      showAdvancedFilter: showAdvancedFilter.value,
+      sortKey: sortKey.value,
+      sortOrder: sortOrder.value,
+    }
+    sessionStorage.setItem(SAVED_FILTERS_KEY, JSON.stringify(filters))
+  } catch (e) {}
+}
+
+watch(
+  [
+    searchId,
+    searchSubject,
+    selectedProject,
+    selectedModule,
+    selectedStatus,
+    selectedPriority,
+    advMilestone,
+    advOverdue,
+    advAssignee,
+    showAdvancedFilter,
+    sortKey,
+    sortOrder,
+  ],
+  () => {
+    persistFilters()
+  }
+)
 
 const activeAdvanceFilterCount = computed(() => {
   let count = 0
@@ -470,6 +556,9 @@ function clearFilters() {
   selectedStatus.value = 'All'
   selectedPriority.value = 'All'
   clearAdvanceFilters()
+  try {
+    sessionStorage.removeItem(SAVED_FILTERS_KEY)
+  } catch (e) {}
 }
 
 // Client-side filtering & sorting
@@ -551,24 +640,28 @@ function loadMore() {
 
 const isAllSelected = computed(() => {
   if (paginatedTasks.value.length === 0) return false
-  return paginatedTasks.value.every((t) => selectedTaskIds.value.includes(t.name))
+  return paginatedTasks.value.every((t) => effectiveSelectedIds.value.includes(t.name))
 })
 
 function toggleSelectAll() {
-  if (isAllSelected.value) {
-    selectedTaskIds.value = []
-  } else {
-    selectedTaskIds.value = paginatedTasks.value.map((t) => t.name)
+  let updated = []
+  if (!isAllSelected.value) {
+    updated = paginatedTasks.value.map((t) => t.name)
   }
+  localSelectedTaskIds.value = updated
+  emit('update:selectedTaskIds', updated)
 }
 
 function toggleSelectTask(id) {
-  const idx = selectedTaskIds.value.indexOf(id)
+  const current = [...effectiveSelectedIds.value]
+  const idx = current.indexOf(id)
   if (idx > -1) {
-    selectedTaskIds.value.splice(idx, 1)
+    current.splice(idx, 1)
   } else {
-    selectedTaskIds.value.push(id)
+    current.push(id)
   }
+  localSelectedTaskIds.value = current
+  emit('update:selectedTaskIds', current)
 }
 
 function cleanId(rawName) {

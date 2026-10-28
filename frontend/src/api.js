@@ -90,6 +90,14 @@ export async function quickUpdateStatus(taskId, status) {
   return request('POST', 'projects.api.task.quick_update_status', { task_id: taskId, status })
 }
 
+export async function bulkUpdateTasks(taskIds, data) {
+  return request('POST', 'projects.api.task.bulk_update_tasks', { task_ids: taskIds, data })
+}
+
+export async function bulkDeleteTasks(taskIds) {
+  return request('POST', 'projects.api.task.bulk_delete_tasks', { task_ids: taskIds })
+}
+
 export async function addTaskComment(taskId, content) {
   return request('POST', 'projects.api.task.add_comment', { task_id: taskId, content })
 }
