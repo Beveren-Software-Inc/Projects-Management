@@ -1,5 +1,5 @@
 <template>
-  <div class="h-full flex flex-col bg-surface-white overflow-hidden">
+  <div class="h-full flex flex-col app-canvas overflow-hidden">
     <!-- Header -->
     <LayoutHeader>
       <template #left-header>

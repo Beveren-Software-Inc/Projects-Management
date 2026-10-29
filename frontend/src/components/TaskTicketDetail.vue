@@ -1,982 +1,296 @@
 <template>
-  <div class="h-full flex flex-col bg-surface-white overflow-hidden select-none">
-    <!-- 1. Layout Header (Matching Frappe Helpdesk TicketHeader) -->
-    <div class="h-11 px-5 border-b border-outline-gray-1 flex items-center justify-between shrink-0 bg-surface-white">
-      <!-- Left Breadcrumbs -->
-      <div class="flex items-center gap-1.5 min-w-0 flex-1 text-sm">
-        <Button
-          v-if="showBack"
-          variant="ghost"
-          size="sm"
-          class="!p-1 text-ink-gray-5 hover:text-ink-gray-8 -ms-1"
-          @click="$emit('back')"
-          title="Back to Tasks"
-        >
-          <template #prefix>
-            <Icon name="arrow-left" size="14" />
-          </template>
-        </Button>
-        <router-link to="/tasks" class="text-ink-gray-5 hover:text-ink-gray-8 transition font-medium">
-          Tasks
-        </router-link>
-        <span class="text-ink-gray-4">/</span>
-        <span class="font-semibold text-ink-gray-9 truncate max-w-xl">
-          {{ task.subject || task.name }}
+  <section class="surface-panel task-detail-panel">
+    <div class="detail-toolbar">
+      <div>
+        <span class="panel-kicker">TASK DETAILS</span>
+        <span class="detail-context">
+          {{ projectLabel || task.project_title || 'Project' }}
+          <Icon name="chevron-right" :size="11" />
+          {{ moduleLabel || task.module_title || 'Module' }}
         </span>
       </div>
-
-      <!-- Right Header Actions (Frappe UI Status Dropdown + More Options) -->
-      <div class="flex items-center gap-2 shrink-0">
-        <!-- Status Pill Dropdown -->
-        <Dropdown :options="statusOptions" align="end">
-          <template #default="{ open }">
-            <Button
-              size="sm"
-              variant="subtle"
-              class="rounded-full shadow-2xs font-medium"
-            >
-              <template #prefix>
-                <IndicatorIcon :class="statusDotClass(task.status)" />
-              </template>
-              <span>{{ task.status || 'Open' }}</span>
-              <template #suffix>
-                <Icon name="chevron-down" size="12" class="text-ink-gray-4 transition-transform" :class="{ 'rotate-180': open }" />
-              </template>
-            </Button>
-          </template>
-        </Dropdown>
-
-        <!-- More actions dropdown -->
-        <Dropdown :options="moreOptions" align="end">
-          <template #default>
-            <Button
-              variant="ghost"
-              size="sm"
-              class="!p-1.5 text-ink-gray-5 hover:text-ink-gray-8"
-              title="More options"
-            >
-              <template #prefix>
-                <Icon name="more-horizontal" size="15" />
-              </template>
-            </Button>
-          </template>
-        </Dropdown>
-
-        <Button
-          v-if="showClose"
-          variant="ghost"
-          size="sm"
-          class="!p-1 text-ink-gray-4 hover:text-ink-gray-7 ml-1"
-          @click="$emit('close')"
-        >
-          <template #prefix>
-            <Icon name="x" size="15" />
-          </template>
-        </Button>
-      </div>
-    </div>
-
-    <!-- 2. Sub-Tabs Bar (✦ Activity, ✉ Emails, 💬 Comments, 📊 Analytics) -->
-    <div class="flex items-center border-b border-outline-gray-1 px-5 bg-surface-white shrink-0">
-      <div class="flex gap-4">
-        <button
-          @click="activeTab = 'activity'"
-          class="flex items-center gap-1.5 py-2.5 text-xs font-medium border-b-2 transition cursor-pointer"
-          :class="activeTab === 'activity' ? 'border-ink-gray-9 text-ink-gray-9 font-semibold' : 'border-transparent text-ink-gray-5 hover:text-ink-gray-8'"
-        >
-          <ActivityIcon class="size-3.5" :class="activeTab === 'activity' ? 'text-ink-gray-9' : 'text-ink-gray-5'" />
-          <span>Activity</span>
-        </button>
-
-        <button
-          @click="activeTab = 'emails'"
-          class="flex items-center gap-1.5 py-2.5 text-xs font-medium border-b-2 transition cursor-pointer"
-          :class="activeTab === 'emails' ? 'border-ink-gray-9 text-ink-gray-9 font-semibold' : 'border-transparent text-ink-gray-5 hover:text-ink-gray-8'"
-        >
-          <EmailIcon class="size-3.5" :class="activeTab === 'emails' ? 'text-ink-gray-9' : 'text-ink-gray-5'" />
-          <span>Emails</span>
-          <span
-            v-if="emailCount > 0"
-            class="text-[10px] px-1.5 py-0.5 rounded-full font-medium"
-            :class="activeTab === 'emails' ? 'bg-surface-gray-3 text-ink-gray-9' : 'bg-surface-gray-2 text-ink-gray-6'"
-          >
-            {{ emailCount }}
-          </span>
-        </button>
-
-        <button
-          @click="activeTab = 'comments'"
-          class="flex items-center gap-1.5 py-2.5 text-xs font-medium border-b-2 transition cursor-pointer"
-          :class="activeTab === 'comments' ? 'border-ink-gray-9 text-ink-gray-9 font-semibold' : 'border-transparent text-ink-gray-5 hover:text-ink-gray-8'"
-        >
-          <CommentIcon class="size-3.5" :class="activeTab === 'comments' ? 'text-ink-gray-9' : 'text-ink-gray-5'" />
-          <span>Comments</span>
-          <span
-            v-if="commentCount > 0"
-            class="text-[10px] px-1.5 py-0.5 rounded-full font-medium"
-            :class="activeTab === 'comments' ? 'bg-surface-gray-3 text-ink-gray-9' : 'bg-surface-gray-2 text-ink-gray-6'"
-          >
-            {{ commentCount }}
-          </span>
-        </button>
-
-        <button
-          @click="activeTab = 'analytics'"
-          class="flex items-center gap-1.5 py-2.5 text-xs font-medium border-b-2 transition cursor-pointer"
-          :class="activeTab === 'analytics' ? 'border-ink-gray-9 text-ink-gray-9 font-semibold' : 'border-transparent text-ink-gray-5 hover:text-ink-gray-8'"
-        >
-          <Icon name="chart-no-axes-column" size="14" :class="activeTab === 'analytics' ? 'text-ink-gray-9' : 'text-ink-gray-5'" />
-          <span>Analytics</span>
+      <div class="detail-actions">
+        <button type="button" class="icon-button" aria-label="Copy task link" @click="copyLink">
+          <Icon name="share" :size="15" />
         </button>
       </div>
     </div>
 
-    <!-- 3. Ticket Split Content (Left Feed & Right Sidebar) -->
-    <div class="flex-1 flex overflow-hidden">
-      
-      <!-- MAIN FEED COLUMN (Frappe Helpdesk Communication Area) -->
-      <div class="flex-1 flex flex-col overflow-hidden bg-[#fafafa]">
-        <!-- Scrollable Feed Area -->
-        <div class="flex-1 overflow-y-auto p-6 space-y-6">
-          <div class="flex items-center justify-between">
-            <h2 class="text-base font-bold text-ink-gray-9">
-              <span v-if="activeTab === 'activity'">Activity</span>
-              <span v-else-if="activeTab === 'emails'">Emails ({{ emailCount }})</span>
-              <span v-else-if="activeTab === 'comments'">Comments ({{ commentCount }})</span>
-              <span v-else-if="activeTab === 'analytics'">Performance & SLA Analytics</span>
-            </h2>
-            <Badge
-              v-if="task.is_milestone"
-              theme="amber"
-              variant="subtle"
-              size="sm"
-              label="Key Milestone"
-            >
-              <template #prefix>
-                <Icon name="flag" size="11" class="text-amber-600" />
-              </template>
-            </Badge>
-          </div>
-
-          <!-- TAB 1: ACTIVITY -->
-          <template v-if="activeTab === 'activity'">
-            <!-- Overdue Alert -->
-            <Alert
-              v-if="task.is_overdue"
-              theme="red"
-              title="Task Deadline Overdue"
-              :description="'This implementation task was scheduled for completion by ' + formatDate(task.exp_end_date) + '.'"
-            />
-
-            <!-- Primary Task Specification Card (Matching Helpdesk Ticket) -->
-            <div class="bg-surface-white rounded-2xl border border-outline-gray-1 p-5 shadow-2xs space-y-4">
-              <div class="flex items-center justify-between pb-3 border-b border-outline-gray-1">
-                <div class="flex items-center gap-2.5">
-                  <Avatar :label="task.owner || 'Administrator'" size="sm" />
-                  <div>
-                    <div class="font-medium text-xs text-ink-gray-9">{{ task.owner || 'Administrator' }}</div>
-                    <div class="text-[11px] text-ink-gray-5">Created {{ formatDate(task.creation) }}</div>
-                  </div>
-                </div>
-
-                <div class="flex items-center gap-1.5 text-xs">
-                  <Badge theme="gray" variant="subtle" size="sm" label="Task Specification" />
-                </div>
-              </div>
-
-              <!-- Task Description -->
-              <div class="text-xs text-ink-gray-8 leading-relaxed whitespace-pre-wrap font-sans">
-                {{ task.description || 'No detailed instructions entered yet for this implementation task.' }}
-              </div>
-            </div>
-
-            <!-- Connected Viewing Timeline (Matching Screenshot 1 & 2) -->
-            <div class="relative pl-6 space-y-3.5 my-2">
-              <!-- Vertical connecting line -->
-              <div class="absolute left-2 top-2 bottom-2 w-[1px] bg-outline-gray-2"></div>
-
-              <div
-                v-for="viewer in viewingHistory"
-                :key="viewer.id"
-                class="relative flex items-center justify-between text-xs text-ink-gray-6"
-              >
-                <div class="flex items-center gap-3 min-w-0">
-                  <span class="w-1.5 h-1.5 rounded-full bg-ink-gray-4 z-10 -ml-[21px] ring-4 ring-[#fafafa]"></span>
-                  <span class="truncate">
-                    <span class="font-semibold text-ink-gray-9">{{ viewer.name }}</span> viewed this
-                  </span>
-                </div>
-                <span class="text-[11px] text-ink-gray-4 shrink-0 ps-2">{{ viewer.time }}</span>
-              </div>
-            </div>
-
-            <!-- Existing Activity Communications / Comments (Matching Screenshot 1) -->
-            <div v-for="item in task.activity_timeline" :key="item.id">
-              <!-- Email Communication Card -->
-              <div
-                v-if="item.type === 'communication'"
-                class="bg-surface-white rounded-2xl border border-outline-gray-1 p-5 shadow-2xs space-y-3"
-              >
-                <div class="flex items-start justify-between">
-                  <div class="flex items-center gap-3 min-w-0">
-                    <Avatar :label="item.sender_name || item.sender" size="md" />
-                    <div class="min-w-0">
-                      <div class="font-medium text-xs text-ink-gray-9 truncate">
-                        {{ item.sender_name || item.sender }}
-                        <span class="text-ink-gray-4 font-normal">&lt;{{ item.sender }}&gt;</span>
-                      </div>
-                      <div v-if="item.recipients" class="text-[11px] text-ink-gray-4 truncate">
-                        To: {{ item.recipients }}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="flex items-center gap-2 text-ink-gray-4 text-xs shrink-0">
-                    <span class="text-[11px]">{{ formatDate(item.timestamp) || '5 days ago' }}</span>
-                    <button
-                      type="button"
-                      @click="handleReplyTo(item.sender)"
-                      class="p-1 hover:text-ink-gray-7 hover:bg-surface-gray-2 rounded-lg cursor-pointer"
-                      title="Reply"
-                    >
-                      ↩
-                    </button>
-                    <button
-                      type="button"
-                      @click="handleReplyTo(item.sender)"
-                      class="p-1 hover:text-ink-gray-7 hover:bg-surface-gray-2 rounded-lg cursor-pointer"
-                      title="Reply all"
-                    >
-                      «
-                    </button>
-                    <button
-                      type="button"
-                      class="p-1 hover:text-ink-gray-7 hover:bg-surface-gray-2 rounded-lg cursor-pointer"
-                      title="More"
-                    >
-                      ···
-                    </button>
-                  </div>
-                </div>
-
-                <div class="text-xs text-ink-gray-8 leading-relaxed whitespace-pre-wrap font-sans">
-                  {{ item.content }}
-                </div>
-              </div>
-
-              <!-- Internal Comment Card -->
-              <div
-                v-else-if="item.type === 'comment'"
-                class="bg-amber-50/40 rounded-2xl border border-amber-200/60 p-4 shadow-2xs space-y-2"
-              >
-                <div class="flex items-center justify-between pb-2 border-b border-amber-100">
-                  <div class="flex items-center gap-2">
-                    <Avatar :label="item.sender_name || item.sender" size="sm" />
-                    <span class="text-xs font-semibold text-ink-gray-9">{{ item.sender_name || item.sender }}</span>
-                    <span class="text-[11px] text-amber-700 bg-amber-100/70 px-2 py-0.5 rounded-full font-medium">Internal Note</span>
-                  </div>
-                  <span class="text-[11px] text-ink-gray-4">{{ formatDate(item.timestamp) }}</span>
-                </div>
-                <div class="text-xs text-ink-gray-8 whitespace-pre-wrap">
-                  {{ item.content }}
-                </div>
-              </div>
-
-              <!-- System Event Log -->
-              <div
-                v-else-if="item.type === 'system'"
-                class="flex items-center gap-2 py-1 text-xs text-ink-gray-5"
-              >
-                <span class="w-1.5 h-1.5 rounded-full bg-ink-gray-4"></span>
-                <span>{{ item.content }}</span>
-                <span class="text-[11px] text-ink-gray-4 ml-auto">{{ formatDate(item.timestamp) }}</span>
-              </div>
-            </div>
-          </template>
-
-          <!-- TAB 2: EMAILS ONLY -->
-          <template v-else-if="activeTab === 'emails'">
-            <!-- Empty state if no emails -->
-            <div
-              v-if="emailCount === 0"
-              class="flex flex-col items-center justify-center py-14 text-center space-y-3 bg-surface-white rounded-2xl border border-outline-gray-1 p-8"
-            >
-              <div class="w-12 h-12 rounded-2xl bg-surface-gray-2 flex items-center justify-center text-ink-gray-4">
-                <EmailIcon class="size-6 text-ink-gray-5" />
-              </div>
-              <div>
-                <h3 class="text-sm font-semibold text-ink-gray-8">No emails yet</h3>
-                <p class="text-xs text-ink-gray-5 max-w-sm mt-1">Start email communication with the client point of contact using the compose area below.</p>
-              </div>
-              <button
-                type="button"
-                @click="commAreaRef?.expandReply(task.client_poc_email)"
-                class="px-3.5 py-1.5 text-xs font-medium rounded-xl bg-ink-gray-9 text-white hover:bg-ink-gray-8 transition cursor-pointer"
-              >
-                Compose Email
-              </button>
-            </div>
-
-            <!-- Email Cards List -->
-            <div v-else class="space-y-4">
-              <div
-                v-for="item in emailTimeline"
-                :key="item.id"
-                class="bg-surface-white rounded-2xl border border-outline-gray-1 p-5 shadow-2xs space-y-3"
-              >
-                <div class="flex items-start justify-between">
-                  <div class="flex items-center gap-3 min-w-0">
-                    <Avatar :label="item.sender_name || item.sender" size="md" />
-                    <div class="min-w-0">
-                      <div class="font-medium text-xs text-ink-gray-9 truncate">
-                        {{ item.sender_name || item.sender }}
-                        <span class="text-ink-gray-4 font-normal">&lt;{{ item.sender }}&gt;</span>
-                      </div>
-                      <div v-if="item.recipients" class="text-[11px] text-ink-gray-4 truncate">
-                        To: {{ item.recipients }}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="flex items-center gap-2 text-ink-gray-4 text-xs shrink-0">
-                    <span class="text-[11px]">{{ formatDate(item.timestamp) || '5 days ago' }}</span>
-                    <button
-                      type="button"
-                      @click="handleReplyTo(item.sender)"
-                      class="p-1 hover:text-ink-gray-7 hover:bg-surface-gray-2 rounded-lg cursor-pointer"
-                      title="Reply"
-                    >
-                      ↩
-                    </button>
-                    <button
-                      type="button"
-                      @click="handleReplyTo(item.sender)"
-                      class="p-1 hover:text-ink-gray-7 hover:bg-surface-gray-2 rounded-lg cursor-pointer"
-                      title="Reply all"
-                    >
-                      «
-                    </button>
-                    <button
-                      type="button"
-                      class="p-1 hover:text-ink-gray-7 hover:bg-surface-gray-2 rounded-lg cursor-pointer"
-                      title="More"
-                    >
-                      ···
-                    </button>
-                  </div>
-                </div>
-
-                <div class="text-xs text-ink-gray-8 leading-relaxed whitespace-pre-wrap font-sans">
-                  {{ item.content }}
-                </div>
-              </div>
-            </div>
-          </template>
-
-          <!-- TAB 3: COMMENTS ONLY -->
-          <template v-else-if="activeTab === 'comments'">
-            <!-- Empty state if no comments -->
-            <div
-              v-if="commentCount === 0"
-              class="flex flex-col items-center justify-center py-14 text-center space-y-3 bg-surface-white rounded-2xl border border-outline-gray-1 p-8"
-            >
-              <div class="w-12 h-12 rounded-2xl bg-amber-50 flex items-center justify-center text-amber-600">
-                <CommentIcon class="size-6 text-amber-600" />
-              </div>
-              <div>
-                <h3 class="text-sm font-semibold text-ink-gray-8">No internal notes yet</h3>
-                <p class="text-xs text-ink-gray-5 max-w-sm mt-1">Leave an internal note for your team. Internal notes are private and not visible to the client.</p>
-              </div>
-              <button
-                type="button"
-                @click="commAreaRef?.expandComment()"
-                class="px-3.5 py-1.5 text-xs font-medium rounded-xl bg-amber-600 text-white hover:bg-amber-700 transition cursor-pointer"
-              >
-                Add Internal Note
-              </button>
-            </div>
-
-            <!-- Comment Cards List -->
-            <div v-else class="space-y-4">
-              <div
-                v-for="item in commentTimeline"
-                :key="item.id"
-                class="bg-amber-50/40 rounded-2xl border border-amber-200/60 p-4 shadow-2xs space-y-2"
-              >
-                <div class="flex items-center justify-between pb-2 border-b border-amber-100">
-                  <div class="flex items-center gap-2">
-                    <Avatar :label="item.sender_name || item.sender" size="sm" />
-                    <span class="text-xs font-semibold text-ink-gray-9">{{ item.sender_name || item.sender }}</span>
-                    <span class="text-[11px] text-amber-700 bg-amber-100/70 px-2 py-0.5 rounded-full font-medium">Internal Note</span>
-                  </div>
-                  <span class="text-[11px] text-ink-gray-4">{{ formatDate(item.timestamp) }}</span>
-                </div>
-                <div class="text-xs text-ink-gray-8 whitespace-pre-wrap">
-                  {{ item.content }}
-                </div>
-              </div>
-            </div>
-          </template>
-
-          <!-- TAB 4: ANALYTICS -->
-          <template v-else-if="activeTab === 'analytics'">
-            <div class="space-y-6">
-              <!-- KPI Metric Cards Grid -->
-              <div class="grid grid-cols-2 md:grid-cols-4 gap-3.5">
-                <div class="bg-surface-white rounded-2xl border border-outline-gray-1 p-4 shadow-2xs">
-                  <div class="text-[11px] font-medium text-ink-gray-5">Target Response</div>
-                  <div class="text-base font-bold text-emerald-600 mt-1">1h 38m</div>
-                  <div class="text-[10px] text-emerald-700 mt-0.5">✓ Target fulfilled</div>
-                </div>
-
-                <div class="bg-surface-white rounded-2xl border border-outline-gray-1 p-4 shadow-2xs">
-                  <div class="text-[11px] font-medium text-ink-gray-5">Delivery Target</div>
-                  <div class="text-base font-bold text-blue-600 mt-1">{{ task.status === 'Completed' ? 'Delivered' : 'On Schedule' }}</div>
-                  <div class="text-[10px] text-ink-gray-4 mt-0.5">Active milestone track</div>
-                </div>
-
-                <div class="bg-surface-white rounded-2xl border border-outline-gray-1 p-4 shadow-2xs">
-                  <div class="text-[11px] font-medium text-ink-gray-5">Total Emails</div>
-                  <div class="text-base font-bold text-ink-gray-9 mt-1">{{ emailCount }}</div>
-                  <div class="text-[10px] text-ink-gray-4 mt-0.5">Client communications</div>
-                </div>
-
-                <div class="bg-surface-white rounded-2xl border border-outline-gray-1 p-4 shadow-2xs">
-                  <div class="text-[11px] font-medium text-ink-gray-5">Internal Notes</div>
-                  <div class="text-base font-bold text-amber-600 mt-1">{{ commentCount }}</div>
-                  <div class="text-[10px] text-ink-gray-4 mt-0.5">Team collaboration logs</div>
-                </div>
-              </div>
-
-              <!-- Lifecycle Details Card -->
-              <div class="bg-surface-white rounded-2xl border border-outline-gray-1 p-5 shadow-2xs space-y-4">
-                <h3 class="text-xs font-semibold text-ink-gray-9">Task Lifecycle & Milestone Schedule</h3>
-                <div class="grid grid-cols-2 gap-4 text-xs">
-                  <div class="space-y-2">
-                    <div class="flex justify-between py-1 border-b border-outline-gray-1">
-                      <span class="text-ink-gray-5">Created By</span>
-                      <span class="font-medium text-ink-gray-8">{{ task.owner || 'Administrator' }}</span>
-                    </div>
-                    <div class="flex justify-between py-1 border-b border-outline-gray-1">
-                      <span class="text-ink-gray-5">Creation Date</span>
-                      <span class="font-medium text-ink-gray-8">{{ formatDate(task.creation) }}</span>
-                    </div>
-                    <div class="flex justify-between py-1 border-b border-outline-gray-1">
-                      <span class="text-ink-gray-5">Assigned To</span>
-                      <span class="font-medium text-ink-gray-8">{{ (task.assignees || []).map(a => a.full_name || a.email).join(', ') || 'Unassigned' }}</span>
-                    </div>
-                  </div>
-                  <div class="space-y-2">
-                    <div class="flex justify-between py-1 border-b border-outline-gray-1">
-                      <span class="text-ink-gray-5">Expected Start</span>
-                      <span class="font-medium text-ink-gray-8">{{ cleanDate(task.exp_start_date) || 'Not set' }}</span>
-                    </div>
-                    <div class="flex justify-between py-1 border-b border-outline-gray-1">
-                      <span class="text-ink-gray-5">Due Date</span>
-                      <span class="font-medium text-ink-gray-8">{{ cleanDate(task.exp_end_date) || 'Not set' }}</span>
-                    </div>
-                    <div class="flex justify-between py-1 border-b border-outline-gray-1">
-                      <span class="text-ink-gray-5">Current Status</span>
-                      <span class="font-medium text-ink-gray-8">{{ task.status }}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- SLA Service Commitment Details -->
-              <div class="bg-surface-white rounded-2xl border border-outline-gray-1 p-5 shadow-2xs space-y-3">
-                <h3 class="text-xs font-semibold text-ink-gray-9">SLA Service Level Agreement</h3>
-                <div class="space-y-2 text-xs text-ink-gray-7">
-                  <div class="flex items-center justify-between p-2.5 rounded-xl bg-surface-gray-2">
-                    <span class="font-medium">Response Target (4h)</span>
-                    <span class="text-emerald-600 font-semibold">Fulfilled in 1h 38m</span>
-                  </div>
-                  <div class="flex items-center justify-between p-2.5 rounded-xl bg-surface-gray-2">
-                    <span class="font-medium">Resolution Target (24h)</span>
-                    <span class="text-blue-600 font-semibold">Clock Paused (On Hold)</span>
-                  </div>
-                  <div class="flex items-center justify-between p-2.5 rounded-xl bg-surface-gray-2">
-                    <span class="font-medium">Business Schedule</span>
-                    <span class="text-ink-gray-6">Standard Hours (Mon - Fri 09:00 - 18:00)</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </template>
-
-          <!-- Helpdesk Communication Area (Replicated from Screenshot 1, 2, 3) -->
-          <CommunicationArea
-            v-if="activeTab !== 'analytics'"
-            ref="commAreaRef"
-            :task-id="task.name || taskId"
-            :client-email="task.client_poc_email || ''"
-            :client-name="task.client_poc_name || ''"
-            :task-subject="task.subject || ''"
-            @submitted="onCommunicationSubmitted"
+    <div ref="threadRef" class="detail-scroll">
+      <div class="detail-title-row">
+        <button
+          type="button"
+          class="detail-complete-toggle"
+          :class="{ 'is-complete': task.status === 'Completed' }"
+          @click="updateStatus(task.status === 'Completed' ? 'Open' : 'Completed')"
+        >
+          <Icon :name="task.status === 'Completed' ? 'check-circle' : 'circle'" :size="21" />
+        </button>
+        <div class="detail-title-copy">
+          <span class="task-id">{{ task.name }}</span>
+          <input
+            class="detail-title-input"
+            :class="{ 'is-complete': task.status === 'Completed' }"
+            :value="task.subject || ''"
+            @change="event => saveSubject(event.target.value)"
           />
         </div>
       </div>
 
-      <!-- 4. RIGHT SIDEBAR (Replicated from Helpdesk TicketDetailsTab.vue) -->
-      <div class="w-80 bg-surface-white border-l border-outline-gray-1 flex flex-col h-full overflow-hidden shrink-0">
-        <!-- Pinned Header: TicketContact + TicketSLA -->
-        <div class="shrink-0 p-4 space-y-3.5 border-b border-outline-gray-1">
-          <!-- TicketContact (matching Helpdesk TicketContact.vue) -->
-          <div class="flex items-center gap-3">
-            <Avatar :label="task.client_poc_name || 'Client'" size="3xl" />
-            <div class="flex min-w-0 flex-1 flex-col gap-1">
-              <p class="truncate text-sm font-medium text-ink-gray-8">
-                {{ task.client_poc_name || 'Client Point of Contact' }}
-              </p>
-              <div class="flex items-center gap-1.5 text-xs text-ink-gray-5">
-                <span class="font-mono">#{{ task.name?.split('-')?.pop() || '0202' }}</span>
-                <span>•</span>
-                <span>via Portal</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- TaskSLA / Delivery Target -->
-          <div class="space-y-1.5 text-xs pt-1">
-            <!-- Target Response -->
-            <div class="flex items-center justify-between">
-              <span class="w-[106px] shrink-0 text-ink-gray-5">Target Response</span>
-              <div class="flex min-w-0 flex-1 items-center gap-1 ps-2">
-                <span class="text-emerald-600 font-medium truncate">Fulfilled in 1h 38m</span>
-                <span class="text-ink-gray-4 text-[11px] cursor-pointer" title="Response Target Met">ⓘ</span>
-              </div>
-            </div>
-
-            <!-- Delivery Status -->
-            <div class="flex items-center justify-between">
-              <span class="w-[106px] shrink-0 text-ink-gray-5">Delivery Status</span>
-              <div class="flex min-w-0 flex-1 items-center gap-1 ps-2">
-                <span
-                  class="font-medium truncate"
-                  :class="task.status === 'Completed' ? 'text-emerald-600' : task.is_overdue ? 'text-red-600' : 'text-blue-600'"
-                >
-                  {{ task.status === 'Completed' ? 'Delivered' : task.is_overdue ? 'Overdue Deadline' : 'On Schedule' }}
-                </span>
-                <span class="text-ink-gray-4 text-[11px] cursor-pointer" title="Delivery Status">ⓘ</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Scrollable Sections with divide-y (Matching Helpdesk Section.vue) -->
-        <div class="flex-1 overflow-y-auto divide-y divide-outline-gray-1">
-          <!-- Section 1: Overview (Fully Interactive matching Helpdesk TicketDetailsTab) -->
-          <div class="p-4 space-y-3">
-            <div
-              class="flex items-center justify-between cursor-pointer select-none"
-              @click="overviewOpen = !overviewOpen"
-            >
-              <span class="text-xs font-semibold text-ink-gray-9">Overview</span>
-              <Icon
-                name="chevron-down"
-                size="13"
-                class="text-ink-gray-5 transition-transform duration-200"
-                :class="{ 'rotate-180': !overviewOpen }"
-              />
-            </div>
-
-            <div v-show="overviewOpen" class="space-y-2.5 text-xs pt-1">
-              <!-- 1. Assignee Row with Interactive Picker -->
-              <div class="flex items-center gap-2 relative">
-                <span class="w-[106px] shrink-0 text-ink-gray-5">Assignee</span>
-                <div class="flex-1 min-w-0">
-                  <div
-                    @click="showAssigneePicker = !showAssigneePicker"
-                    class="flex items-center justify-between px-2.5 py-1.5 -ms-2 rounded-xl hover:bg-surface-gray-2 cursor-pointer transition select-none group"
-                  >
-                    <div class="flex items-center gap-1.5 min-w-0">
-                      <template v-if="task.assignees?.length > 0">
-                        <Avatar :label="task.assignees[0].full_name || task.assignees[0].email" size="sm" />
-                        <span class="font-medium text-ink-gray-8 truncate">
-                          {{ task.assignees[0].full_name || task.assignees[0].email }}
-                        </span>
-                        <span v-if="task.assignees.length > 1" class="text-[10px] text-ink-gray-5 font-mono">
-                          +{{ task.assignees.length - 1 }}
-                        </span>
-                      </template>
-                      <template v-else>
-                        <span class="text-ink-gray-4 italic">Set Assignee...</span>
-                      </template>
-                    </div>
-                    <Icon name="chevron-down" size="12" class="text-ink-gray-4 group-hover:text-ink-gray-7 shrink-0 transition-transform" :class="{ 'rotate-180': showAssigneePicker }" />
-                  </div>
-
-                  <!-- Assignee Dropdown Picker Popover -->
-                  <div
-                    v-if="showAssigneePicker"
-                    class="absolute left-0 top-full mt-1.5 w-64 !bg-white border border-outline-gray-2 rounded-2xl shadow-xl z-50 p-2.5 space-y-2 animate-in fade-in duration-100"
-                  >
-                    <!-- Search user -->
-                    <div class="px-1">
-                      <input
-                        v-model="assigneeSearch"
-                        type="text"
-                        placeholder="Search users..."
-                        class="w-full px-3 py-1.5 text-xs rounded-xl border border-outline-gray-2 bg-surface-gray-1 focus:outline-none focus:bg-surface-white transition shadow-2xs"
-                        @click.stop
-                      />
-                    </div>
-
-                    <!-- User Options List -->
-                    <div class="max-h-48 overflow-y-auto space-y-0.5">
-                      <div
-                        v-for="u in filteredUsers"
-                        :key="u.name"
-                        @click.stop="toggleAssignee(u)"
-                        class="px-2.5 py-1.5 rounded-xl flex items-center justify-between hover:bg-surface-gray-2 cursor-pointer transition text-xs"
-                      >
-                        <div class="flex items-center gap-2 min-w-0">
-                          <Avatar :label="u.full_name || u.name" size="sm" />
-                          <div class="truncate">
-                            <div class="font-medium text-ink-gray-9 truncate">{{ u.full_name || u.name }}</div>
-                            <div class="text-[10px] text-ink-gray-4 truncate">{{ u.name }}</div>
-                          </div>
-                        </div>
-
-                        <!-- Checkmark if assigned -->
-                        <span v-if="isAssigned(u.name)" class="text-blue-600 font-bold shrink-0">✓</span>
-                      </div>
-                    </div>
-
-                    <div class="pt-1.5 border-t border-outline-gray-1 flex justify-end">
-                      <Button variant="ghost" size="sm" label="Close" class="!px-2.5 !py-0.5 rounded-lg" @click="showAssigneePicker = false" />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- 2. Priority Row (Interactive Dropdown) -->
-              <div class="flex items-center gap-2">
-                <span class="w-[106px] shrink-0 text-ink-gray-5">Priority</span>
-                <div class="flex-1 min-w-0">
-                  <Dropdown :options="priorityDropdownOptions" align="start">
-                    <template #default="{ open }">
-                      <div class="flex items-center justify-between px-2.5 py-1.5 -ms-2 rounded-xl hover:bg-surface-gray-2 cursor-pointer transition select-none group">
-                        <div class="flex items-center gap-1.5 min-w-0">
-                          <TicketPriority :priority="task.priority || 'Medium'" />
-                        </div>
-                        <Icon name="chevron-down" size="12" class="text-ink-gray-4 group-hover:text-ink-gray-7 shrink-0 transition-transform" :class="{ 'rotate-180': open }" />
-                      </div>
-                    </template>
-                  </Dropdown>
-                </div>
-              </div>
-
-              <!-- 3. Module Row (Interactive Dropdown) -->
-              <div class="flex items-center gap-2">
-                <span class="w-[106px] shrink-0 text-ink-gray-5">Module</span>
-                <div class="flex-1 min-w-0">
-                  <Dropdown :options="moduleDropdownOptions" align="start">
-                    <template #default="{ open }">
-                      <div class="flex items-center justify-between px-2.5 py-1.5 -ms-2 rounded-xl hover:bg-surface-gray-2 cursor-pointer transition select-none group">
-                        <span class="font-medium text-ink-gray-8 truncate">
-                          {{ task.module_title || 'General' }}
-                        </span>
-                        <Icon name="chevron-down" size="12" class="text-ink-gray-4 group-hover:text-ink-gray-7 shrink-0 transition-transform" :class="{ 'rotate-180': open }" />
-                      </div>
-                    </template>
-                  </Dropdown>
-                </div>
-              </div>
-
-              <!-- 4. Customer Row (Interactive Editor) -->
-              <div class="flex items-center gap-2 relative">
-                <span class="w-[106px] shrink-0 text-ink-gray-5">Customer</span>
-                <div class="flex-1 min-w-0">
-                  <div
-                    v-if="!editingCustomer"
-                    @click="startCustomerEdit"
-                    class="flex items-center justify-between px-2.5 py-1.5 -ms-2 rounded-xl hover:bg-surface-gray-2 cursor-pointer transition select-none group"
-                  >
-                    <span class="font-medium text-ink-gray-8 truncate">
-                      {{ task.client_poc_name || 'Set Customer...' }}
-                    </span>
-                    <Icon name="edit-2" size="11" class="text-ink-gray-4 group-hover:text-ink-gray-7 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" />
-                  </div>
-                  <div v-else class="flex items-center gap-1.5">
-                    <input
-                      ref="customerInputRef"
-                      v-model="customerText"
-                      @keydown.enter="saveCustomerEdit"
-                      @keydown.escape="editingCustomer = false"
-                      class="flex-1 px-3 py-1.5 text-xs rounded-xl border border-outline-gray-3 bg-surface-white focus:outline-none transition shadow-2xs"
-                    />
-                    <button @click="saveCustomerEdit" class="text-xs text-emerald-600 font-bold px-2 py-1 rounded-lg hover:bg-emerald-50">✓</button>
-                    <button @click="editingCustomer = false" class="text-xs text-ink-gray-4 px-2 py-1 rounded-lg hover:bg-surface-gray-2">✕</button>
-                  </div>
-                </div>
-              </div>
-
-              <!-- 5. Project Row (Interactive Dropdown) -->
-              <div class="flex items-center gap-2">
-                <span class="w-[106px] shrink-0 text-ink-gray-5">Project</span>
-                <div class="flex-1 min-w-0">
-                  <Dropdown :options="projectDropdownOptions" align="start">
-                    <template #default="{ open }">
-                      <div class="flex items-center justify-between px-2.5 py-1.5 -ms-2 rounded-xl hover:bg-surface-gray-2 cursor-pointer transition select-none group">
-                        <span class="font-medium text-ink-gray-8 truncate">
-                          {{ task.project_title || 'Select Project...' }}
-                        </span>
-                        <Icon name="chevron-down" size="12" class="text-ink-gray-4 group-hover:text-ink-gray-7 shrink-0 transition-transform" :class="{ 'rotate-180': open }" />
-                      </div>
-                    </template>
-                  </Dropdown>
-                </div>
-              </div>
-
-              <!-- 6. Tags Row (Interactive Chips + Add Tag) -->
-              <div class="flex items-start gap-2 pt-1">
-                <span class="w-[106px] shrink-0 text-ink-gray-5 pt-0.5">Tags</span>
-                <div class="flex-1 min-w-0 flex flex-wrap items-center gap-1.5">
-                  <span
-                    v-for="tag in (task.tags || [])"
-                    :key="tag"
-                    class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] bg-surface-gray-2 text-ink-gray-7 border border-outline-gray-2"
-                  >
-                    <span>{{ tag }}</span>
-                    <button @click.stop="handleRemoveTag(tag)" class="text-ink-gray-4 hover:text-ink-gray-9 text-xs font-bold leading-none">×</button>
-                  </span>
-
-                  <!-- Inline Add Tag Input -->
-                  <div v-if="showTagInput" class="inline-flex items-center gap-1.5">
-                    <input
-                      ref="tagInputRef"
-                      v-model="newTagText"
-                      @keydown.enter.prevent="handleAddTag"
-                      @keydown.escape="showTagInput = false"
-                      placeholder="Tag..."
-                      class="w-24 px-2.5 py-1 text-[11px] rounded-xl border border-outline-gray-3 bg-surface-white focus:outline-none transition shadow-2xs"
-                    />
-                    <button @click="handleAddTag" class="text-[11px] text-ink-gray-8 font-medium px-2 py-0.5 rounded-lg hover:bg-surface-gray-2">Add</button>
-                    <button @click="showTagInput = false" class="text-[11px] text-ink-gray-4 px-1.5 py-0.5 rounded-lg hover:bg-surface-gray-2">✕</button>
-                  </div>
-                  <Button
-                    v-else
-                    variant="ghost"
-                    size="sm"
-                    label="+ Add"
-                    class="!px-2 !py-0.5 rounded-lg text-ink-gray-6 hover:text-ink-gray-9"
-                    @click="openTagInput"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Section 2: More Details (Collapsible matching Helpdesk) -->
-          <div class="p-4 space-y-3">
-            <div
-              class="flex items-center justify-between cursor-pointer select-none"
-              @click="moreDetailsOpen = !moreDetailsOpen"
-            >
-              <span class="text-xs font-semibold text-ink-gray-9">More Details</span>
-              <Icon
-                name="chevron-down"
-                size="13"
-                class="text-ink-gray-5 transition-transform duration-200"
-                :class="{ 'rotate-180': !moreDetailsOpen }"
-              />
-            </div>
-
-            <div v-show="moreDetailsOpen" class="space-y-2.5 text-xs pt-1">
-              <!-- Due Date -->
-              <div class="flex items-center gap-2">
-                <span class="w-[106px] shrink-0 text-ink-gray-5">Due Date</span>
-                <input
-                  type="date"
-                  :value="cleanDate(task.exp_end_date)"
-                  @change="e => handleGenericUpdate('exp_end_date', e.target.value)"
-                  class="flex-1 px-2.5 py-1 text-xs rounded-xl border border-outline-gray-2 bg-surface-white text-ink-gray-8 focus:outline-none focus:border-outline-gray-4"
-                />
-              </div>
-
-              <!-- Start Date -->
-              <div class="flex items-center gap-2">
-                <span class="w-[106px] shrink-0 text-ink-gray-5">Start Date</span>
-                <input
-                  type="date"
-                  :value="cleanDate(task.exp_start_date)"
-                  @change="e => handleGenericUpdate('exp_start_date', e.target.value)"
-                  class="flex-1 px-2.5 py-1 text-xs rounded-xl border border-outline-gray-2 bg-surface-white text-ink-gray-8 focus:outline-none focus:border-outline-gray-4"
-                />
-              </div>
-
-              <!-- Estimated Hours -->
-              <div class="flex items-center gap-2">
-                <span class="w-[106px] shrink-0 text-ink-gray-5">Est. Hours</span>
-                <input
-                  type="number"
-                  :value="task.expected_time || 0"
-                  @change="e => handleGenericUpdate('expected_time', parseFloat(e.target.value) || 0)"
-                  class="w-20 px-2.5 py-1 text-xs rounded-xl border border-outline-gray-2 bg-surface-white text-ink-gray-8 focus:outline-none"
-                />
-              </div>
-
-              <!-- Key Milestone Toggle -->
-              <div class="flex items-center justify-between pt-1">
-                <span class="text-ink-gray-7">Key Milestone</span>
-                <input
-                  type="checkbox"
-                  :checked="Boolean(task.is_milestone)"
-                  @change="e => handleGenericUpdate('is_milestone', e.target.checked ? 1 : 0)"
-                  class="rounded-md border-outline-gray-3 text-ink-gray-9 focus:ring-0"
-                />
-              </div>
-
-              <!-- Client Visible Toggle -->
-              <div class="flex items-center justify-between">
-                <span class="text-ink-gray-7">Client Visible</span>
-                <input
-                  type="checkbox"
-                  :checked="Boolean(task.client_visible)"
-                  @change="e => handleGenericUpdate('client_visible', e.target.checked ? 1 : 0)"
-                  class="rounded-md border-outline-gray-3 text-ink-gray-9 focus:ring-0"
-                />
-              </div>
-            </div>
-          </div>
-
-          <!-- Section 3: Recent Tasks -->
-          <div class="p-4 space-y-3">
-            <div
-              class="flex items-center justify-between cursor-pointer select-none"
-              @click="recentTicketsOpen = !recentTicketsOpen"
-            >
-              <span class="text-xs font-semibold text-ink-gray-9">Recent Tasks</span>
-              <Icon
-                name="chevron-down"
-                size="13"
-                class="text-ink-gray-5 transition-transform duration-200"
-                :class="{ 'rotate-180': !recentTicketsOpen }"
-              />
-            </div>
-
-            <div v-show="recentTicketsOpen" class="space-y-1.5 pt-1">
-              <div
-                v-for="item in recentTasksList"
-                :key="item.name"
-                @click="$router.push('/tasks/' + item.name)"
-                class="p-2.5 rounded-xl hover:bg-surface-gray-2 cursor-pointer transition space-y-1"
-              >
-                <div class="flex items-start justify-between gap-1">
-                  <div class="font-medium text-xs text-ink-gray-9 truncate leading-snug">
-                    {{ item.subject }}
-                  </div>
-                  <Badge
-                    size="sm"
-                    variant="subtle"
-                    :theme="item.status === 'Open' ? 'red' : item.status === 'Working' ? 'blue' : 'gray'"
-                    :label="item.status === 'Working' ? 'Replied' : item.status"
-                  />
-                </div>
-                <div class="text-[11px] text-ink-gray-4">
-                  {{ formatDate(item.exp_end_date) || '22-10-2026' }} • #{{ item.name?.split('-')?.pop() || '0200' }}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+      <div class="detail-status-row">
+        <span class="status-pill status-pill-large" :class="statusClass(task.status)"><span />{{ statusLabel(task.status) }}</span>
+        <span v-if="isOverdue" class="overdue-callout"><Icon name="alert-circle" :size="12" /> Past due</span>
+        <span class="priority-chip" :class="'priority-' + String(task.priority || 'Medium').toLowerCase()">
+          <Icon name="flag" :size="12" /> {{ task.priority || 'Medium' }} priority
+        </span>
       </div>
+
+      <div class="detail-properties">
+        <label class="detail-property">
+          <span>Assignee</span>
+          <span class="select-wrap assignee-select">
+            <select :value="task.assignee_emails?.[0] || ''" @change="setAssignee($event.target.value)">
+              <option value="">Unassigned</option>
+              <option v-for="user in availableUsers" :key="user.name" :value="user.name">
+                {{ user.full_name || user.name }}
+              </option>
+            </select>
+            <Icon name="chevron-down" :size="14" />
+          </span>
+        </label>
+        <label class="detail-property">
+          <span>Due date</span>
+          <span class="select-wrap">
+            <input class="property-date" type="date" :value="cleanDate(task.exp_end_date)" @change="handleGenericUpdate('exp_end_date', $event.target.value || null)" />
+          </span>
+        </label>
+        <label class="detail-property">
+          <span>Status</span>
+          <span class="select-wrap">
+            <select :value="task.status || 'Open'" @change="updateStatus($event.target.value)">
+              <option value="Open">To do</option>
+              <option value="Working">In progress</option>
+              <option value="Pending Review">In review</option>
+              <option value="Completed">Completed</option>
+              <option value="Cancelled">Cancelled</option>
+            </select>
+            <Icon name="chevron-down" :size="14" />
+          </span>
+        </label>
+        <label class="detail-property">
+          <span>Priority</span>
+          <span class="select-wrap">
+            <select :value="task.priority || 'Medium'" @change="handleGenericUpdate('priority', $event.target.value)">
+              <option>Low</option>
+              <option>Medium</option>
+              <option>High</option>
+              <option>Urgent</option>
+            </select>
+            <Icon name="chevron-down" :size="14" />
+          </span>
+        </label>
+      </div>
+
+      <section class="detail-section description-section">
+        <div class="section-heading-line">
+          <h3>Description</h3>
+        </div>
+        <textarea
+          class="description-editor"
+          rows="3"
+          placeholder="Add the notes for this task."
+          :value="task.description || ''"
+          @change="handleGenericUpdate('description', $event.target.value)"
+        />
+      </section>
+
+      <div v-if="(task.files || []).length" class="task-attachment-summary">
+        <Icon name="paperclip" :size="14" />
+        <strong>{{ task.files.length }} attachments</strong>
+        <a :href="task.files[0].file_url" target="_blank">{{ task.files[0].file_name }}</a>
+        <span v-if="task.files.length > 1" class="attachment-more">+{{ task.files.length - 1 }}</span>
+      </div>
+      <label class="add-workstream" style="margin-top: 0">
+        <Icon name="paperclip" :size="14" />
+        Attach to task
+        <input type="file" class="hidden" multiple @change="onTaskFiles" />
+      </label>
+
+      <section class="detail-section activity-section">
+        <div class="section-heading-line">
+          <div class="activity-heading-copy">
+            <h3>Activity</h3>
+            <span>{{ messageCount }}</span>
+          </div>
+          <button type="button" class="activity-filter" @click="commentsOnly = !commentsOnly">
+            <Icon name="list-filter" :size="12" />
+            {{ commentsOnly ? 'Comments' : 'All activity' }}
+          </button>
+        </div>
+        <template v-for="item in visibleActivity" :key="item.id">
+          <div v-if="!isMessage(item)" class="activity-event">
+            <span class="activity-timeline-dot"><Icon name="check" :size="10" /></span>
+            <div class="activity-event-copy">
+              <p><strong>{{ item.sender_name || 'System' }}</strong> {{ item.content }}</p>
+              <span>{{ formatDateTime(item.timestamp) }}</span>
+            </div>
+          </div>
+          <article v-else class="comment-item">
+            <span class="avatar avatar-small" :class="avatarTone(item.sender_name || item.sender)">
+              {{ initials(item.sender_name || item.sender) }}
+            </span>
+            <div class="comment-content">
+              <div class="comment-byline">
+                <strong>{{ isMine(item) ? 'You' : (item.sender_name || item.sender || 'Someone') }}</strong>
+                <span>{{ formatDateTime(item.timestamp) }}</span>
+              </div>
+              <p v-if="item.content">{{ item.content }}</p>
+              <p v-for="file in item.files || []" :key="file.name">
+                <a :href="file.file_url" target="_blank">{{ file.file_name }}</a>
+              </p>
+            </div>
+          </article>
+        </template>
+        <p v-if="!visibleActivity.length" class="description-editor">No messages yet. Write the first note below.</p>
+      </section>
+
+      <section v-if="(task.subtasks || []).length" class="detail-section checklist-section">
+        <div class="section-heading-line">
+          <div class="checklist-heading-copy">
+            <h3>Implementation checklist</h3>
+            <span>{{ doneSubtasks }} of {{ task.subtasks.length }} complete</span>
+          </div>
+        </div>
+        <div class="checklist-progress-track">
+          <span :style="{ width: checklistProgress + '%' }" />
+        </div>
+        <ul class="checklist-items">
+          <li v-for="child in task.subtasks" :key="child.name">
+            <button
+              type="button"
+              class="checklist-checkbox"
+              :class="{ 'is-checked': child.status === 'Completed' }"
+              @click="toggleSubtask(child)"
+            >
+              <Icon v-if="child.status === 'Completed'" name="check" :size="10" />
+            </button>
+            <span :class="{ 'checklist-done': child.status === 'Completed' }" @click="openRelated(child.name)">{{ child.subject }}</span>
+          </li>
+        </ul>
+      </section>
     </div>
-  </div>
+
+    <div v-if="showMentionMenu" class="mention-menu">
+      <button
+        v-for="(user, index) in mentionUsers"
+        :key="user.name"
+        type="button"
+        :class="{ 'is-active': index === mentionIndex }"
+        @mousedown.prevent="selectMention(user)"
+      >
+        {{ user.full_name || user.name }}
+      </button>
+      <div v-if="!mentionUsers.length" class="px-3 py-2 text-xs">No matching people</div>
+    </div>
+    <div v-if="pendingFiles.length" class="task-attachment-summary" style="margin: 0 16px 8px">
+      <span v-for="(file, index) in pendingFiles" :key="file.name + index">
+        {{ file.name }}
+        <button type="button" @click="pendingFiles.splice(index, 1)">×</button>
+      </span>
+    </div>
+    <form class="comment-composer" @submit.prevent="submitComment">
+      <span class="avatar avatar-small avatar-indigo">{{ initials(myName) }}</span>
+      <textarea
+        ref="commentInput"
+        v-model="commentDraft"
+        rows="2"
+        placeholder="Write a comment or use @ to mention someone"
+        @input="onCommentInput"
+        @keydown="onCommentKeydown"
+      />
+      <label class="icon-button" title="Attach files">
+        <Icon name="paperclip" :size="15" />
+        <input type="file" class="hidden" multiple @change="onCommentFiles" />
+      </label>
+      <button type="submit" class="comment-send" aria-label="Send comment" :disabled="(!commentDraft.trim() && !pendingFiles.length) || commentSending">
+        <Icon name="send" :size="14" />
+      </button>
+    </form>
+  </section>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch, nextTick } from 'vue'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import Icon from './Icon.vue'
-import ActivityIcon from './icons/ActivityIcon.vue'
-import EmailIcon from './icons/EmailIcon.vue'
-import CommentIcon from './icons/CommentIcon.vue'
-import IndicatorIcon from './icons/IndicatorIcon.vue'
-import TicketPriority from './TicketPriority.vue'
-import CommunicationArea from './CommunicationArea.vue'
+import { sessionUserName } from '@/sessionUser'
 import {
-  getTask,
-  updateTask,
-  getTasks,
-  getUsers,
-  getImplementationModules,
-  getProjects,
+  addTaskComment,
   assignTask,
+  getTask,
+  getUsers,
+  updateTask,
+  uploadFile,
 } from '../api'
 
 const props = defineProps({
-  taskId: {
-    type: String,
-    required: true,
-  },
-  showBack: {
-    type: Boolean,
-    default: true,
-  },
-  showClose: {
-    type: Boolean,
-    default: false,
-  },
+  taskId: { type: String, required: true },
+  showBack: { type: Boolean, default: true },
+  showClose: { type: Boolean, default: false },
+  projectLabel: { type: String, default: '' },
+  moduleLabel: { type: String, default: '' },
 })
 
 const emit = defineEmits(['back', 'close', 'updated'])
+const router = useRouter()
 
 const task = ref({})
-const activeTab = ref('activity')
-const commAreaRef = ref(null)
-const overviewOpen = ref(true)
-const moreDetailsOpen = ref(false)
-const recentTicketsOpen = ref(true)
-
-const emailTimeline = computed(() => {
-  return (task.value.activity_timeline || []).filter(item => item.type === 'communication')
-})
-
-const commentTimeline = computed(() => {
-  return (task.value.activity_timeline || []).filter(item => item.type === 'comment')
-})
-
-const emailCount = computed(() => emailTimeline.value.length)
-const commentCount = computed(() => commentTimeline.value.length)
-
-function handleReplyTo(senderEmail) {
-  activeTab.value = 'emails'
-  commAreaRef.value?.expandReply(senderEmail)
-}
-
-function handleAddComment() {
-  activeTab.value = 'comments'
-  commAreaRef.value?.expandComment()
-}
-
 const availableUsers = ref([])
-const availableModules = ref([])
-const availableProjects = ref([])
+const commentDraft = ref('')
+const commentSending = ref(false)
+const commentInput = ref(null)
+const threadRef = ref(null)
+const pendingFiles = ref([])
+const showMentionMenu = ref(false)
+const mentionQuery = ref('')
+const mentionIndex = ref(0)
+const pickedMentions = ref([])
+const commentsOnly = ref(false)
+const myName = computed(() => sessionUserName())
 
-// Assignee Picker
-const showAssigneePicker = ref(false)
-const assigneeSearch = ref('')
+const activityFeed = computed(() => {
+  return [...(task.value.activity_timeline || [])].sort((a, b) =>
+    String(a.timestamp || '').localeCompare(String(b.timestamp || ''))
+  )
+})
 
-// Customer Edit
-const editingCustomer = ref(false)
-const customerText = ref('')
-const customerInputRef = ref(null)
+const visibleActivity = computed(() => {
+  if (!commentsOnly.value) return activityFeed.value
+  return activityFeed.value.filter(item => isMessage(item))
+})
 
-// Tags Edit
-const showTagInput = ref(false)
-const newTagText = ref('')
-const tagInputRef = ref(null)
+const messageCount = computed(() => activityFeed.value.filter(item => isMessage(item)).length)
 
-const recentTasksList = ref([])
+const doneSubtasks = computed(() => (task.value.subtasks || []).filter(child => child.status === 'Completed').length)
 
-const viewingHistory = computed(() => {
-  return [
-    { id: 'v1', name: 'Abid Khan', time: '6 days ago' },
-    { id: 'v2', name: 'Balachandar S', time: '6 days ago' },
-    { id: 'v3', name: 'Abdullah', time: '6 days ago' },
-    { id: 'v4', name: 'Saiyoni', time: '5 days ago' },
-  ]
+const checklistProgress = computed(() => {
+  const total = (task.value.subtasks || []).length
+  if (!total) return 0
+  return Math.round((doneSubtasks.value / total) * 100)
+})
+
+const isOverdue = computed(() => {
+  if (!task.value.exp_end_date) return false
+  if (task.value.status === 'Completed' || task.value.status === 'Cancelled') return false
+  return cleanDate(task.value.exp_end_date) < new Date().toISOString().slice(0, 10)
+})
+
+const mentionUsers = computed(() => {
+  const query = mentionQuery.value.toLowerCase()
+  return availableUsers.value.filter(user => {
+    if (!query) return true
+    return (user.full_name || '').toLowerCase().includes(query) || (user.name || '').toLowerCase().includes(query)
+  }).slice(0, 8)
 })
 
 const statusOptions = computed(() => [
@@ -987,114 +301,43 @@ const statusOptions = computed(() => [
   { label: 'Cancelled', onClick: () => updateStatus('Cancelled') },
 ])
 
-const moreOptions = computed(() => [
-  { label: 'Copy Task ID', onClick: () => navigator.clipboard.writeText(task.value.name) },
-  { label: 'Open in Desk', onClick: () => window.open('/app/task/' + task.value.name, '_blank') },
-])
-
-const priorityDropdownOptions = computed(() => [
-  { label: 'Low', onClick: () => handleGenericUpdate('priority', 'Low') },
-  { label: 'Medium', onClick: () => handleGenericUpdate('priority', 'Medium') },
-  { label: 'High', onClick: () => handleGenericUpdate('priority', 'High') },
-  { label: 'Urgent', onClick: () => handleGenericUpdate('priority', 'Urgent') },
-])
-
-const moduleDropdownOptions = computed(() => {
-  return availableModules.value.map(m => ({
-    label: m.module_name,
-    onClick: () => handleModuleSelect(m),
-  }))
-})
-
-const projectDropdownOptions = computed(() => {
-  return availableProjects.value.map(p => ({
-    label: p.project_name,
-    onClick: () => handleProjectSelect(p),
-  }))
-})
-
-const filteredUsers = computed(() => {
-  if (!assigneeSearch.value.trim()) return availableUsers.value
-  const q = assigneeSearch.value.toLowerCase()
-  return availableUsers.value.filter(u =>
-    (u.full_name || '').toLowerCase().includes(q) || (u.name || '').toLowerCase().includes(q)
-  )
-})
-
 onMounted(async () => {
-  await Promise.all([
-    loadTask(),
-    loadRecentTasks(),
-    loadMetadata(),
-  ])
+  await Promise.all([loadTask(), loadMetadata()])
 })
 
-watch(() => props.taskId, async () => {
-  await loadTask()
-  await loadRecentTasks()
+watch(() => props.taskId, () => {
+  commentDraft.value = ''
+  pendingFiles.value = []
+  pickedMentions.value = []
+  showMentionMenu.value = false
+  loadTask()
 })
 
 async function loadMetadata() {
   try {
-    const [uList, mList, pList] = await Promise.all([
-      getUsers(),
-      getImplementationModules(),
-      getProjects(),
-    ])
-    availableUsers.value = uList || []
-    availableModules.value = mList || []
-    availableProjects.value = pList || []
-  } catch (e) {
-    console.error('Failed to load sidebar metadata', e)
+    availableUsers.value = (await getUsers()) || []
+  } catch (error) {
+    console.error(error)
   }
+}
+
+function openRelated(taskId) {
+  if (!taskId) return
+  if (task.value.project) {
+    router.push(`/projects/${task.value.project}/tasks/${taskId}`)
+    return
+  }
+  router.push('/tasks/' + taskId)
 }
 
 async function loadTask() {
   if (!props.taskId) return
   try {
-    const data = await getTask(props.taskId)
-    task.value = data
-    customerText.value = data.client_poc_name || ''
-  } catch (e) {
-    console.error('Failed to load task', e)
-  }
-}
-
-async function loadRecentTasks() {
-  try {
-    const list = await getTasks({ limit: 4 })
-    recentTasksList.value = list.filter(t => t.name !== props.taskId).slice(0, 4)
-  } catch (e) {}
-}
-
-function isAssigned(userEmail) {
-  return Boolean(
-    task.value.assignee_emails?.includes(userEmail) ||
-    task.value.assignees?.some(a => a.email === userEmail)
-  )
-}
-
-async function toggleAssignee(user) {
-  const email = user.name
-  const assigned = isAssigned(email)
-  try {
-    await assignTask(task.value.name, email, assigned ? 'remove' : 'add')
-    if (assigned) {
-      task.value.assignees = (task.value.assignees || []).filter(a => a.email !== email)
-      task.value.assignee_emails = (task.value.assignee_emails || []).filter(e => e !== email)
-    } else {
-      if (!task.value.assignees) task.value.assignees = []
-      if (!task.value.assignee_emails) task.value.assignee_emails = []
-      task.value.assignees.push({
-        email: email,
-        full_name: user.full_name || email,
-        user_image: user.user_image,
-      })
-      task.value.assignee_emails.push(email)
-    }
-    emit('updated')
-  } catch (e) {
-    alert('Failed to update assignee: ' + e.message)
+    task.value = await getTask(props.taskId)
+    await nextTick()
+    if (threadRef.value) threadRef.value.scrollTop = threadRef.value.scrollHeight
+  } catch (error) {
+    console.error(error)
   }
 }
 
@@ -1102,132 +345,211 @@ async function handleGenericUpdate(fieldName, value) {
   try {
     await updateTask(task.value.name, { [fieldName]: value })
     task.value[fieldName] = value
+    await loadTask()
     emit('updated')
-  } catch (e) {
-    alert(`Failed to update ${fieldName}: ` + e.message)
+  } catch (error) {
+    alert(`Could not update ${fieldName}`)
   }
 }
 
-async function handleModuleSelect(m) {
+async function saveSubject(value) {
+  const subject = value.trim()
+  if (!subject || subject === task.value.subject) return
+  await handleGenericUpdate('subject', subject)
+}
+
+async function updateStatus(status) {
+  await handleGenericUpdate('status', status)
+  if (status === 'Completed') task.value.progress = 100
+}
+
+async function setAssignee(email) {
   try {
-    await updateTask(task.value.name, { implementation_module: m.name })
-    task.value.implementation_module = m.name
-    task.value.module_title = m.module_name
-    task.value.module_icon = m.icon
-    task.value.module_color = m.color
+    task.value = await assignTask(task.value.name, email, 'set')
     emit('updated')
-  } catch (e) {
-    alert('Failed to update module: ' + e.message)
+  } catch (error) {
+    alert('Could not update the assignee')
   }
 }
 
-async function handleProjectSelect(p) {
+async function toggleSubtask(child) {
+  const status = child.status === 'Completed' ? 'Open' : 'Completed'
   try {
-    await updateTask(task.value.name, { project: p.name })
-    task.value.project = p.name
-    task.value.project_title = p.project_name
-    task.value.client_poc_name = p.client_poc_name
+    await updateTask(child.name, { status })
+    await loadTask()
     emit('updated')
-  } catch (e) {
-    alert('Failed to update project: ' + e.message)
+  } catch (error) {
+    alert('Could not update the subtask')
   }
 }
 
-function startCustomerEdit() {
-  customerText.value = task.value.client_poc_name || ''
-  editingCustomer.value = true
-  nextTick(() => {
-    customerInputRef.value?.focus()
-  })
+function onCommentFiles(event) {
+  pendingFiles.value.push(...Array.from(event.target.files || []))
+  event.target.value = ''
 }
 
-async function saveCustomerEdit() {
-  const val = customerText.value.trim()
-  editingCustomer.value = false
-  if (val !== task.value.client_poc_name) {
-    await handleGenericUpdate('client_poc_name', val)
+async function onTaskFiles(event) {
+  const files = Array.from(event.target.files || [])
+  event.target.value = ''
+  if (!files.length || !task.value.name) return
+  try {
+    for (const file of files) {
+      await uploadFile('Task', task.value.name, file)
+    }
+    await loadTask()
+    emit('updated')
+  } catch (error) {
+    alert('Could not upload the file')
   }
 }
 
-function openTagInput() {
-  showTagInput.value = true
-  newTagText.value = ''
-  nextTick(() => {
-    tagInputRef.value?.focus()
-  })
-}
-
-async function handleAddTag() {
-  const tag = newTagText.value.trim()
-  if (!tag) {
-    showTagInput.value = false
-    return
-  }
-  if (!task.value.tags) task.value.tags = []
-  if (!task.value.tags.includes(tag)) {
-    task.value.tags.push(tag)
-    try {
-      await updateTask(task.value.name, { tags: task.value.tags })
-      emit('updated')
-    } catch (e) {
-      alert('Failed to add tag: ' + e.message)
+function onCommentInput() {
+  const cursor = commentInput.value?.selectionStart || 0
+  const before = commentDraft.value.slice(0, cursor)
+  const at = before.lastIndexOf('@')
+  if (at !== -1 && (at === 0 || /\s/.test(before[at - 1]))) {
+    const query = before.slice(at + 1)
+    if (!/\s/.test(query)) {
+      mentionQuery.value = query
+      mentionIndex.value = 0
+      showMentionMenu.value = true
+      return
     }
   }
-  newTagText.value = ''
-  showTagInput.value = false
+  showMentionMenu.value = false
 }
 
-async function handleRemoveTag(tagToRemove) {
-  task.value.tags = (task.value.tags || []).filter(t => t !== tagToRemove)
-  try {
-    await updateTask(task.value.name, { tags: task.value.tags })
-    emit('updated')
-  } catch (e) {
-    alert('Failed to remove tag: ' + e.message)
+function onCommentKeydown(event) {
+  if (!showMentionMenu.value) return
+  if (event.key === 'ArrowDown') {
+    event.preventDefault()
+    mentionIndex.value = (mentionIndex.value + 1) % Math.max(mentionUsers.value.length, 1)
+  } else if (event.key === 'ArrowUp') {
+    event.preventDefault()
+    mentionIndex.value = (mentionIndex.value - 1 + mentionUsers.value.length) % Math.max(mentionUsers.value.length, 1)
+  } else if (event.key === 'Enter' && mentionUsers.value.length) {
+    event.preventDefault()
+    selectMention(mentionUsers.value[mentionIndex.value])
+  } else if (event.key === 'Escape') {
+    showMentionMenu.value = false
   }
 }
 
-async function updateStatus(s) {
-  try {
-    await updateTask(task.value.name, { status: s })
-    task.value.status = s
-    emit('updated')
-  } catch (e) {
-    alert('Failed to update status: ' + e.message)
+function selectMention(user) {
+  if (!user) return
+  const cursor = commentInput.value?.selectionStart || commentDraft.value.length
+  const before = commentDraft.value.slice(0, cursor)
+  const at = before.lastIndexOf('@')
+  const label = user.full_name || user.name
+  if (at !== -1) {
+    commentDraft.value = before.slice(0, at) + `@${label} ` + commentDraft.value.slice(cursor)
   }
+  if (!pickedMentions.value.some(person => person.email === user.name)) {
+    pickedMentions.value.push({ email: user.name, label })
+  }
+  showMentionMenu.value = false
+  nextTick(() => commentInput.value?.focus())
 }
 
-async function onCommunicationSubmitted() {
-  await loadTask()
-  emit('updated')
+function commentHtml(text) {
+  let html = escapeHtml(text)
+  const people = [...pickedMentions.value].sort((a, b) => b.label.length - a.label.length)
+  for (const person of people) {
+    const token = escapeHtml(`@${person.label}`)
+    const span = `<span class="mention" data-id="${escapeHtml(person.email)}" data-value="${escapeHtml(person.label)}">@${escapeHtml(person.label)}</span>`
+    html = html.split(token).join(span)
+  }
+  return html.replace(/\n/g, '<br>')
 }
 
-function statusDotClass(status) {
-  switch (status) {
-    case 'Completed':
-      return 'text-emerald-500'
-    case 'Working':
-      return 'text-blue-500'
-    case 'Pending Review':
-      return 'text-amber-500'
-    default:
-      return 'text-blue-500'
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+}
+
+function isMessage(item) {
+  return item.type === 'comment' || item.type === 'communication'
+}
+
+function isMine(item) {
+  return Boolean(window.session_user) && item.sender === window.session_user
+}
+
+async function submitComment() {
+  const text = commentDraft.value.trim()
+  const files = [...pendingFiles.value]
+  if ((!text && !files.length) || !task.value.name) return
+  const content = text || files.map(file => file.name).join(', ')
+  commentSending.value = true
+  try {
+    const saved = await addTaskComment(task.value.name, commentHtml(content))
+    for (const file of files) {
+      await uploadFile('Comment', saved.id, file)
+    }
+    commentDraft.value = ''
+    pendingFiles.value = []
+    pickedMentions.value = []
+    showMentionMenu.value = false
+    await loadTask()
+    emit('updated')
+  } catch (error) {
+    alert('Could not send the message')
+  } finally {
+    commentSending.value = false
   }
 }
 
 function cleanDate(dateStr) {
   if (!dateStr) return ''
-  return dateStr.split(' ')[0]
+  return String(dateStr).split(' ')[0]
 }
 
-function formatDate(dateStr) {
-  if (!dateStr) return ''
+function statusLabel(status) {
+  if (status === 'Working') return 'In progress'
+  if (status === 'Pending Review') return 'In review'
+  if (status === 'Open') return 'To do'
+  return status || 'To do'
+}
+
+function avatarTone(name) {
+  const tones = ['avatar-indigo', 'avatar-coral', 'avatar-teal', 'avatar-lilac', 'avatar-amber']
+  let total = 0
+  for (const char of String(name || '')) total += char.charCodeAt(0)
+  return tones[total % tones.length]
+}
+
+async function copyLink() {
   try {
-    const d = new Date(dateStr.split(' ')[0])
-    if (isNaN(d.getTime())) return dateStr
-    return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
-  } catch (e) {
-    return dateStr
+    await navigator.clipboard.writeText(window.location.href)
+  } catch (error) {
+    console.error(error)
   }
+}
+
+function statusClass(status) {
+  if (status === 'Completed') return 'status-completed'
+  if (status === 'Working') return 'status-in-progress'
+  if (status === 'Pending Review') return 'status-in-review'
+  return 'status-to-do'
+}
+
+function initials(name) {
+  const parts = String(name || '?').trim().split(/\s+/).slice(0, 2)
+  return parts.map(part => part[0]?.toUpperCase() || '').join('') || '?'
+}
+
+function formatDateTime(dateStr) {
+  if (!dateStr) return ''
+  const date = new Date(String(dateStr).replace(' ', 'T'))
+  if (Number.isNaN(date.getTime())) return String(dateStr)
+  return date.toLocaleString(undefined, {
+    day: 'numeric',
+    month: 'short',
+    hour: 'numeric',
+    minute: '2-digit',
+  })
 }
 </script>

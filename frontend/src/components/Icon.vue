@@ -367,6 +367,64 @@
       <circle cx="12" cy="12" r="3"/>
     </g>
 
+    <g v-else-if="name === 'home'">
+      <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+      <polyline points="9 22 9 12 15 12 15 22"/>
+    </g>
+    <g v-else-if="name === 'bell'">
+      <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/>
+      <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
+    </g>
+    <g v-else-if="name === 'circle'">
+      <circle cx="12" cy="12" r="10"/>
+    </g>
+    <g v-else-if="name === 'check'">
+      <path d="M20 6 9 17l-5-5"/>
+    </g>
+    <g v-else-if="name === 'share'">
+      <circle cx="18" cy="5" r="3"/>
+      <circle cx="6" cy="12" r="3"/>
+      <circle cx="18" cy="19" r="3"/>
+      <line x1="8.59" x2="15.42" y1="13.51" y2="17.49"/>
+      <line x1="15.41" x2="8.59" y1="6.51" y2="10.49"/>
+    </g>
+    <g v-else-if="name === 'paperclip'">
+      <path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
+    </g>
+    <g v-else-if="name === 'activity'">
+      <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+    </g>
+    <g v-else-if="name === 'panel-left'">
+      <rect width="18" height="18" x="3" y="3" rx="2"/>
+      <path d="M9 3v18"/>
+    </g>
+    <g v-else-if="name === 'help'">
+      <circle cx="12" cy="12" r="10"/>
+      <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+      <path d="M12 17h.01"/>
+    </g>
+    <g v-else-if="name === 'sparkles'">
+      <path d="M9.94 15.5A2 2 0 0 0 8.5 14.06L2 12l6.5-2.06A2 2 0 0 0 9.94 8.5L12 2l2.06 6.5a2 2 0 0 0 1.44 1.44L22 12l-6.5 2.06a2 2 0 0 0-1.44 1.44L12 22Z"/>
+    </g>
+    <g v-else-if="name === 'list-filter'">
+      <path d="M3 6h18"/>
+      <path d="M7 12h10"/>
+      <path d="M10 18h4"/>
+    </g>
+    <g v-else-if="name === 'arrow-up-down'">
+      <path d="m21 16-4 4-4-4"/>
+      <path d="M17 20V4"/>
+      <path d="m3 8 4-4 4 4"/>
+      <path d="M7 4v16"/>
+    </g>
+    <g v-else-if="name === 'list-todo'">
+      <rect x="3" y="5" width="6" height="6" rx="1"/>
+      <path d="m3 17 2 2 4-4"/>
+      <path d="M13 6h8"/>
+      <path d="M13 12h8"/>
+      <path d="M13 18h8"/>
+    </g>
+
     <!-- Default fallback -->
     <g v-else>
       <circle cx="12" cy="12" r="10"/>

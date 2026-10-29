@@ -27,6 +27,12 @@ const routes = [
     props: true,
   },
   {
+    path: '/projects/:projectName/tasks/:taskId',
+    name: 'ProjectTask',
+    component: SingleProjectDashboard,
+    props: true,
+  },
+  {
     path: '/tasks',
     name: 'Tasks',
     component: Tasks,

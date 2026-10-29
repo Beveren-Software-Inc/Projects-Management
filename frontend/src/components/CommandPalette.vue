@@ -173,7 +173,7 @@ const defaultActions = [
   { id: 'act-new-task', type: 'action', label: 'Create New Task', icon: 'plus', action: 'open-new-task' },
   { id: 'act-new-project', type: 'action', label: 'Create Implementation Project', icon: 'plus', action: 'open-new-project' },
   { id: 'act-settings', type: 'action', label: 'App Settings & Branding', icon: 'settings', action: 'open-settings' },
-  { id: 'nav-dashboard', type: 'nav', label: 'Go to Dashboard', icon: 'layout-dashboard', route: '/dashboard' },
+  { id: 'nav-dashboard', type: 'nav', label: 'Go to Home', icon: 'home', route: '/dashboard' },
   { id: 'nav-projects', type: 'nav', label: 'Go to Projects', icon: 'folder-kanban', route: '/projects' },
   { id: 'nav-tasks', type: 'nav', label: 'Go to Tasks', icon: 'ticket', route: '/tasks' },
   { id: 'nav-modules', type: 'nav', label: 'Go to Module Templates', icon: 'layers', route: '/modules' },
@@ -260,7 +260,7 @@ function selectActiveItem() {
 function handleSelect(item) {
   close()
   if (item.itemType === 'task') {
-    router.push('/tasks/' + item.name)
+    router.push(item.project ? `/projects/${item.project}/tasks/${item.name}` : '/tasks/' + item.name)
   } else if (item.itemType === 'project') {
     router.push('/projects/' + item.name)
   } else if (item.route) {

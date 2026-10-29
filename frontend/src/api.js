@@ -130,6 +130,27 @@ export async function bulkDeleteTasks(taskIds) {
   return request('POST', 'projects.api.task.bulk_delete_tasks', { task_ids: taskIds })
 }
 
+export async function uploadFile(doctype, docname, file) {
+  const body = new FormData()
+  body.append('file', file)
+  body.append('doctype', doctype)
+  body.append('docname', docname)
+  body.append('is_private', '1')
+  const response = await fetch('/api/method/upload_file', {
+    method: 'POST',
+    headers: {
+      Accept: 'application/json',
+      'X-Frappe-CSRF-Token': getCsrfToken(),
+    },
+    body,
+  })
+  const json = await response.json()
+  if (!response.ok || json.exc) {
+    throw new Error('Could not upload the file')
+  }
+  return json.message !== undefined ? json.message : json
+}
+
 export async function addTaskComment(taskId, content) {
   return request('POST', 'projects.api.task.add_comment', { task_id: taskId, content })
 }

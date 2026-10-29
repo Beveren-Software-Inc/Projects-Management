@@ -291,6 +291,29 @@ def get_project(project_name):
 	)
 	project_data["recent_activities"] = activities
 
+	task_names = [t.name for t in tasks]
+	file_fields = ["name", "file_name", "file_url", "file_size", "creation", "attached_to_doctype", "attached_to_name"]
+	project_files = frappe.get_all(
+		"File",
+		filters={"attached_to_doctype": "Project", "attached_to_name": project_name},
+		fields=file_fields,
+		order_by="creation desc",
+		limit=40,
+	)
+	task_files = []
+	if task_names:
+		task_files = frappe.get_all(
+			"File",
+			filters={"attached_to_doctype": "Task", "attached_to_name": ["in", task_names]},
+			fields=file_fields,
+			order_by="creation desc",
+			limit=40,
+		)
+	subject_by_task = {t.name: t.subject for t in tasks}
+	for row in task_files:
+		row["task_subject"] = subject_by_task.get(row.attached_to_name) or row.attached_to_name
+	project_data["files"] = project_files + task_files
+
 	return project_data
 
 

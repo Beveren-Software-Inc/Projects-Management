@@ -1,5 +1,5 @@
 <template>
-  <div class="h-full flex flex-col bg-[#f8f9fa] overflow-hidden select-none">
+  <div class="h-full flex flex-col app-canvas overflow-hidden select-none">
     <!-- 1. Layout Header matching Helpdesk -->
     <LayoutHeader>
       <template #left-header>

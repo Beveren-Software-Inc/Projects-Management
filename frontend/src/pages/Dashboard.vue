@@ -1,11 +1,11 @@
 <template>
-  <div class="h-full flex flex-col bg-surface-white overflow-hidden">
+  <div class="h-full flex flex-col app-canvas overflow-hidden">
     <!-- Layout Header matching Helpdesk -->
     <LayoutHeader>
       <template #left-header>
         <div class="flex items-center gap-2">
-          <h1 class="text-sm font-semibold text-ink-gray-9">Dashboard</h1>
-          <Badge theme="gray" variant="subtle" size="sm" label="Portfolio Overview" />
+          <h1 class="text-sm font-semibold text-ink-gray-9">Home</h1>
+          <Badge theme="gray" variant="subtle" size="sm" label="Portfolio" />
         </div>
       </template>
 
@@ -50,7 +50,7 @@
     </LayoutHeader>
 
     <!-- Scrollable Body -->
-    <div class="flex-1 overflow-y-auto p-6 space-y-6">
+    <div class="flex-1 overflow-y-auto p-6 space-y-5">
       <!-- Frappe UI Alert: Overdue Notifications Banner -->
       <Alert
         v-if="(data.kpis?.overdue_tasks || 0) > 0"
@@ -84,7 +84,7 @@
           <div class="text-2xl font-bold text-ink-gray-9">{{ data.kpis?.overall_completion_pct || 0 }}%</div>
           <div class="w-full h-1.5 bg-surface-gray-2 rounded-full overflow-hidden">
             <div
-              class="h-full bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-600 rounded-full transition-all duration-500"
+              class="h-full rounded-full transition-all duration-500 brand-progress"
               :style="{ width: (data.kpis?.overall_completion_pct || 0) + '%' }"
             ></div>
           </div>
@@ -248,7 +248,7 @@
                     <div class="w-full h-1.5 bg-surface-gray-2 rounded-full overflow-hidden">
                       <div
                         class="h-full rounded-full transition-all duration-300"
-                        :class="p.percent_complete === 100 ? 'bg-emerald-500' : 'bg-gradient-to-r from-blue-500 to-indigo-600'"
+                        :class="p.percent_complete === 100 ? 'bg-emerald-500' : 'brand-progress'"
                         :style="{ width: (p.percent_complete || 0) + '%' }"
                       ></div>
                     </div>

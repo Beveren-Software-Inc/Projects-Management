@@ -1,5 +1,5 @@
 <template>
-  <header class="h-11 bg-surface-white border-b border-outline-gray-2 px-5 flex items-center justify-between shrink-0 select-none">
+  <header class="topbar shrink-0 select-none">
     <!-- Left Header (Breadcrumbs) -->
     <div class="flex items-center gap-1.5 min-w-0 flex-1">
       <slot name="left-header">

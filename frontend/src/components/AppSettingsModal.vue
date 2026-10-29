@@ -53,94 +53,35 @@
           <div v-if="activeTab === 'branding'" class="space-y-6">
             <div>
               <h3 class="text-xs font-semibold text-ink-gray-9">App Identity & Logo</h3>
-              <p class="text-[11px] text-ink-gray-5 mt-0.5">Customize the workspace brand name, subtitle, and attached icon displayed in the sidebar.</p>
+              <p class="text-[11px] text-ink-gray-5 mt-0.5">The sidebar uses the Beveren mark. The line under the company name is always the signed-in user.</p>
             </div>
 
-            <!-- Live Sidebar Header Preview Card -->
-            <div class="p-4 rounded-2xl border border-outline-gray-2 bg-surface-gray-1 space-y-2">
-              <div class="text-[10px] font-semibold uppercase tracking-wider text-ink-gray-4">Live Sidebar Header Preview</div>
+            <div class="p-4 rounded-2xl border border-outline-gray-2 bg-[#f7f8fb] space-y-3">
+              <div class="text-[10px] font-semibold uppercase tracking-wider text-ink-gray-4">Sidebar header</div>
+              <img :src="logoLight" alt="Beveren" class="h-10 w-auto rounded-lg" />
               <div class="flex items-center gap-3 p-3 rounded-xl bg-white border border-outline-gray-2 shadow-2xs max-w-xs">
-                <!-- Preview Icon -->
-                <div
-                  class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 shadow-xs border transition"
-                  :style="{
-                    backgroundColor: settings.brandColor,
-                    borderColor: settings.brandColor
-                  }"
-                >
-                  <Icon :name="settings.brandIcon" size="20" color="#ffffff" />
+                <div class="size-8 rounded-lg overflow-hidden shrink-0">
+                  <BrandLogo />
                 </div>
                 <div class="truncate">
-                  <div class="font-semibold text-xs text-ink-gray-9 truncate">{{ settings.brandName || 'Beveren Software' }}</div>
-                  <div class="text-[11px] text-ink-gray-5 truncate">{{ settings.brandSubtitle || 'Abid Khan' }}</div>
+                  <div class="font-semibold text-xs text-ink-gray-9 truncate">{{ settings.brandName || 'Beveren' }}</div>
+                  <div class="text-[11px] text-ink-gray-5 truncate">{{ userName }}</div>
                 </div>
               </div>
             </div>
 
             <!-- Inputs -->
-            <div class="grid grid-cols-2 gap-4">
-              <div>
-                <label class="block text-xs font-medium text-ink-gray-7 mb-1">Brand / Company Name</label>
-                <input
-                  v-model="settings.brandName"
-                  type="text"
-                  placeholder="e.g. Beveren Software"
-                  class="w-full px-3 py-2 text-xs rounded-xl border border-outline-gray-2 bg-surface-gray-1 hover:bg-surface-gray-2 focus:bg-white focus:outline-none focus:border-outline-gray-4 transition shadow-2xs"
-                />
-              </div>
-
-              <div>
-                <label class="block text-xs font-medium text-ink-gray-7 mb-1">Subtitle / User Name</label>
-                <input
-                  v-model="settings.brandSubtitle"
-                  type="text"
-                  placeholder="e.g. Abid Khan"
-                  class="w-full px-3 py-2 text-xs rounded-xl border border-outline-gray-2 bg-surface-gray-1 hover:bg-surface-gray-2 focus:bg-white focus:outline-none focus:border-outline-gray-4 transition shadow-2xs"
-                />
-              </div>
+            <div>
+              <label class="block text-xs font-medium text-ink-gray-7 mb-1">Brand / Company Name</label>
+              <input
+                v-model="settings.brandName"
+                type="text"
+                placeholder="Beveren"
+                class="w-full px-3 py-2 text-xs rounded-xl border border-outline-gray-2 bg-surface-gray-1 hover:bg-surface-gray-2 focus:bg-white focus:outline-none focus:border-outline-gray-4 transition shadow-2xs"
+              />
+              <p class="mt-2 text-[11px] text-ink-gray-5">The name under the brand is the person who is signed in: {{ userName }}.</p>
             </div>
 
-            <!-- Brand Color Theme -->
-            <div class="space-y-1.5">
-              <label class="block text-xs font-medium text-ink-gray-7">Icon Background Color</label>
-              <div class="flex flex-wrap items-center gap-2">
-                <button
-                  v-for="c in COLOR_OPTIONS"
-                  :key="c"
-                  type="button"
-                  @click="settings.brandColor = c"
-                  class="w-6 h-6 rounded-full transition-all flex items-center justify-center cursor-pointer border"
-                  :style="{
-                    backgroundColor: c,
-                    borderColor: settings.brandColor === c ? '#1E293B' : 'transparent',
-                    transform: settings.brandColor === c ? 'scale(1.15)' : 'scale(1)'
-                  }"
-                  :title="c"
-                >
-                  <span v-if="settings.brandColor === c" class="text-white text-[10px] font-bold">✓</span>
-                </button>
-              </div>
-            </div>
-
-            <!-- Brand Icon Selection -->
-            <div class="space-y-1.5">
-              <label class="block text-xs font-medium text-ink-gray-7">Select App Icon</label>
-              <div class="grid grid-cols-10 gap-2 p-3 bg-surface-gray-1 rounded-xl border border-outline-gray-2 max-h-40 overflow-y-auto">
-                <button
-                  v-for="iconItem in ICON_OPTIONS"
-                  :key="iconItem"
-                  type="button"
-                  @click="settings.brandIcon = iconItem"
-                  class="p-2 rounded-xl flex items-center justify-center transition cursor-pointer"
-                  :class="settings.brandIcon === iconItem
-                    ? 'bg-white shadow-2xs border border-outline-gray-4 text-ink-gray-9 scale-105'
-                    : 'text-ink-gray-5 hover:text-ink-gray-9 hover:bg-surface-gray-2'"
-                  :title="iconItem"
-                >
-                  <Icon :name="iconItem" size="18" />
-                </button>
-              </div>
-            </div>
           </div>
 
           <!-- TAB 2: EMAIL & NOTIFICATIONS (Using the Frappe UI Checkbox Component) -->
@@ -265,9 +206,11 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import { Button, Checkbox } from 'frappe-ui'
 import Icon from './Icon.vue'
+import BrandLogo from './BrandLogo.vue'
+import { sessionUserName } from '@/sessionUser'
 
 const props = defineProps({
   show: Boolean,
@@ -276,6 +219,8 @@ const props = defineProps({
 const emit = defineEmits(['close', 'saved'])
 
 const activeTab = ref('branding')
+const userName = computed(() => sessionUserName())
+const logoLight = '/assets/projects/brand/logo-light.jpg'
 
 const SETTINGS_TABS = [
   { id: 'branding', label: 'Branding & App Icon', icon: 'settings' },
@@ -283,45 +228,9 @@ const SETTINGS_TABS = [
   { id: 'sla', label: 'Task & SLA Defaults', icon: 'clock' },
 ]
 
-const COLOR_OPTIONS = [
-  '#0f172a', // Slate Navy (Default)
-  '#10B981', // Emerald
-  '#3B82F6', // Blue
-  '#6366F1', // Indigo
-  '#8B5CF6', // Violet
-  '#EC4899', // Pink
-  '#F59E0B', // Amber
-  '#06B6D4', // Cyan
-  '#14B8A6', // Teal
-  '#F43F5E', // Rose
-]
-
-const ICON_OPTIONS = [
-  'layers',
-  'box',
-  'folder-kanban',
-  'check-square',
-  'Cpu',
-  'Server',
-  'Shield',
-  'Wrench',
-  'Zap',
-  'Award',
-  'Target',
-  'Package',
-  'Briefcase',
-  'CreditCard',
-  'ShoppingCart',
-  'TrendingUp',
-  'Users',
-  'ticket',
-  'settings',
-  'Truck',
-]
-
 const settings = ref({
-  brandName: 'Beveren Software',
-  brandSubtitle: 'Abid Khan',
+  brandName: 'Beveren',
+  brandSubtitle: '',
   brandColor: '#0f172a',
   brandIcon: 'layers',
   emailNotifications: true,

@@ -1,8 +1,54 @@
 <template>
-  <div class="h-full flex flex-col overflow-hidden bg-surface-white">
-    <!-- CASE 1: Individual Task Ticket Detail View (Helpdesk style) -->
-    <div v-if="currentTaskId" class="h-full flex flex-col overflow-hidden">
+  <div class="h-full flex flex-col overflow-hidden app-canvas">
+    <div v-if="currentTaskId" class="h-full flex overflow-hidden min-w-0">
+      <aside class="w-80 shrink-0 border-r border-outline-gray-1 bg-white flex flex-col min-h-0">
+        <div class="h-12 px-3 border-b border-outline-gray-1 flex items-center justify-between shrink-0">
+          <button
+            type="button"
+            class="text-sm font-semibold text-ink-gray-8 hover:text-ink-gray-9"
+            @click="handleBackToList"
+          >
+            Tasks
+          </button>
+          <span class="text-[11px] text-ink-gray-4">{{ tasks.length }}</span>
+        </div>
+        <div class="flex-1 overflow-y-auto py-1">
+          <button
+            v-for="item in tasks"
+            :key="item.name"
+            type="button"
+            class="w-full text-left px-3 py-2.5 border-l-2 transition"
+            :class="item.name === currentTaskId
+              ? 'bg-[#f4f7fb] border-[#1d6fe8]'
+              : 'border-transparent hover:bg-surface-gray-1'"
+            @click="handleSelectTask(item.name)"
+          >
+            <div class="flex items-start gap-2">
+              <span
+                class="mt-1 size-3.5 rounded-full border shrink-0"
+                :class="item.status === 'Completed' ? 'bg-emerald-500 border-emerald-500' : 'border-ink-gray-4'"
+              />
+              <div class="min-w-0">
+                <div
+                  class="text-[13px] font-medium text-ink-gray-9 truncate"
+                  :class="item.status === 'Completed' ? 'text-ink-gray-5' : ''"
+                >
+                  {{ item.subject }}
+                </div>
+                <div class="text-[11px] text-ink-gray-4 truncate mt-0.5">
+                  {{ item.project_title || item.project || 'No project' }}
+                  <span v-if="item.exp_end_date"> · {{ item.exp_end_date }}</span>
+                </div>
+              </div>
+            </div>
+          </button>
+          <div v-if="!tasks.length" class="px-4 py-8 text-xs text-ink-gray-4 text-center">
+            No tasks in this view.
+          </div>
+        </div>
+      </aside>
       <TaskTicketDetail
+        class="flex-1 min-w-0"
         :task-id="currentTaskId"
         :show-back="true"
         @back="handleBackToList"
@@ -160,6 +206,7 @@ import TaskTicketDetail from '../components/TaskTicketDetail.vue'
 import BulkEditModal from '../components/BulkEditModal.vue'
 import {
   getTasks,
+  getTask,
   getProjects,
   getImplementationModules,
   quickUpdateStatus,
@@ -349,8 +396,29 @@ async function loadTasks() {
 }
 
 function handleSelectTask(taskId) {
+  const task = tasks.value.find(item => item.name === taskId)
+  if (task?.project) {
+    router.push(`/projects/${task.project}/tasks/${taskId}`)
+    return
+  }
   router.push('/tasks/' + taskId)
 }
+
+watch(currentTaskId, async (taskId) => {
+  if (!taskId) return
+  const known = tasks.value.find(item => item.name === taskId)
+  if (known?.project) {
+    router.replace(`/projects/${known.project}/tasks/${taskId}`)
+    return
+  }
+  if (known) return
+  try {
+    const data = await getTask(taskId)
+    if (data?.project) router.replace(`/projects/${data.project}/tasks/${taskId}`)
+  } catch (e) {
+    console.error(e)
+  }
+}, { immediate: true })
 
 function handleBackToList() {
   router.push({ path: '/tasks', query: { view: activeView.value } })

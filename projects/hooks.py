@@ -14,7 +14,7 @@ app_license = "mit"
 add_to_apps_screen = [
 	{
 		"name": "projects",
-		"logo": "/assets/projects/logo.svg",
+		"logo": "/assets/projects/brand/icon-light.jpg",
 		"title": "Projects",
 		"route": "/projects",
 		"has_permission": "projects.api.check_app_permission",

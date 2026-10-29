@@ -1,11 +1,13 @@
 <template>
   <FrappeUIProvider>
-    <div class="h-screen w-screen flex bg-surface-white text-ink-gray-9 overflow-hidden antialiased select-none">
+    <div class="app-shell h-screen w-screen overflow-hidden antialiased select-none" :class="{ 'is-sidebar-collapsed': sidebarCollapsed }">
       <!-- Helpdesk-styled Sidebar -->
       <Sidebar
         :unread-count="unreadCount"
+        :overdue-count="dashboardData.kpis?.overdue_tasks || 0"
         :is-search-open="showCommandPalette"
         :is-notifications-open="showNotifications"
+        @toggle-collapsed="sidebarCollapsed = !sidebarCollapsed"
         @open-search="showCommandPalette = true"
         @open-notifications="showNotifications = !showNotifications"
         @open-new-project="showNewProjectModal = true"
@@ -32,14 +34,17 @@
       />
 
       <!-- Main View Content Area -->
-      <div class="flex-1 flex flex-col h-full overflow-hidden min-w-0 bg-surface-white relative">
+      <main class="app-main">
         <router-view
+          ref="pageRef"
           :data="dashboardData"
           @open-new-project="showNewProjectModal = true"
           @open-new-task="openNewTaskModal"
+          @open-search="showCommandPalette = true"
+          @open-notifications="showNotifications = !showNotifications"
           @refresh="refreshData"
         />
-      </div>
+      </main>
 
       <!-- Modals -->
       <NewProjectModal
@@ -76,12 +81,14 @@ import AppSettingsModal from './components/AppSettingsModal.vue'
 import { getPortfolioDashboard, getNotifications } from './api'
 
 const router = useRouter()
+const pageRef = ref(null)
 
 const showNewProjectModal = ref(false)
 const showNewTaskModal = ref(false)
 const showCommandPalette = ref(false)
 const showNotifications = ref(false)
 const showAppSettings = ref(false)
+const sidebarCollapsed = ref(false)
 const unreadCount = ref(0)
 const selectedProjectForNewTask = ref('')
 const dashboardData = ref({})
@@ -122,7 +129,14 @@ async function onProjectCreated(res) {
   }
 }
 
-async function onTaskCreated() {
+async function onTaskCreated(task) {
   await refreshData()
+  if (task?.project && task?.name) {
+    await router.push({
+      path: `/projects/${task.project}/tasks/${task.name}`,
+      query: task.implementation_module ? { module: task.implementation_module } : {},
+    })
+  }
+  pageRef.value?.loadProject?.()
 }
 </script>

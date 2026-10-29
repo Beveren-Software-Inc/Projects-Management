@@ -86,11 +86,38 @@ input[type="checkbox"]:indeterminate {
   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 16 16'%3e%3cpath stroke='white' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M4 8h8'/%3e%3c/svg%3e") !important;
 }
 
-/* Sidebar matching Frappe Helpdesk - light grey canvas with pure white active pill */
+.app-canvas {
+  background: #f6f8fc;
+  color: #19263f;
+}
+
+.brand-progress {
+  background-image: linear-gradient(90deg, #6872e4, #6b9ae8);
+}
+
+.app-canvas .rounded-2xl.border {
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 10px 28px rgba(15, 23, 42, 0.04);
+}
+
+/* Sidebar: light canvas, white active row, Beveren accent */
 .helpdesk-sidebar,
 [data-slot="sidebar"],
 aside.helpdesk-sidebar {
-  background-color: #f8f9fa !important;
+  background-color: #ffffff !important;
+  border-right: 1px solid #e5e9f1 !important;
+}
+
+.helpdesk-sidebar [data-slot="sidebar-header"] .size-7 {
+  width: 2.25rem !important;
+  height: 2.25rem !important;
+  overflow: hidden;
+  border-radius: 8px;
+  background: transparent;
+}
+
+.helpdesk-sidebar [data-slot="sidebar-header"] img {
+  object-fit: contain;
+  transform: none;
 }
 
 [data-slot="sidebar-header"] button:hover {
@@ -99,16 +126,16 @@ aside.helpdesk-sidebar {
 
 [data-slot="sidebar-item"][data-state="active"],
 .group\/sidebar-item[data-state="active"] {
-  background-color: #ffffff !important;
-  color: #111827 !important;
-  font-weight: 500 !important;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.07), 0 1px 2px -1px rgba(0, 0, 0, 0.04) !important;
-  border: 1px solid rgba(209, 213, 219, 0.7) !important;
+  background-color: #eff0ff !important;
+  color: #4c57c8 !important;
+  font-weight: 650 !important;
+  box-shadow: inset 3px 0 0 #5d67d9 !important;
+  border: 0 !important;
 }
 
 [data-slot="sidebar-item"]:hover:not([data-state="active"]),
 .group\/sidebar-item:hover:not([data-state="active"]) {
-  background-color: #eeeff1 !important;
+  background-color: #f6f7fb !important;
 }
 
 .palette-content,
@@ -140,13 +167,6 @@ aside.helpdesk-sidebar {
 .menu-item,
 [role="option"] {
   border-radius: 10px !important;
-}
-
-/* Global radius for all filters, form inputs, selects, and typing spaces */
-input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
-select,
-textarea {
-  border-radius: 12px !important;
 }
 
 /* Ensure modal backdrops have visible dark translucent overlay */

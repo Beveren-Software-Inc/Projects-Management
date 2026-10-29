@@ -136,6 +136,89 @@ def get_tasks(
 	return filtered_tasks
 
 
+def _attached_files(doctype, names):
+	"""Files already stored against these documents."""
+	if not names:
+		return {}
+	rows = frappe.get_all(
+		"File",
+		filters={"attached_to_doctype": doctype, "attached_to_name": ["in", names]},
+		fields=["name", "file_name", "file_url", "attached_to_name"],
+		order_by="creation asc",
+	)
+	grouped = {}
+	for row in rows:
+		grouped.setdefault(row.attached_to_name, []).append({
+			"name": row.name,
+			"file_name": row.file_name,
+			"file_url": row.file_url,
+		})
+	return grouped
+
+
+def _activity_text(value):
+	if value in (None, ""):
+		return "empty"
+	text = " ".join(frappe.utils.strip_html(str(value)).split())
+	if not text:
+		return "empty"
+	if len(text) > 80:
+		return text[:77] + "..."
+	return text
+
+
+def _task_version_events(task_id):
+	"""Turn saved Task versions into readable activity lines."""
+	skip = {"modified", "modified_by", "creation", "owner", "idx", "docstatus", "_assign", "_user_tags", "_comments", "_liked_by"}
+	labels = {
+		"status": "status",
+		"priority": "priority",
+		"progress": "progress",
+		"subject": "name",
+		"exp_end_date": "due date",
+		"exp_start_date": "start date",
+		"description": "description",
+		"project": "project",
+		"implementation_module": "module",
+		"is_milestone": "milestone",
+		"expected_time": "expected time",
+		"actual_time": "actual time",
+		"parent_task": "parent task",
+	}
+	events = []
+	versions = frappe.get_all(
+		"Version",
+		filters={"ref_doctype": "Task", "docname": task_id},
+		fields=["name", "owner", "creation", "data"],
+		order_by="creation asc",
+	)
+	for version in versions:
+		try:
+			payload = json.loads(version.data or "{}")
+		except Exception:
+			continue
+		owner_name = frappe.db.get_value("User", version.owner, "full_name") or version.owner
+		for change in payload.get("changed") or []:
+			if not isinstance(change, (list, tuple)) or len(change) < 3:
+				continue
+			field, old, new = change[0], change[1], change[2]
+			if field in skip:
+				continue
+			label = labels.get(field, str(field).replace("_", " "))
+			old_text = _activity_text(old)
+			new_text = _activity_text(new)
+			events.append({
+				"type": "change",
+				"id": f"{version.name}-{field}",
+				"sender": version.owner,
+				"sender_name": owner_name,
+				"field": field,
+				"content": f"changed {label} from {old_text} to {new_text}",
+				"timestamp": version.creation,
+			})
+	return events
+
+
 @frappe.whitelist()
 def get_task(task_id):
 	"""Return comprehensive ticket details including full activity timeline."""
@@ -192,29 +275,39 @@ def get_task(task_id):
 			task_data["client_poc_email"] = proj.client_poc_email
 			task_data["project_manager"] = proj.project_manager
 
-	# -------------------------------------------------------------------------
-	# Helpdesk Ticket-Style Activity Timeline:
-	# Comments, Emails (Communications), and System Version Changes
-	# -------------------------------------------------------------------------
+	task_data["subtasks"] = frappe.get_all(
+		"Task",
+		filters={"parent_task": task_id},
+		fields=["name", "subject", "status", "priority", "exp_end_date"],
+		order_by="creation asc",
+	)
+	if doc.parent_task:
+		task_data["parent_task"] = doc.parent_task
+		task_data["parent_subject"] = frappe.db.get_value("Task", doc.parent_task, "subject")
+
+	# Comments, emails, and document versions. No fabricated events.
 	timeline = []
 
-	# 1. Comments
 	comments = frappe.get_all(
 		"Comment",
 		filters={"reference_doctype": "Task", "reference_name": task_id},
 		fields=["name", "comment_type", "comment_email", "comment_by", "content", "creation"],
-		order_by="creation desc",
+		order_by="creation asc",
 	)
+	comment_ids = [c.name for c in comments]
+	comment_files = _attached_files("Comment", comment_ids)
 	for c in comments:
 		user_img = frappe.db.get_value("User", c.comment_email, "user_image")
+		is_note = (c.comment_type or "Comment") == "Comment"
 		timeline.append({
-			"type": "comment",
+			"type": "comment" if is_note else "system",
 			"id": c.name,
 			"comment_type": c.comment_type,
 			"sender": c.comment_email,
 			"sender_name": c.comment_by or c.comment_email,
 			"sender_image": user_img,
-			"content": c.content,
+			"content": frappe.utils.strip_html(c.content or ""),
+			"files": comment_files.get(c.name, []),
 			"timestamp": c.creation,
 		})
 
@@ -248,9 +341,11 @@ def get_task(task_id):
 			"sender_image": user_img,
 			"recipients": cm.recipients,
 			"subject": cm.subject,
-			"content": cm.content,
+			"content": frappe.utils.strip_html(cm.content or ""),
 			"timestamp": cm.creation,
 		})
+
+	timeline.extend(_task_version_events(task_id))
 
 	# 3. Document Creation Event
 	timeline.append({
@@ -266,6 +361,7 @@ def get_task(task_id):
 	# Sort chronological (newest first or oldest first)
 	timeline.sort(key=lambda x: str(x["timestamp"]), reverse=True)
 	task_data["activity_timeline"] = timeline
+	task_data["files"] = _attached_files("Task", [task_id]).get(task_id, [])
 
 	return task_data
 
@@ -338,6 +434,7 @@ def create_task(data):
 		"doctype": "Task",
 		"subject": subject,
 		"project": project,
+		"parent_task": data.get("parent_task") or None,
 		"implementation_module": data.get("implementation_module"),
 		"priority": data.get("priority") or "Medium",
 		"status": data.get("status") or "Open",
@@ -650,7 +747,19 @@ def send_task_email(task_id, recipients, subject, message):
 @frappe.whitelist()
 def assign_task(task_id, user_email, action="add"):
 	"""Assign or unassign user from task, and notify them."""
-	if action == "add":
+	if action == "set":
+		current = json.loads(frappe.db.get_value("Task", task_id, "_assign") or "[]")
+		for email in current:
+			if email != user_email:
+				remove_assignment("Task", task_id, email)
+		if user_email and user_email not in current:
+			add_assignment({
+				"doctype": "Task",
+				"name": task_id,
+				"assign_to": [user_email],
+				"description": f"Assigned to {task_id}",
+			})
+	elif action == "add":
 		add_assignment({
 			"doctype": "Task",
 			"name": task_id,

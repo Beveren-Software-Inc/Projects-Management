@@ -1,407 +1,397 @@
 <template>
-  <div class="h-full flex flex-col bg-surface-white overflow-hidden">
-    <!-- Header -->
-    <LayoutHeader>
-      <template #left-header>
-        <div class="flex items-center text-sm font-medium text-ink-gray-5 truncate">
-          <router-link to="/projects" class="hover:text-ink-gray-8 transition">Projects</router-link>
-          <span class="mx-1.5 text-ink-gray-4">/</span>
-          <span class="text-ink-gray-9 font-semibold truncate">{{ project.project_name || projectName }}</span>
-        </div>
-      </template>
-
-      <template #right-header>
-        <div class="flex items-center gap-2">
-          <Button
-            variant="subtle"
-            size="sm"
-            label="Add Module"
-            @click="showAddModuleModal = true"
-          >
-            <template #prefix>
-              <Icon name="modules" size="13" />
-            </template>
-          </Button>
-
-          <Button
-            theme="gray"
-            variant="solid"
-            size="sm"
-            label="New Task"
-            @click="$emit('open-new-task', project.name)"
-          >
-            <template #prefix>
-              <Icon name="plus" size="13" />
-            </template>
-          </Button>
-        </div>
-      </template>
-    </LayoutHeader>
-
-    <div v-if="loading" class="flex-1 flex items-center justify-center">
-      <div class="flex items-center gap-2 text-xs text-ink-gray-5">
-        <Icon name="refresh" size="16" class="animate-spin text-ink-gray-7" />
-        <span>Loading project dashboard...</span>
+  <div class="project-page">
+    <header class="topbar">
+      <div class="breadcrumb" aria-label="Breadcrumb">
+        <router-link to="/projects">Projects</router-link>
+        <Icon name="chevron-right" :size="13" />
+        <strong>{{ project.project_name || projectName }}</strong>
       </div>
+      <div class="topbar-actions">
+        <label class="global-search">
+          <Icon name="search" :size="15" />
+          <input
+            v-model="taskQuery"
+            type="search"
+            placeholder="Search projects, tasks..."
+            aria-label="Search projects and tasks"
+            @focus="projectView = 'Work plan'"
+          />
+          <kbd>⌘ K</kbd>
+        </label>
+        <button type="button" class="icon-button notification-button" aria-label="Notifications" @click="$emit('open-notifications')">
+          <Icon name="bell" :size="16" />
+        </button>
+        <button type="button" class="icon-button" aria-label="Search" @click="$emit('open-search')">
+          <Icon name="search" :size="16" />
+        </button>
+      </div>
+    </header>
+
+    <div v-if="loading" class="project-content">
+      <p class="detail-empty">Loading project...</p>
+    </div>
+    <div v-else-if="!project.name" class="project-content">
+      <p class="detail-empty">Project not found.</p>
     </div>
 
-    <div v-else-if="!project.name" class="p-12 text-center text-xs text-ink-gray-5">
-      Project not found.
-    </div>
+    <div v-else class="project-content">
+      <section class="project-hero">
+        <div class="project-heading">
+          <div class="project-eyebrow">
+            <span class="eyebrow-dot" />
+            CLIENT IMPLEMENTATION
+            <span class="eyebrow-separator">/</span>
+            ERPNEXT
+          </div>
+          <div class="project-title-row">
+            <h1>{{ project.project_name }}</h1>
+            <span class="project-status" :class="{ 'is-risk': project.stats?.overdue_tasks }">
+              <span />{{ project.stats?.overdue_tasks ? 'Needs attention' : 'On track' }}
+            </span>
+          </div>
+          <p>ERPNext implementation · {{ stageLabel }}</p>
+        </div>
+        <div class="project-actions">
+          <div v-if="teamPeople.length" class="team-stack">
+            <span
+              v-for="person in teamPeople.slice(0, 4)"
+              :key="person.key"
+              class="avatar avatar-small"
+              :class="person.tone"
+              :title="person.name"
+            >{{ person.initials }}</span>
+            <span v-if="teamPeople.length > 4" class="team-more">+{{ teamPeople.length - 4 }}</span>
+          </div>
+          <button type="button" class="share-button" @click="copyLink">
+            <Icon name="share" :size="14" />
+            {{ copied ? 'Copied' : 'Share' }}
+          </button>
+          <button type="button" class="primary-action" @click="startNewTask">
+            <Icon name="plus" :size="14" />
+            New task
+          </button>
+        </div>
+      </section>
 
-    <div v-else class="flex-1 overflow-y-auto p-6 space-y-6">
-      <!-- Frappe UI Alert for client communications status -->
-      <Alert
-        v-if="project.auto_emails"
-        theme="blue"
-        title="Automated Client Updates Active"
-        description="Kickoff communications and milestone completion updates are delivered automatically to the client point of contact."
-      />
-
-      <!-- Project Top Banner Card -->
-      <div class="bg-surface-white rounded-2xl border border-outline-gray-1 shadow-2xs p-5 space-y-4">
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <section class="project-health">
+        <div class="health-progress-card">
+          <div class="health-progress-topline">
+            <span>Project completion</span>
+            <strong>{{ project.stats?.percent_complete || 0 }}%</strong>
+          </div>
+          <div class="health-progress-track">
+            <span :style="{ width: (project.stats?.percent_complete || 0) + '%' }" />
+          </div>
+          <div class="health-progress-foot">
+            <span>{{ project.stats?.completed_tasks || 0 }} of {{ project.stats?.total_tasks || 0 }} tasks complete</span>
+            <span v-if="!project.stats?.overdue_tasks" class="on-track-label">
+              <Icon name="check-circle" :size="12" /> On track
+            </span>
+          </div>
+        </div>
+        <div class="health-divider" />
+        <div class="health-stat">
+          <span class="health-icon health-icon-alert"><Icon name="alert-circle" :size="16" /></span>
           <div>
-            <h1 class="text-base font-semibold text-ink-gray-9 flex items-center gap-2.5">
-              <span>{{ project.project_name }}</span>
-              <!-- Stage Selector -->
-              <select
-                v-model="project.implementation_stage"
-                @change="handleStageChange"
-                class="px-3 py-1 text-xs font-medium rounded-xl border border-outline-gray-2 bg-surface-gray-1 hover:bg-surface-gray-2 text-ink-gray-8 cursor-pointer focus:outline-none transition shadow-2xs"
-              >
-                <option value="Discovery">Discovery & Planning</option>
-                <option value="Design">Solution Design</option>
-                <option value="Configuration & Customization">Configuration</option>
-                <option value="Data Migration">Data Migration</option>
-                <option value="UAT & Training">UAT & Training</option>
-                <option value="Go-Live">Go-Live</option>
-                <option value="Hypercare Support">Hypercare</option>
-                <option value="Closed">Closed</option>
-              </select>
-            </h1>
-            <div class="text-[11px] text-ink-gray-4 font-mono mt-0.5">#{{ project.name }}</div>
+            <strong>{{ String(project.stats?.overdue_tasks || 0).padStart(2, '0') }}</strong>
+            <span>Overdue tasks</span>
           </div>
         </div>
-
-        <!-- Stakeholders Grid with Frappe UI Avatars -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-3 border-t border-outline-gray-1 text-xs">
-          <!-- Client PoC -->
-          <div class="p-3 rounded-xl bg-surface-gray-1 border border-outline-gray-1 space-y-2">
-            <div class="text-[11px] font-medium text-ink-gray-5 flex items-center gap-1.5">
-              <div class="w-5 h-5 rounded-md bg-blue-50 text-blue-600 border border-blue-100 flex items-center justify-center shrink-0">
-                <Icon name="user" size="11" class="text-blue-600" />
-              </div>
-              <span>Client Point of Contact</span>
-            </div>
-            <div class="flex items-center gap-2">
-              <Avatar :label="project.client_poc_name || 'Client'" size="sm" />
-              <div>
-                <div class="font-medium text-ink-gray-9">{{ project.client_poc_name || 'Not specified' }}</div>
-                <div v-if="project.client_poc_email" class="text-ink-gray-5 text-[11px]">
-                  <a :href="'mailto:' + project.client_poc_email" class="text-ink-gray-7 hover:underline truncate">{{ project.client_poc_email }}</a>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Partner PoC -->
-          <div class="p-3 rounded-xl bg-surface-gray-1 border border-outline-gray-1 space-y-2">
-            <div class="text-[11px] font-medium text-ink-gray-5 flex items-center gap-1.5">
-              <div class="w-5 h-5 rounded-md bg-purple-50 text-purple-600 border border-purple-100 flex items-center justify-center shrink-0">
-                <Icon name="users" size="11" class="text-purple-600" />
-              </div>
-              <span>Partner Lead</span>
-            </div>
-            <div class="flex items-center gap-2">
-              <Avatar :label="project.partner_poc_name || 'Partner'" size="sm" />
-              <div>
-                <div class="font-medium text-ink-gray-9">{{ project.partner_poc_name || 'Not assigned' }}</div>
-                <div class="text-[11px] text-ink-gray-5">{{ project.partner_poc || '' }}</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Project Manager -->
-          <div class="p-3 rounded-xl bg-surface-gray-1 border border-outline-gray-1 space-y-2">
-            <div class="text-[11px] font-medium text-ink-gray-5 flex items-center gap-1.5">
-              <div class="w-5 h-5 rounded-md bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center shrink-0">
-                <Icon name="target" size="11" class="text-emerald-600" />
-              </div>
-              <span>Project Manager</span>
-            </div>
-            <div class="flex items-center gap-2">
-              <Avatar :label="project.project_manager_name || 'PM'" size="sm" />
-              <div>
-                <div class="font-medium text-ink-gray-9">{{ project.project_manager_name || 'Not assigned' }}</div>
-                <div class="text-[11px] text-ink-gray-5">{{ project.project_manager || '' }}</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Timeline -->
-          <div class="p-3 rounded-xl bg-surface-gray-1 border border-outline-gray-1 space-y-1">
-            <div class="text-[11px] font-medium text-ink-gray-5 flex items-center gap-1.5">
-              <div class="w-5 h-5 rounded-md bg-amber-50 text-amber-600 border border-amber-100 flex items-center justify-center shrink-0">
-                <Icon name="clock" size="11" class="text-amber-600" />
-              </div>
-              <span>Timeline</span>
-            </div>
-            <div class="font-medium text-ink-gray-9">
-              {{ formatDate(project.expected_start_date) }} - {{ formatDate(project.expected_end_date) }}
-            </div>
-            <div class="text-[11px] flex items-center gap-1" :class="project.auto_emails ? 'text-emerald-600' : 'text-ink-gray-4'">
-              <span>{{ project.auto_emails ? '✓ Auto-emails enabled' : 'Auto-emails disabled' }}</span>
-            </div>
+        <div class="health-divider" />
+        <div class="health-stat">
+          <span class="health-icon health-icon-milestone"><Icon name="calendar" :size="16" /></span>
+          <div>
+            <strong>{{ goLiveLabel }}</strong>
+            <span>{{ goLiveHint }}</span>
           </div>
         </div>
-      </div>
-
-      <!-- Stats row -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
-        <div class="p-4 rounded-2xl border border-outline-gray-1 bg-surface-white shadow-2xs space-y-1.5 hover:shadow-xs transition">
-          <div class="flex items-center justify-between text-xs text-ink-gray-5">
-            <span class="font-medium">Completion Rate</span>
-            <div class="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-600 border border-indigo-100 flex items-center justify-center shrink-0">
-              <Icon name="trending-up" size="13" class="text-indigo-600" />
-            </div>
-          </div>
-          <div class="text-2xl font-bold text-ink-gray-9">{{ project.stats?.percent_complete || 0 }}%</div>
-          <div class="w-full h-1.5 bg-surface-gray-2 rounded-full overflow-hidden">
-            <div
-              class="h-full bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full transition-all duration-300"
-              :style="{ width: (project.stats?.percent_complete || 0) + '%' }"
-            ></div>
-          </div>
-        </div>
-
-        <div class="p-4 rounded-2xl border border-outline-gray-1 bg-surface-white shadow-2xs space-y-1 hover:shadow-xs transition">
-          <div class="flex items-center justify-between text-xs text-ink-gray-5">
-            <span class="font-medium">Total Tasks</span>
-            <div class="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 border border-blue-100 flex items-center justify-center shrink-0">
-              <Icon name="check-square" size="13" class="text-blue-600" />
-            </div>
-          </div>
-          <div class="text-2xl font-bold text-ink-gray-9">{{ project.stats?.total_tasks || 0 }}</div>
-          <div class="text-[11px] text-ink-gray-4">{{ project.stats?.completed_tasks || 0 }} completed</div>
-        </div>
-
-        <div class="p-4 rounded-2xl border border-outline-gray-1 bg-surface-white shadow-2xs space-y-1 hover:shadow-xs transition">
-          <div class="flex items-center justify-between text-xs text-ink-gray-5">
-            <span class="font-medium">In Progress</span>
-            <div class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center shrink-0">
-              <Icon name="refresh" size="13" class="text-emerald-600" />
-            </div>
-          </div>
-          <div class="text-2xl font-bold text-ink-gray-9">{{ project.stats?.open_tasks || 0 }}</div>
-          <div class="text-[11px] text-ink-gray-4">Active workload</div>
-        </div>
-
-        <div
-          class="p-4 rounded-2xl border shadow-2xs space-y-1 hover:shadow-xs transition"
-          :class="(project.stats?.overdue_tasks || 0) > 0 ? 'border-red-200 bg-red-50/20' : 'border-outline-gray-1 bg-surface-white'"
-        >
-          <div class="flex items-center justify-between text-xs" :class="(project.stats?.overdue_tasks || 0) > 0 ? 'text-red-700 font-medium' : 'text-ink-gray-5'">
-            <span class="font-medium">Overdue Tasks</span>
-            <div
-              class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
-              :class="(project.stats?.overdue_tasks || 0) > 0 ? 'bg-red-100 text-red-600 border border-red-200' : 'bg-rose-50 text-rose-500 border border-rose-100'"
-            >
-              <Icon name="alert-circle" size="13" />
-            </div>
-          </div>
-          <div class="text-2xl font-bold" :class="(project.stats?.overdue_tasks || 0) > 0 ? 'text-red-600' : 'text-ink-gray-9'">
-            {{ project.stats?.overdue_tasks || 0 }}
-          </div>
-          <div class="text-[11px] text-ink-gray-4">Needs priority action</div>
-        </div>
-
-        <div class="p-4 rounded-2xl border border-outline-gray-1 bg-surface-white shadow-2xs space-y-1 hover:shadow-xs transition">
-          <div class="flex items-center justify-between text-xs text-ink-gray-5">
-            <span class="font-medium">Milestones</span>
-            <div class="w-7 h-7 rounded-lg bg-amber-50 text-amber-600 border border-amber-100 flex items-center justify-center shrink-0">
-              <Icon name="flag" size="13" class="text-amber-600" />
-            </div>
-          </div>
-          <div class="text-2xl font-bold text-amber-600">
-            {{ project.stats?.completed_milestones || 0 }} <span class="text-ink-gray-4 text-base font-normal">/ {{ project.stats?.milestone_count || 0 }}</span>
-          </div>
-          <div class="text-[11px] text-ink-gray-4">Signed-off</div>
-        </div>
-      </div>
-
-      <!-- Modules & Tasks Tabs -->
-      <div class="bg-surface-white rounded-2xl border border-outline-gray-1 shadow-2xs overflow-hidden">
-        <div class="flex border-b border-outline-gray-1 px-5 bg-surface-gray-1">
-          <button
-            @click="activeTab = 'modules'"
-            class="py-3 px-4 text-xs font-medium border-b-2 transition flex items-center gap-1.5"
-            :class="activeTab === 'modules' ? 'border-ink-gray-9 text-ink-gray-9 font-semibold' : 'border-transparent text-ink-gray-5 hover:text-ink-gray-8'"
-          >
-            <Icon name="modules" size="14" />
-            <span>Modules ({{ project.modules?.length || 0 }})</span>
-          </button>
-
-          <button
-            @click="activeTab = 'tasks'"
-            class="py-3 px-4 text-xs font-medium border-b-2 transition flex items-center gap-1.5"
-            :class="activeTab === 'tasks' ? 'border-ink-gray-9 text-ink-gray-9 font-semibold' : 'border-transparent text-ink-gray-5 hover:text-ink-gray-8'"
-          >
-            <Icon name="check-square" size="14" />
-            <span>Tasks ({{ project.tasks?.length || 0 }})</span>
-          </button>
-        </div>
-
-        <!-- Modules Grid -->
-        <div v-show="activeTab === 'modules'" class="p-5">
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
-            <div
-              v-for="mod in project.modules"
-              :key="mod.module"
-              class="p-4 rounded-2xl border border-outline-gray-1 bg-surface-white hover:border-outline-gray-2 hover:shadow-xs transition space-y-3"
-            >
-              <div class="flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                  <div
-                    class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border transition shadow-2xs"
-                    :style="{
-                      backgroundColor: (mod.color || getModuleColor(mod.module_title || mod.module)) + '18',
-                      borderColor: (mod.color || getModuleColor(mod.module_title || mod.module)) + '38',
-                      color: mod.color || getModuleColor(mod.module_title || mod.module)
-                    }"
-                  >
-                    <Icon
-                      :name="mod.icon || getModuleIcon(mod.module_title || mod.module)"
-                      size="18"
-                      :color="mod.color || getModuleColor(mod.module_title || mod.module)"
-                    />
-                  </div>
-                  <div>
-                    <h4 class="font-semibold text-xs text-ink-gray-9">{{ mod.module_title || mod.module_name }}</h4>
-                    <div class="text-[10px] text-ink-gray-4">{{ mod.module }}</div>
-                  </div>
-                </div>
-
-                <span
-                  class="text-xs font-bold font-mono px-2 py-0.5 rounded-md"
-                  :style="{
-                    backgroundColor: (mod.color || getModuleColor(mod.module_title || mod.module)) + '15',
-                    color: mod.color || getModuleColor(mod.module_title || mod.module)
-                  }"
-                >
-                  {{ mod.progress || 0 }}%
-                </span>
-              </div>
-
-              <div class="space-y-1">
-                <div class="w-full h-1.5 bg-surface-gray-2 rounded-full overflow-hidden">
-                  <div
-                    class="h-full rounded-full transition-all duration-500"
-                    :style="{
-                      width: (mod.progress || 0) + '%',
-                      backgroundColor: mod.color || getModuleColor(mod.module_title || mod.module)
-                    }"
-                  ></div>
-                </div>
-              </div>
-
-              <div class="pt-2 border-t border-outline-gray-1 flex items-center justify-between text-[11px] text-ink-gray-5">
-                <span>{{ mod.completed_tasks || 0 }}/{{ mod.total_tasks || 0 }} tasks</span>
-                <span
-                  v-if="mod.overdue_tasks > 0"
-                  class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-red-50 text-red-600 border border-red-200"
-                >
-                  <Icon name="alert-circle" size="10" />
-                  <span>{{ mod.overdue_tasks }} overdue</span>
-                </span>
-                <span v-else class="text-[10px] text-emerald-600 flex items-center gap-1">
-                  <Icon name="check-circle" size="11" />
-                  <span>On track</span>
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Tasks List -->
-        <div v-show="activeTab === 'tasks'" class="divide-y divide-outline-gray-1">
-          <div
-            v-for="task in project.tasks"
-            :key="task.name"
-            @click="$router.push('/tasks/' + task.name)"
-            class="p-3.5 px-5 flex items-center justify-between hover:bg-surface-gray-2 cursor-pointer transition select-none group text-xs"
-          >
-            <div class="flex items-center gap-2.5 min-w-0">
-              <span v-if="task.is_milestone" class="text-amber-500 shrink-0" title="Milestone">
-                <Icon name="flag" size="13" />
-              </span>
-              <span class="font-mono text-[11px] text-ink-gray-4 shrink-0">#{{ task.name?.split('-')?.pop() || task.name }}</span>
-              <span class="font-medium text-xs text-ink-gray-9 group-hover:text-ink-black transition truncate max-w-md">
-                {{ task.subject }}
-              </span>
-              <Badge
-                v-if="task.module_title"
-                theme="gray"
-                variant="subtle"
-                size="sm"
-                :label="task.module_title"
-              />
-            </div>
-
-            <div class="flex items-center gap-4 shrink-0 text-xs">
-              <Badge
-                size="sm"
-                variant="subtle"
-                :theme="task.status === 'Completed' ? 'green' : 'gray'"
-                :label="task.status"
-              />
-              <span class="text-[11px] text-ink-gray-5">
-                {{ formatDate(task.exp_end_date) }}
-              </span>
-              <span class="font-mono text-[11px] text-ink-gray-5">{{ task.progress || 0 }}%</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Add Module Modal -->
-      <div v-if="showAddModuleModal" class="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
-        <div class="bg-surface-white rounded-2xl border border-outline-gray-2 p-5 max-w-md w-full space-y-3.5 shadow-2xl">
-          <h3 class="text-sm font-semibold text-ink-gray-9">Add Module to {{ project.project_name }}</h3>
-          <p class="text-xs text-ink-gray-5">Select a module to add. Standard tasks will be instantiated automatically.</p>
-          
-          <select
-            v-model="moduleToAdd"
-            class="w-full px-3 py-2 text-xs rounded-xl border border-outline-gray-2 bg-surface-gray-1 hover:bg-surface-gray-2 focus:bg-white focus:outline-none transition shadow-2xs cursor-pointer"
-          >
-            <option value="">-- Choose Module --</option>
-            <option
-              v-for="m in allModules"
-              :key="m.module_code"
-              :value="m.module_code"
-              :disabled="project.modules?.some(pm => pm.module === m.module_code)"
-            >
-              {{ m.module_name }} {{ project.modules?.some(pm => pm.module === m.module_code) ? '(Already added)' : '' }}
-            </option>
+        <div class="phase-chip">
+          <span>PHASE {{ phaseIndex }} / {{ stages.length }}</span>
+          <select v-model="project.implementation_stage" @change="handleStageChange">
+            <option v-for="stage in stages" :key="stage.value" :value="stage.value">{{ stage.label }}</option>
           </select>
+        </div>
+      </section>
 
-          <div class="flex justify-end gap-2 pt-2">
-            <Button
-              variant="subtle"
-              size="sm"
-              label="Cancel"
-              @click="showAddModuleModal = false"
-            />
-            <Button
-              theme="gray"
-              variant="solid"
-              size="sm"
-              :disabled="!moduleToAdd || addingModule"
-              :loading="addingModule"
-              label="Add Module & Tasks"
-              @click="handleAddModule"
-            />
+      <nav class="project-tabs" aria-label="Project views">
+        <button type="button" class="project-tab" :class="{ 'is-active': projectView === 'Work plan' }" @click="projectView = 'Work plan'">
+          <Icon name="list-todo" :size="15" /> Work plan
+        </button>
+        <button type="button" class="project-tab" :class="{ 'is-active': projectView === 'Timeline' }" @click="projectView = 'Timeline'">
+          <Icon name="calendar" :size="15" /> Timeline
+        </button>
+        <button type="button" class="project-tab" :class="{ 'is-active': projectView === 'Files' }" @click="projectView = 'Files'">
+          <Icon name="file-text" :size="15" /> Files
+        </button>
+        <button type="button" class="project-tab" :class="{ 'is-active': projectView === 'Activity' }" @click="projectView = 'Activity'">
+          <Icon name="activity" :size="15" /> Activity
+        </button>
+        <div class="tabs-spacer" />
+        <span class="updated-label"><span />Live from ERPNext</span>
+      </nav>
+
+      <div v-if="projectView === 'Work plan'" class="workspace-grid">
+        <section class="surface-panel workstream-panel">
+          <div class="panel-heading">
+            <div>
+              <h2>Workstreams</h2>
+              <p>ERPNext modules</p>
+            </div>
+            <button type="button" class="icon-button" aria-label="Add a module" @click="showAddModuleModal = true">
+              <Icon name="more-horizontal" :size="16" />
+            </button>
           </div>
+          <button type="button" class="workstream-total" @click="selectModule('')">
+            <span class="total-icon"><Icon name="layers" :size="12" /></span>
+            <span>All workstreams</span>
+            <strong>{{ project.tasks?.length || 0 }}</strong>
+          </button>
+          <div class="workstream-list">
+            <button
+              v-for="(mod, index) in project.modules || []"
+              :key="mod.module"
+              type="button"
+              class="workstream-row"
+              :class="{ 'is-selected': selectedModuleCode === mod.module }"
+              @click="selectModule(mod.module)"
+            >
+              <span class="workstream-icon" :class="'workstream-icon-' + tone(index)">
+                <Icon name="layers" :size="14" />
+              </span>
+              <span class="workstream-content">
+                <span class="workstream-name-line">
+                  <span class="workstream-name">{{ mod.module_title || mod.module_name || mod.module }}</span>
+                  <span class="workstream-percent">{{ Math.round(mod.progress || 0) }}%</span>
+                </span>
+                <span class="workstream-progress-track">
+                  <span :class="'progress-' + tone(index)" :style="{ width: (mod.progress || 0) + '%' }" />
+                </span>
+                <span class="workstream-meta">
+                  {{ mod.completed_tasks || 0 }}/{{ mod.total_tasks || 0 }} tasks
+                  <span v-if="mod.overdue_tasks" class="workstream-overdue">{{ mod.overdue_tasks }} overdue</span>
+                </span>
+              </span>
+              <Icon name="chevron-right" class="workstream-chevron" :size="14" />
+            </button>
+          </div>
+          <button type="button" class="add-workstream" @click="showAddModuleModal = true">
+            <Icon name="plus" :size="14" />
+            Add a workstream
+          </button>
+        </section>
+
+        <section class="surface-panel task-list-panel">
+          <div class="task-panel-heading">
+            <div>
+              <div class="panel-kicker">WORKSTREAM</div>
+              <h2>{{ selectedModule?.title || 'All workstreams' }}</h2>
+              <p>{{ moduleCompleted }} of {{ moduleTasks.length }} tasks complete</p>
+            </div>
+          </div>
+          <div class="task-toolbar">
+            <label class="task-search">
+              <Icon name="search" :size="14" />
+              <input v-model="taskQuery" type="search" placeholder="Filter tasks" aria-label="Filter tasks" />
+            </label>
+            <button type="button" class="filter-button" aria-label="Sort by due date" @click="sortDesc = !sortDesc">
+              <Icon name="list-filter" :size="14" />
+            </button>
+          </div>
+          <div class="task-filter-tabs">
+            <button
+              v-for="item in filterItems"
+              :key="item.id"
+              type="button"
+              class="task-filter-tab"
+              :class="{ 'is-active': taskFilter === item.id }"
+              @click="taskFilter = item.id"
+            >
+              {{ item.label }}<span>{{ item.count }}</span>
+            </button>
+            <button type="button" class="sort-button" aria-label="Sort tasks" @click="sortDesc = !sortDesc">
+              <Icon name="arrow-up-down" :size="14" />
+            </button>
+          </div>
+          <div v-if="isAddingTask" class="quick-add-task">
+            <input
+              v-model="newTaskTitle"
+              type="text"
+              placeholder="Write a task title..."
+              @keydown.enter.prevent="addQuickTask"
+            />
+            <button type="button" class="primary-action quick-add-submit" :disabled="!newTaskTitle.trim() || addingTask" @click="addQuickTask">Add</button>
+            <button type="button" class="icon-button" @click="isAddingTask = false"><Icon name="x" :size="14" /></button>
+          </div>
+          <div class="task-list-scroll">
+            <ul v-if="visibleTasks.length" class="task-list">
+              <li v-for="task in visibleTasks" :key="task.name" class="task-row" :class="{ 'is-selected': task.name === taskId }">
+                <button
+                  type="button"
+                  class="task-complete-button"
+                  :class="{ 'is-complete': task.status === 'Completed' }"
+                  @click="toggleComplete(task)"
+                >
+                  <Icon :name="task.status === 'Completed' ? 'check-circle' : 'circle'" :size="16" />
+                </button>
+                <button type="button" class="task-main" @click="goToTask(task)">
+                  <span class="task-title-line">
+                    <span class="task-title" :class="{ 'task-title-complete': task.status === 'Completed' }">{{ task.subject }}</span>
+                    <span v-if="task.priority === 'High' || task.priority === 'Urgent'" class="priority-marker">
+                      <Icon name="flag" :size="12" />
+                    </span>
+                  </span>
+                  <span class="task-meta-line">
+                    <span class="status-pill" :class="statusClass(task.status)"><span />{{ statusLabel(task.status) }}</span>
+                    <span class="task-meta-dot">·</span>
+                    <span :class="task.is_overdue && task.status !== 'Completed' ? 'due-overdue' : 'task-due'">
+                      {{ task.is_overdue && task.status !== 'Completed' ? 'Overdue · ' : '' }}{{ formatDate(task.exp_end_date) || 'No date' }}
+                    </span>
+                  </span>
+                </button>
+                <span v-if="assigneeLabel(task)" class="task-assignee" :title="assigneeLabel(task)">
+                  <span class="avatar avatar-small" :class="avatarTone(assigneeLabel(task))">{{ initials(assigneeLabel(task)) }}</span>
+                </span>
+                <span v-else class="task-unassigned"><Icon name="users" :size="14" /></span>
+              </li>
+            </ul>
+            <div v-else class="task-empty-state">
+              <span class="empty-icon"><Icon name="search" :size="16" /></span>
+              <strong>No tasks found</strong>
+              <p>Try another search or switch the filter.</p>
+            </div>
+          </div>
+          <button v-if="!isAddingTask" type="button" class="task-add-row" @click="startNewTask">
+            <Icon name="plus" :size="14" />
+            Add a task
+          </button>
+        </section>
+
+        <TaskTicketDetail
+          v-if="taskId"
+          :task-id="taskId"
+          :project-label="project.project_name"
+          :module-label="crumbModule?.title || ''"
+          @updated="loadProject"
+        />
+        <section v-else class="surface-panel task-detail-panel detail-empty">
+          <span class="empty-icon"><Icon name="list-todo" :size="16" /></span>
+          <h2>Select a task</h2>
+          <p>Choose a task from the workstream to see its details and activity.</p>
+        </section>
+      </div>
+
+      <section v-else-if="projectView === 'Timeline'" class="surface-panel secondary-view timeline-view">
+        <div class="secondary-view-heading">
+          <div>
+            <span class="panel-kicker">PROJECT SCHEDULE</span>
+            <h2>Milestones and delivery plan</h2>
+            <p>What this implementation is moving through next.</p>
+          </div>
+        </div>
+        <div v-if="timelineRows.length" class="timeline-list">
+          <article v-for="(row, index) in timelineRows" :key="row.key" class="milestone-row" :class="'milestone-' + row.tone">
+            <div class="milestone-date">{{ row.date }}<span>{{ row.year }}</span></div>
+            <div class="milestone-track">
+              <span class="milestone-dot">
+                <Icon v-if="row.tone === 'complete'" name="check" :size="12" />
+              </span>
+              <span v-if="index < timelineRows.length - 1" class="milestone-line" />
+            </div>
+            <div class="milestone-copy">
+              <div class="milestone-title-row">
+                <h3>{{ row.title }}</h3>
+                <span class="milestone-status" :class="'milestone-status-' + row.tone">{{ row.status }}</span>
+              </div>
+              <p>{{ row.detail }}</p>
+              <div class="milestone-progress"><span :style="{ width: row.progress + '%' }" /></div>
+            </div>
+          </article>
+        </div>
+        <div v-else class="detail-empty">
+          <h2>No milestones yet</h2>
+          <p>Mark a task as a milestone and it will show up on this plan.</p>
+        </div>
+      </section>
+
+      <section v-else-if="projectView === 'Files'" class="surface-panel secondary-view files-view">
+        <div class="secondary-view-heading">
+          <div>
+            <span class="panel-kicker">PROJECT LIBRARY</span>
+            <h2>Project files</h2>
+            <p>Files attached to this implementation and its tasks.</p>
+          </div>
+        </div>
+        <div v-if="project.files?.length" class="file-grid">
+          <a v-for="file in project.files" :key="file.name" class="project-file-card" :href="file.file_url" target="_blank">
+            <div class="file-preview" :class="filePreviewClass(file.file_name)">
+              <Icon :name="isSheet(file.file_name) ? 'file-text' : 'file-text'" :size="22" />
+              <span>{{ fileKind(file.file_name) }}</span>
+            </div>
+            <div class="project-file-copy">
+              <strong>{{ file.file_name }}</strong>
+              <span>{{ file.task_subject || formatBytes(file.file_size) }}</span>
+            </div>
+            <div class="project-file-footer"><span>{{ formatDate(file.creation) }}</span></div>
+          </a>
+        </div>
+        <div v-else class="detail-empty">
+          <h2>No files yet</h2>
+          <p>Attach a file on a task or a comment and it will be listed here.</p>
+        </div>
+      </section>
+
+      <section v-else class="surface-panel secondary-view activity-view">
+        <div class="secondary-view-heading">
+          <div>
+            <span class="panel-kicker">TEAM UPDATES</span>
+            <h2>Project activity</h2>
+            <p>Comments and messages across this implementation.</p>
+          </div>
+        </div>
+        <div v-if="project.recent_activities?.length" class="activity-feed-list">
+          <article v-for="event in project.recent_activities" :key="event.name" class="feed-event">
+            <span class="avatar" :class="avatarTone(event.sender_name || event.sender)">{{ initials(event.sender_name || event.sender) }}</span>
+            <div class="feed-event-copy">
+              <p>
+                <strong>{{ event.sender_name || event.sender || 'Someone' }}</strong>
+                {{ event.activity_type === 'Communication' ? 'sent a message on' : 'commented on' }}
+                <b>{{ taskSubject(event.task_name) }}</b>
+              </p>
+              <span>{{ plainText(event.content) }}</span>
+            </div>
+            <span class="feed-event-icon"><Icon name="message-square" :size="14" /></span>
+          </article>
+        </div>
+        <div v-else class="detail-empty">
+          <h2>No activity yet</h2>
+          <p>Comments on tasks will show up here.</p>
+        </div>
+      </section>
+
+      <footer class="project-footer">
+        <span><Icon name="sparkles" :size="14" /> Project updates stay connected to your ERPNext rollout.</span>
+        <span v-if="project.modified">Updated {{ formatDateTime(project.modified) }}</span>
+      </footer>
+    </div>
+
+    <div v-if="showAddModuleModal" class="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
+      <div class="bg-white rounded-2xl border border-outline-gray-2 p-5 max-w-md w-full space-y-3.5 shadow-2xl">
+        <h3 class="text-sm font-semibold">Add a workstream</h3>
+        <p class="text-xs text-ink-gray-5">Standard tasks for the module are created with it.</p>
+        <select v-model="moduleToAdd" class="w-full px-3 py-2 text-xs border border-outline-gray-2 bg-white">
+          <option value="">Choose a module</option>
+          <option
+            v-for="m in allModules"
+            :key="m.module_code"
+            :value="m.module_code"
+            :disabled="project.modules?.some(pm => pm.module === m.module_code)"
+          >
+            {{ m.module_name }}
+          </option>
+        </select>
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" class="share-button" @click="showAddModuleModal = false">Cancel</button>
+          <button type="button" class="primary-action" :disabled="!moduleToAdd || addingModule" @click="handleAddModule">Add module</button>
         </div>
       </div>
     </div>
@@ -409,47 +399,205 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import Icon from '../components/Icon.vue'
-import LayoutHeader from '../components/LayoutHeader.vue'
+import TaskTicketDetail from '../components/TaskTicketDetail.vue'
 import {
+  addModuleToProject,
+  createTask,
+  getImplementationModules,
   getProject,
   updateProject,
-  addModuleToProject,
-  getImplementationModules,
+  updateTask,
 } from '../api'
 
 const props = defineProps({
-  projectName: {
-    type: String,
-    required: true,
-  },
+  projectName: { type: String, required: true },
+  taskId: { type: String, default: '' },
 })
 
-defineEmits(['open-new-task', 'select-task'])
+defineEmits(['open-new-task', 'open-search', 'open-notifications', 'select-task'])
+
+const route = useRoute()
+const router = useRouter()
 
 const loading = ref(true)
 const project = ref({})
-const activeTab = ref('modules')
-
 const showAddModuleModal = ref(false)
 const moduleToAdd = ref('')
 const addingModule = ref(false)
 const allModules = ref([])
+const projectView = ref('Work plan')
+const taskFilter = ref('all')
+const taskQuery = ref('')
+const sortDesc = ref(false)
+const isAddingTask = ref(false)
+const newTaskTitle = ref('')
+const addingTask = ref(false)
+const copied = ref(false)
+
+const stages = [
+  { value: 'Discovery', label: 'Discovery & Planning' },
+  { value: 'Design', label: 'Solution Design' },
+  { value: 'Configuration & Customization', label: 'Configuration' },
+  { value: 'Data Migration', label: 'Data Migration' },
+  { value: 'UAT & Training', label: 'UAT & Training' },
+  { value: 'Go-Live', label: 'Go-live readiness' },
+  { value: 'Hypercare Support', label: 'Hypercare' },
+  { value: 'Closed', label: 'Closed' },
+]
+const tones = ['violet', 'blue', 'teal', 'coral', 'amber', 'lilac', 'slate']
+const avatarTones = ['avatar-indigo', 'avatar-coral', 'avatar-teal', 'avatar-lilac', 'avatar-amber']
+
+const openTask = computed(() => {
+  if (!props.taskId) return null
+  return (project.value.tasks || []).find(task => task.name === props.taskId) || null
+})
+
+const selectedModuleCode = computed(() => {
+  if (route.query.scope === 'all') return ''
+  if (route.query.module) return String(route.query.module)
+  if (props.taskId && openTask.value?.implementation_module) return openTask.value.implementation_module
+  return project.value.modules?.[0]?.module || ''
+})
+
+const selectedModule = computed(() => {
+  const code = selectedModuleCode.value
+  if (!code) return null
+  const mod = (project.value.modules || []).find(item => item.module === code)
+  return {
+    code,
+    title: mod?.module_title || mod?.module_name || code,
+  }
+})
+
+const crumbModule = computed(() => selectedModule.value)
+
+const moduleTasks = computed(() => {
+  const tasks = project.value.tasks || []
+  if (!selectedModuleCode.value) return tasks
+  return tasks.filter(task => task.implementation_module === selectedModuleCode.value)
+})
+
+const moduleCompleted = computed(() => moduleTasks.value.filter(task => task.status === 'Completed').length)
+
+const filterItems = computed(() => {
+  const tasks = moduleTasks.value
+  return [
+    { id: 'all', label: 'All', count: tasks.length },
+    { id: 'open', label: 'Open', count: tasks.filter(task => task.status !== 'Completed' && task.status !== 'Cancelled').length },
+    { id: 'overdue', label: 'Overdue', count: tasks.filter(task => task.is_overdue).length },
+  ]
+})
+
+const visibleTasks = computed(() => {
+  const query = taskQuery.value.trim().toLowerCase()
+  const rows = moduleTasks.value.filter(task => {
+    const matchesQuery = !query || `${task.subject} ${task.name}`.toLowerCase().includes(query)
+    const matchesFilter = taskFilter.value === 'all'
+      || (taskFilter.value === 'open' && task.status !== 'Completed' && task.status !== 'Cancelled')
+      || (taskFilter.value === 'overdue' && task.is_overdue)
+    return matchesQuery && matchesFilter
+  })
+  return [...rows].sort((a, b) => {
+    const left = String(a.exp_end_date || '9999')
+    const right = String(b.exp_end_date || '9999')
+    return sortDesc.value ? right.localeCompare(left) : left.localeCompare(right)
+  })
+})
+
+const stageLabel = computed(() => {
+  const current = stages.find(stage => stage.value === project.value.implementation_stage)
+  return current?.label || project.value.implementation_stage || 'Discovery & Planning'
+})
+
+const phaseIndex = computed(() => {
+  const index = stages.findIndex(stage => stage.value === project.value.implementation_stage)
+  return index >= 0 ? index + 1 : 1
+})
+
+const goLiveLabel = computed(() => formatDate(project.value.expected_end_date) || 'No date')
+
+const goLiveHint = computed(() => {
+  const days = daysUntil(project.value.expected_end_date)
+  if (days === null) return 'Go-live target'
+  if (days === 0) return 'Go-live target · today'
+  if (days > 0) return `Go-live target · ${days} days`
+  return `Go-live target · ${Math.abs(days)} days ago`
+})
+
+const teamPeople = computed(() => {
+  const people = []
+  const seen = new Set()
+  const add = (name) => {
+    const label = String(name || '').trim()
+    if (!label || seen.has(label)) return
+    seen.add(label)
+    people.push({
+      key: label,
+      name: label.includes('@') ? label.split('@')[0] : label,
+      initials: initials(label.includes('@') ? label.split('@')[0] : label),
+      tone: avatarTone(label),
+    })
+  }
+  add(project.value.project_manager_name)
+  add(project.value.partner_poc_name)
+  add(project.value.client_poc_name)
+  for (const task of project.value.tasks || []) {
+    for (const email of task.assignees || []) add(email)
+  }
+  return people
+})
+
+const timelineRows = computed(() => {
+  const milestones = (project.value.tasks || []).filter(task => task.is_milestone)
+  const source = milestones.length ? milestones : (project.value.modules || [])
+  if (milestones.length) {
+    return milestones.map(task => ({
+      key: task.name,
+      title: task.subject,
+      detail: task.module_title || 'Milestone',
+      date: formatDate(task.exp_end_date) || '—',
+      year: yearOf(task.exp_end_date),
+      status: statusLabel(task.status),
+      tone: task.status === 'Completed' ? 'complete' : task.is_overdue ? 'target' : 'active',
+      progress: task.status === 'Completed' ? 100 : Number(task.progress || 40),
+    }))
+  }
+  return source.map(mod => ({
+    key: mod.module,
+    title: mod.module_title || mod.module_name || mod.module,
+    detail: `${mod.completed_tasks || 0} of ${mod.total_tasks || 0} tasks`,
+    date: 'Now',
+    year: '',
+    status: (mod.progress || 0) >= 100 ? 'Complete' : 'In progress',
+    tone: (mod.progress || 0) >= 100 ? 'complete' : 'active',
+    progress: mod.progress || 0,
+  }))
+})
 
 onMounted(async () => {
   await loadProject()
   try {
     allModules.value = await getImplementationModules()
-  } catch (e) {}
+  } catch (e) {
+    console.error(e)
+  }
 })
 
-watch(() => props.projectName, async () => {
-  await loadProject()
+watch(() => props.projectName, () => {
+  loadProject()
+})
+
+watch([() => props.taskId, () => (project.value.tasks || []).length], () => {
+  if (props.taskId || !project.value.name) return
+  const first = visibleTasks.value[0]
+  if (first) goToTask(first)
 })
 
 async function loadProject() {
-  loading.value = true
+  loading.value = !project.value.name
   try {
     project.value = await getProject(props.projectName)
   } catch (e) {
@@ -459,11 +607,73 @@ async function loadProject() {
   }
 }
 
+function selectModule(code) {
+  const query = code ? { module: code } : { scope: 'all' }
+  const tasks = (project.value.tasks || []).filter(task => !code || task.implementation_module === code)
+  const first = tasks[0]
+  if (first) {
+    router.push({ path: `/projects/${props.projectName}/tasks/${first.name}`, query })
+    return
+  }
+  router.push({ path: '/projects/' + props.projectName, query })
+}
+
+function goToTask(task) {
+  router.push({
+    path: `/projects/${props.projectName}/tasks/${task.name}`,
+    query: task.implementation_module ? { module: task.implementation_module } : { scope: 'all' },
+  })
+}
+
+function startNewTask() {
+  projectView.value = 'Work plan'
+  isAddingTask.value = true
+  newTaskTitle.value = ''
+}
+
+async function addQuickTask() {
+  const subject = newTaskTitle.value.trim()
+  if (!subject) return
+  addingTask.value = true
+  try {
+    const created = await createTask({
+      subject,
+      project: project.value.name,
+      implementation_module: selectedModuleCode.value || undefined,
+      status: 'Open',
+    })
+    newTaskTitle.value = ''
+    isAddingTask.value = false
+    await loadProject()
+    const name = created?.name || created?.task_name
+    if (name) {
+      router.push({
+        path: `/projects/${props.projectName}/tasks/${name}`,
+        query: selectedModuleCode.value ? { module: selectedModuleCode.value } : {},
+      })
+    }
+  } catch (e) {
+    alert('Could not add the task')
+  } finally {
+    addingTask.value = false
+  }
+}
+
+async function toggleComplete(task) {
+  const status = task.status === 'Completed' ? 'Open' : 'Completed'
+  try {
+    await updateTask(task.name, { status, progress: status === 'Completed' ? 100 : task.progress || 0 })
+    await loadProject()
+  } catch (e) {
+    alert('Could not update the task')
+  }
+}
+
 async function handleStageChange() {
   try {
     await updateProject(project.value.name, { implementation_stage: project.value.implementation_stage })
   } catch (e) {
-    alert('Failed to update stage: ' + e.message)
+    alert('Could not update the stage')
   }
 }
 
@@ -476,50 +686,118 @@ async function handleAddModule() {
     moduleToAdd.value = ''
     await loadProject()
   } catch (e) {
-    alert('Error adding module: ' + e.message)
+    alert('Could not add the module')
   } finally {
     addingModule.value = false
   }
 }
 
-const MODULE_META = {
-  accounts: { color: '#10B981', icon: 'CreditCard' },
-  buying: { color: '#F59E0B', icon: 'ShoppingCart' },
-  selling: { color: '#3B82F6', icon: 'TrendingUp' },
-  stock: { color: '#8B5CF6', icon: 'Package' },
-  hrms: { color: '#EC4899', icon: 'Users' },
-  crm: { color: '#06B6D4', icon: 'Target' },
-  manufacturing: { color: '#6366F1', icon: 'Cpu' },
-  support: { color: '#F97316', icon: 'LifeBuoy' },
-  assets: { color: '#14B8A6', icon: 'Server' },
+async function copyLink() {
+  try {
+    await navigator.clipboard.writeText(window.location.href)
+    copied.value = true
+    setTimeout(() => { copied.value = false }, 1600)
+  } catch (e) {
+    copied.value = false
+  }
 }
 
-function getModuleColor(nameOrCode) {
-  if (!nameOrCode) return '#3B82F6'
-  const key = String(nameOrCode).toLowerCase()
-  for (const [k, v] of Object.entries(MODULE_META)) {
-    if (key.includes(k)) return v.color
-  }
-  return '#3B82F6'
+function assigneeLabel(task) {
+  const first = (task.assignees || [])[0]
+  if (!first) return ''
+  return String(first).includes('@') ? String(first).split('@')[0] : String(first)
 }
 
-function getModuleIcon(nameOrCode) {
-  if (!nameOrCode) return 'package'
-  const key = String(nameOrCode).toLowerCase()
-  for (const [k, v] of Object.entries(MODULE_META)) {
-    if (key.includes(k)) return v.icon
-  }
-  return 'package'
+function taskSubject(name) {
+  return (project.value.tasks || []).find(task => task.name === name)?.subject || name
+}
+
+function plainText(value) {
+  const node = document.createElement('div')
+  node.innerHTML = String(value || '')
+  return (node.textContent || '').replace(/\s+/g, ' ').trim()
+}
+
+function tone(index) {
+  return tones[index % tones.length]
+}
+
+function avatarTone(name) {
+  let total = 0
+  for (const char of String(name || '')) total += char.charCodeAt(0)
+  return avatarTones[total % avatarTones.length]
+}
+
+function initials(name) {
+  const parts = String(name || '?').trim().split(/[\s@._-]+/).filter(Boolean).slice(0, 2)
+  return parts.map(part => part[0]?.toUpperCase() || '').join('') || '?'
+}
+
+function statusLabel(status) {
+  if (status === 'Working') return 'In progress'
+  if (status === 'Pending Review') return 'In review'
+  if (status === 'Open') return 'To do'
+  return status || 'To do'
+}
+
+function statusClass(status) {
+  if (status === 'Completed') return 'status-completed'
+  if (status === 'Working') return 'status-in-progress'
+  if (status === 'Pending Review') return 'status-in-review'
+  return 'status-to-do'
 }
 
 function formatDate(dateStr) {
-  if (!dateStr) return '-'
-  try {
-    const d = new Date(dateStr.split(' ')[0])
-    if (isNaN(d.getTime())) return dateStr
-    return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
-  } catch (e) {
-    return dateStr
-  }
+  if (!dateStr) return ''
+  const date = new Date(String(dateStr).split(' ')[0])
+  if (Number.isNaN(date.getTime())) return ''
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 }
+
+function yearOf(dateStr) {
+  if (!dateStr) return ''
+  const date = new Date(String(dateStr).split(' ')[0])
+  return Number.isNaN(date.getTime()) ? '' : String(date.getFullYear())
+}
+
+function daysUntil(dateStr) {
+  if (!dateStr) return null
+  const date = new Date(String(dateStr).split(' ')[0])
+  if (Number.isNaN(date.getTime())) return null
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  return Math.round((date.getTime() - today.getTime()) / 86400000)
+}
+
+function formatDateTime(dateStr) {
+  if (!dateStr) return ''
+  const date = new Date(String(dateStr).replace(' ', 'T'))
+  if (Number.isNaN(date.getTime())) return String(dateStr)
+  return date.toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
+}
+
+function fileKind(name) {
+  const ext = String(name || '').split('.').pop().toLowerCase()
+  if (ext === 'xlsx' || ext === 'xls' || ext === 'csv') return 'XLSX'
+  if (ext === 'pdf') return 'PDF'
+  return (ext || 'FILE').slice(0, 4).toUpperCase()
+}
+
+function isSheet(name) {
+  return ['xlsx', 'xls', 'csv'].includes(String(name || '').split('.').pop().toLowerCase())
+}
+
+function filePreviewClass(name) {
+  return isSheet(name) ? 'file-preview-sheet' : 'file-preview-pdf'
+}
+
+function formatBytes(size) {
+  const value = Number(size || 0)
+  if (!value) return 'File'
+  if (value < 1024) return `${value} B`
+  if (value < 1024 * 1024) return `${Math.round(value / 1024)} KB`
+  return `${(value / (1024 * 1024)).toFixed(1)} MB`
+}
+
+defineExpose({ loadProject })
 </script>
