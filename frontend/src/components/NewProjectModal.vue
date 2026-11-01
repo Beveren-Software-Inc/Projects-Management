@@ -1,367 +1,314 @@
 <template>
-  <div v-if="show" class="fixed inset-0 z-50 overflow-y-auto bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-2xl border border-outline-gray-2 w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150">
-      
-      <!-- Modal Header -->
-      <div class="px-6 py-4 border-b border-outline-gray-2 flex items-center justify-between shrink-0 bg-white rounded-t-2xl">
+  <Dialog
+    :model-value="show"
+    @update:model-value="$emit('close')"
+    size="4xl"
+  >
+    <!-- Custom Header Slot -->
+    <template #title>
+      <div class="flex items-center justify-between w-full">
         <div>
           <h2 class="text-base font-semibold text-ink-gray-9">Create Implementation Project</h2>
           <p class="text-xs text-ink-gray-5 mt-0.5">Configure project details and select modules to automatically generate implementation tasks.</p>
         </div>
-        <button
-          @click="$emit('close')"
-          class="p-1.5 text-ink-gray-4 hover:text-ink-gray-7 rounded-xl hover:bg-surface-gray-2 transition"
-        >
-          <Icon name="x" size="18" />
-        </button>
       </div>
+    </template>
 
-      <!-- Modal Body (Tabs / Steps) -->
-      <div class="flex border-b border-outline-gray-2 px-6 bg-surface-gray-1 shrink-0">
-        <button
-          type="button"
-          @click="activeTab = 'details'"
-          class="py-2.5 px-4 text-xs font-medium border-b-2 transition"
-          :class="activeTab === 'details' ? 'border-ink-gray-9 text-ink-gray-9 font-semibold' : 'border-transparent text-ink-gray-5 hover:text-ink-gray-8'"
-        >
-          1. Project Details & Stakeholders
-        </button>
-        <button
-          type="button"
-          @click="activeTab = 'modules'"
-          class="py-2.5 px-4 text-xs font-medium border-b-2 transition flex items-center gap-1.5"
-          :class="activeTab === 'modules' ? 'border-ink-gray-9 text-ink-gray-9 font-semibold' : 'border-transparent text-ink-gray-5 hover:text-ink-gray-8'"
-        >
-          <span>2. Select Modules</span>
-          <Badge theme="blue" variant="subtle" size="sm" :label="selectedModules.length + ' selected'" />
-        </button>
-        <button
-          type="button"
-          @click="activeTab = 'preview'"
-          class="py-2.5 px-4 text-xs font-medium border-b-2 transition flex items-center gap-1.5"
-          :class="activeTab === 'preview' ? 'border-ink-gray-9 text-ink-gray-9 font-semibold' : 'border-transparent text-ink-gray-5 hover:text-ink-gray-8'"
-        >
-          <span>3. Task Preview</span>
-          <Badge theme="gray" variant="subtle" size="sm" :label="totalPreviewTasks + ' tasks'" />
-        </button>
-      </div>
+    <!-- Body Content -->
+    <div class="space-y-4 pt-1">
+      <!-- Steps Navigation using TabButtons -->
+      <TabButtons
+        :buttons="[
+          { label: '1. Project Details', value: 'details' },
+          { label: `2. Select Modules (${selectedModules.length})`, value: 'modules' },
+          { label: `3. Task Preview (${totalPreviewTasks})`, value: 'preview' },
+        ]"
+        v-model="activeTab"
+        class="w-full"
+      />
 
-      <!-- Tab Content (Scrollable) -->
-      <div class="p-6 overflow-y-auto flex-1 bg-white">
-        
-        <!-- TAB 1: DETAILS -->
-        <div v-show="activeTab === 'details'" class="space-y-5">
-          <!-- Project General -->
-          <div class="grid grid-cols-2 gap-4">
-            <div class="col-span-2 sm:col-span-1">
-              <label class="block text-xs font-medium text-ink-gray-7 mb-1">Project Name <span class="text-red-500">*</span></label>
-              <input
-                v-model="form.project_name"
-                type="text"
-                placeholder="e.g. Acme Corp ERPNext Rollout"
-                class="w-full px-3 py-2 text-xs rounded-xl border border-outline-gray-2 bg-surface-gray-1 hover:bg-surface-gray-2 focus:bg-white focus:outline-none focus:border-outline-gray-4 transition shadow-2xs"
-                required
-              />
-            </div>
-            <div class="col-span-2 sm:col-span-1">
-              <label class="block text-xs font-medium text-ink-gray-7 mb-1">Project Type</label>
-              <input
-                v-model="form.project_type"
-                type="text"
-                placeholder="Implementation"
-                class="w-full px-3 py-2 text-xs rounded-xl border border-outline-gray-2 bg-surface-gray-1 hover:bg-surface-gray-2 focus:bg-white focus:outline-none focus:border-outline-gray-4 transition shadow-2xs"
-              />
-            </div>
-          </div>
-
-          <!-- Dates & Priority -->
-          <div class="grid grid-cols-3 gap-4">
-            <div>
-              <label class="block text-xs font-medium text-ink-gray-7 mb-1">Expected Start Date</label>
-              <input
-                v-model="form.expected_start_date"
-                type="date"
-                class="w-full px-3 py-2 text-xs rounded-xl border border-outline-gray-2 bg-surface-gray-1 hover:bg-surface-gray-2 focus:bg-white focus:outline-none focus:border-outline-gray-4 transition shadow-2xs"
-              />
-            </div>
-            <div>
-              <label class="block text-xs font-medium text-ink-gray-7 mb-1">Expected End Date</label>
-              <input
-                v-model="form.expected_end_date"
-                type="date"
-                class="w-full px-3 py-2 text-xs rounded-xl border border-outline-gray-2 bg-surface-gray-1 hover:bg-surface-gray-2 focus:bg-white focus:outline-none focus:border-outline-gray-4 transition shadow-2xs"
-              />
-            </div>
-            <div>
-              <label class="block text-xs font-medium text-ink-gray-7 mb-1">Priority</label>
-              <select
-                v-model="form.priority"
-                class="w-full px-3 py-2 text-xs rounded-xl border border-outline-gray-2 bg-surface-gray-1 hover:bg-surface-gray-2 focus:bg-white focus:outline-none focus:border-outline-gray-4 transition shadow-2xs cursor-pointer"
-              >
-                <option value="Low">Low</option>
-                <option value="Medium">Medium</option>
-                <option value="High">High</option>
-                <option value="Urgent">Urgent</option>
-              </select>
-            </div>
-          </div>
-
-          <!-- Client Details Section -->
-          <div class="p-4 rounded-2xl border border-outline-gray-2 bg-surface-gray-1 space-y-3">
-            <div class="text-xs font-semibold text-ink-gray-8 flex items-center gap-1.5">
-              <div class="w-6 h-6 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
-                <Icon name="user" size="13" />
-              </div>
-              <span>Client's Point of Contact (PoC)</span>
-            </div>
-            <div class="grid grid-cols-3 gap-3">
-              <div>
-                <label class="block text-[11px] font-medium text-ink-gray-6 mb-1">Contact Name</label>
-                <input
-                  v-model="form.client_poc_name"
-                  type="text"
-                  placeholder="e.g. John Doe"
-                  class="w-full px-3 py-1.5 text-xs rounded-xl border border-outline-gray-3 bg-white focus:outline-none focus:border-blue-500"
-                />
-              </div>
-              <div>
-                <label class="block text-[11px] font-medium text-ink-gray-6 mb-1">Contact Email (for auto updates)</label>
-                <input
-                  v-model="form.client_poc_email"
-                  type="email"
-                  placeholder="john@clientcorp.com"
-                  class="w-full px-3 py-1.5 text-xs rounded-xl border border-outline-gray-3 bg-white focus:outline-none focus:border-blue-500"
-                />
-              </div>
-              <div>
-                <label class="block text-[11px] font-medium text-ink-gray-6 mb-1">Contact Phone</label>
-                <input
-                  v-model="form.client_poc_phone"
-                  type="text"
-                  placeholder="+1 555-0199"
-                  class="w-full px-3 py-1.5 text-xs rounded-xl border border-outline-gray-3 bg-white focus:outline-none focus:border-blue-500"
-                />
-              </div>
-            </div>
-
-            <!-- Auto Email Checkbox -->
-            <label class="flex items-center gap-2 cursor-pointer pt-1">
-              <input
-                v-model="form.auto_emails"
-                type="checkbox"
-                class="rounded-md text-blue-600 focus:ring-blue-500"
-              />
-              <span class="text-xs text-ink-gray-7">Send automated kickoff email and milestone notifications to Client PoC</span>
-            </label>
-          </div>
-
-          <!-- Partner PoC & Project Manager -->
-          <div class="grid grid-cols-2 gap-4">
-            <div>
-              <label class="block text-xs font-medium text-ink-gray-7 mb-1">Partner Side PoC</label>
-              <select
-                v-model="form.partner_poc"
-                class="w-full px-3 py-2 text-xs rounded-xl border border-outline-gray-3 focus:outline-none focus:border-blue-500"
-              >
-                <option value="">-- Select Partner PoC --</option>
-                <option v-for="u in users" :key="u.name" :value="u.name">
-                  {{ u.full_name || u.name }}
-                </option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-xs font-medium text-ink-gray-7 mb-1">Project Manager</label>
-              <select
-                v-model="form.project_manager"
-                class="w-full px-3 py-2 text-xs rounded-xl border border-outline-gray-3 focus:outline-none focus:border-blue-500"
-              >
-                <option value="">-- Select Project Manager --</option>
-                <option v-for="u in users" :key="u.name" :value="u.name">
-                  {{ u.full_name || u.name }}
-                </option>
-              </select>
-            </div>
-          </div>
-
-          <!-- Tags & Stage -->
-          <div class="grid grid-cols-2 gap-4">
-            <div>
-              <label class="block text-xs font-medium text-ink-gray-7 mb-1">Implementation Stage</label>
-              <select
-                v-model="form.implementation_stage"
-                class="w-full px-3 py-2 text-xs rounded-xl border border-outline-gray-3 focus:outline-none focus:border-blue-500"
-              >
-                <option value="Discovery">Discovery & Requirement Gathering</option>
-                <option value="Design">Solution Design & Architecture</option>
-                <option value="Configuration & Customization">Configuration & Customization</option>
-                <option value="Data Migration">Data Cleansing & Migration</option>
-                <option value="UAT & Training">UAT & User Training</option>
-                <option value="Go-Live">Go-Live Execution</option>
-                <option value="Hypercare Support">Hypercare Support</option>
-                <option value="Closed">Closed</option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-xs font-medium text-ink-gray-7 mb-1">Tags (comma separated)</label>
-              <input
-                v-model="tagsInput"
-                type="text"
-                placeholder="Enterprise, Retail, High-Priority"
-                class="w-full px-3 py-2 text-xs rounded-xl border border-outline-gray-3 focus:outline-none focus:border-blue-500"
-              />
-            </div>
-          </div>
-        </div>
-
-        <!-- TAB 2: SELECT MODULES -->
-        <div v-show="activeTab === 'modules'" class="space-y-4">
-          <Alert
-            theme="blue"
-            title="Automated Task Instantiation"
-            description="Each selected module will automatically generate standard implementation tasks, milestones, and work breakdown structures for this rollout."
+      <!-- TAB 1: DETAILS -->
+      <div v-show="activeTab === 'details'" class="space-y-4 pt-2 max-h-[60vh] overflow-y-auto px-1">
+        <!-- Project General -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <TextInput
+            v-model="form.project_name"
+            label="Project Name *"
+            placeholder="e.g. Acme Corp ERPNext Rollout"
+            size="sm"
+            required
           />
+          <TextInput
+            v-model="form.project_type"
+            label="Project Type"
+            placeholder="Implementation"
+            size="sm"
+          />
+        </div>
 
-          <div class="flex items-center justify-between">
-            <div class="text-xs text-ink-gray-6">
-              Select which ERPNext modules are in scope for this client:
+        <!-- Dates & Priority -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <TextInput
+            v-model="form.expected_start_date"
+            type="date"
+            label="Expected Start Date"
+            size="sm"
+          />
+          <TextInput
+            v-model="form.expected_end_date"
+            type="date"
+            label="Expected End Date"
+            size="sm"
+          />
+          <Select
+            v-model="form.priority"
+            label="Priority"
+            :options="[
+              { label: 'Low', value: 'Low' },
+              { label: 'Medium', value: 'Medium' },
+              { label: 'High', value: 'High' },
+              { label: 'Urgent', value: 'Urgent' },
+            ]"
+            size="sm"
+          />
+        </div>
+
+        <!-- Client Details Section -->
+        <div class="p-4 rounded-2xl border border-outline-gray-2 bg-surface-gray-1 space-y-3">
+          <div class="text-xs font-semibold text-ink-gray-8 flex items-center gap-2">
+            <div class="w-6 h-6 rounded-lg bg-surface-blue-2 text-ink-blue-7 flex items-center justify-center shrink-0">
+              <Icon name="user" size="13" />
             </div>
-            <div class="flex gap-2">
-              <button
-                type="button"
-                @click="selectAllModules"
-                class="text-xs text-blue-600 hover:text-blue-700 font-medium"
-              >
-                Select All
-              </button>
-              <span class="text-outline-gray-4">|</span>
-              <button
-                type="button"
-                @click="deselectAllModules"
-                class="text-xs text-ink-gray-5 hover:text-ink-gray-7 font-medium"
-              >
-                Clear
-              </button>
-            </div>
+            <span>Client Point of Contact (PoC)</span>
           </div>
 
-          <!-- Modules Grid -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            <div
-              v-for="mod in availableModules"
-              :key="mod.module_code"
-              @click="toggleModule(mod.module_code)"
-              class="relative p-3.5 rounded-2xl border cursor-pointer transition select-none flex flex-col justify-between"
-              :class="isModuleSelected(mod.module_code)
-                ? 'border-blue-600 bg-blue-50/40 shadow-xs'
-                : 'border-outline-gray-2 bg-surface-white hover:border-outline-gray-4 hover:shadow-xs'"
-            >
-              <div>
-                <div class="flex items-start justify-between mb-2">
-                  <div
-                    class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-                    :style="{ backgroundColor: (mod.color || '#3B82F6') + '20', color: mod.color || '#3B82F6' }"
-                  >
-                    <Icon :name="mod.icon || 'package'" size="17" />
-                  </div>
-                  <div
-                    class="w-4 h-4 rounded-md border flex items-center justify-center transition"
-                    :class="isModuleSelected(mod.module_code)
-                      ? 'bg-blue-600 border-blue-600 text-white'
-                      : 'border-outline-gray-3 bg-white'"
-                  >
-                    <Icon v-if="isModuleSelected(mod.module_code)" name="check-circle" size="12" />
-                  </div>
-                </div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <TextInput
+              v-model="form.client_poc_name"
+              label="Contact Name"
+              placeholder="e.g. John Doe"
+              size="sm"
+            />
+            <TextInput
+              v-model="form.client_poc_email"
+              type="email"
+              label="Contact Email"
+              placeholder="john@clientcorp.com"
+              size="sm"
+            />
+            <TextInput
+              v-model="form.client_poc_phone"
+              label="Contact Phone"
+              placeholder="+1 555-0199"
+              size="sm"
+            />
+          </div>
 
-                <div class="font-semibold text-xs text-ink-gray-9 mb-1">{{ mod.module_name }}</div>
-                <p class="text-[11px] text-ink-gray-5 line-clamp-2 leading-relaxed">{{ mod.description }}</p>
-              </div>
-
-              <div class="mt-3 pt-2 border-t border-outline-gray-2/60 flex items-center justify-between text-[11px] text-ink-gray-5">
-                <span>{{ mod.task_count || mod.tasks?.length || 0 }} standard tasks</span>
-                <span v-if="isModuleSelected(mod.module_code)" class="text-blue-600 font-medium">Included</span>
-              </div>
-            </div>
+          <div class="pt-1">
+            <Checkbox
+              v-model="form.auto_emails"
+              label="Send automated kickoff email and milestone notifications to Client PoC"
+            />
           </div>
         </div>
 
-        <!-- TAB 3: TASK PREVIEW -->
-        <div v-show="activeTab === 'preview'" class="space-y-4">
-          <div class="p-3 bg-blue-50 rounded-xl border border-blue-100 flex items-center justify-between text-xs text-blue-900">
-            <span>
-              Total <b>{{ totalPreviewTasks }} tasks</b> will be generated starting from <b>{{ form.expected_start_date }}</b>.
-            </span>
-            <span class="text-[11px] text-blue-700">Calculated based on module lead days</span>
-          </div>
+        <!-- Partner PoC & Project Manager -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <Select
+            v-model="form.partner_poc"
+            label="Partner Side PoC"
+            placeholder="Select Partner PoC"
+            :options="userOptions"
+            size="sm"
+          />
+          <Select
+            v-model="form.project_manager"
+            label="Project Manager"
+            placeholder="Select Project Manager"
+            :options="userOptions"
+            size="sm"
+          />
+        </div>
 
-          <div v-if="previewModules.length === 0" class="py-12 text-center text-xs text-ink-gray-5">
-            No modules selected. Please go to "2. Select Modules" and pick at least one module.
-          </div>
+        <!-- Tags & Stage -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <Select
+            v-model="form.implementation_stage"
+            label="Implementation Stage"
+            :options="[
+              { label: 'Discovery & Requirement Gathering', value: 'Discovery' },
+              { label: 'Solution Design & Architecture', value: 'Design' },
+              { label: 'Configuration & Customization', value: 'Configuration & Customization' },
+              { label: 'Data Cleansing & Migration', value: 'Data Migration' },
+              { label: 'UAT & User Training', value: 'UAT & Training' },
+              { label: 'Go-Live Execution', value: 'Go-Live' },
+              { label: 'Hypercare Support', value: 'Hypercare Support' },
+              { label: 'Closed', value: 'Closed' },
+            ]"
+            size="sm"
+          />
+          <TextInput
+            v-model="tagsInput"
+            label="Tags (comma separated)"
+            placeholder="Enterprise, Retail, High-Priority"
+            size="sm"
+          />
+        </div>
+      </div>
 
-          <div v-else class="space-y-4">
-            <div
-              v-for="mod in previewModules"
-              :key="mod.module_code"
-              class="border border-outline-gray-2 rounded-2xl overflow-hidden bg-white shadow-xs"
-            >
-              <div
-                class="px-4 py-2.5 bg-surface-gray-1 border-b border-outline-gray-2 flex items-center justify-between"
-              >
-                <div class="flex items-center gap-2">
-                  <div
-                    class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
-                    :style="{ backgroundColor: (mod.color || '#3B82F6') + '20', color: mod.color || '#3B82F6' }"
-                  >
-                    <Icon :name="mod.icon || 'package'" size="14" />
-                  </div>
-                  <span class="text-xs font-semibold text-ink-gray-9">{{ mod.module_name }}</span>
+      <!-- TAB 2: SELECT MODULES -->
+      <div v-show="activeTab === 'modules'" class="space-y-4 pt-2 max-h-[60vh] overflow-y-auto px-1">
+        <Alert
+          theme="blue"
+          title="Automated Task Instantiation"
+          description="Each selected module will automatically generate standard implementation tasks, milestones, and work breakdown structures for this rollout."
+        />
+
+        <div class="flex items-center justify-between">
+          <div class="text-xs text-ink-gray-6">
+            Select which ERPNext modules are in scope for this client:
+          </div>
+          <div class="flex gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              label="Select All"
+              @click="selectAllModules"
+            />
+            <Button
+              variant="ghost"
+              size="sm"
+              label="Clear"
+              @click="deselectAllModules"
+            />
+          </div>
+        </div>
+
+        <!-- Modules Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          <div
+            v-for="mod in availableModules"
+            :key="mod.module_code"
+            @click="toggleModule(mod.module_code)"
+            class="relative p-3.5 rounded-2xl border cursor-pointer transition select-none flex flex-col justify-between"
+            :class="isModuleSelected(mod.module_code)
+              ? 'border-blue-600 bg-surface-blue-2/30 shadow-xs'
+              : 'border-outline-gray-2 bg-surface-white hover:border-outline-gray-4 hover:shadow-xs'"
+          >
+            <div>
+              <div class="flex items-start justify-between mb-2">
+                <div
+                  class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+                  :style="{ backgroundColor: (mod.color || '#3B82F6') + '20', color: mod.color || '#3B82F6' }"
+                >
+                  <Icon :name="mod.icon || 'package'" size="17" />
                 </div>
-                <span class="text-[11px] text-ink-gray-5 font-medium">{{ mod.tasks?.length || 0 }} tasks</span>
+                <div
+                  class="w-4 h-4 rounded-md border flex items-center justify-center transition"
+                  :class="isModuleSelected(mod.module_code)
+                    ? 'bg-surface-blue-7 border-surface-blue-7 text-white'
+                    : 'border-outline-gray-3 bg-white'"
+                >
+                  <Icon v-if="isModuleSelected(mod.module_code)" name="check-circle" size="12" />
+                </div>
               </div>
 
-              <div class="divide-y divide-outline-gray-1">
+              <div class="font-semibold text-xs text-ink-gray-9 mb-1">{{ mod.module_name }}</div>
+              <p class="text-[11px] text-ink-gray-5 line-clamp-2 leading-relaxed">{{ mod.description }}</p>
+            </div>
+
+            <div class="mt-3 pt-2 border-t border-outline-gray-2/60 flex items-center justify-between text-[11px] text-ink-gray-5">
+              <span>{{ mod.task_count || mod.tasks?.length || 0 }} standard tasks</span>
+              <Badge
+                v-if="isModuleSelected(mod.module_code)"
+                theme="blue"
+                variant="subtle"
+                size="sm"
+                label="Included"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 3: TASK PREVIEW -->
+      <div v-show="activeTab === 'preview'" class="space-y-4 pt-2 max-h-[60vh] overflow-y-auto px-1">
+        <div class="p-3 bg-surface-blue-2 rounded-xl border border-outline-blue-3 flex items-center justify-between text-xs text-ink-blue-7">
+          <span>
+            Total <b>{{ totalPreviewTasks }} tasks</b> will be generated starting from <b>{{ form.expected_start_date }}</b>.
+          </span>
+          <span class="text-[11px]">Calculated based on module lead days</span>
+        </div>
+
+        <div v-if="previewModules.length === 0" class="py-12 text-center text-xs text-ink-gray-5">
+          No modules selected. Please go to "2. Select Modules" and pick at least one module.
+        </div>
+
+        <div v-else class="space-y-4">
+          <div
+            v-for="mod in previewModules"
+            :key="mod.module_code"
+            class="border border-outline-gray-2 rounded-2xl overflow-hidden bg-white shadow-xs"
+          >
+            <div
+              class="px-4 py-2.5 bg-surface-gray-1 border-b border-outline-gray-2 flex items-center justify-between"
+            >
+              <div class="flex items-center gap-2">
                 <div
-                  v-for="(task, idx) in mod.tasks"
-                  :key="idx"
-                  class="px-4 py-2 flex items-center justify-between text-xs hover:bg-surface-gray-1/50 transition"
+                  class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
+                  :style="{ backgroundColor: (mod.color || '#3B82F6') + '20', color: mod.color || '#3B82F6' }"
                 >
-                  <div class="flex items-center gap-2.5">
-                    <span class="text-[11px] text-ink-gray-4 font-mono w-4">{{ idx + 1 }}</span>
-                    <div>
-                      <div class="font-medium text-ink-gray-8">{{ task.subject }}</div>
-                      <div class="text-[11px] text-ink-gray-5 line-clamp-1">{{ task.description }}</div>
-                    </div>
+                  <Icon :name="mod.icon || 'package'" size="14" />
+                </div>
+                <span class="text-xs font-semibold text-ink-gray-9">{{ mod.module_name }}</span>
+              </div>
+              <Badge theme="gray" variant="subtle" size="sm" :label="(mod.tasks?.length || 0) + ' tasks'" />
+            </div>
+
+            <div class="divide-y divide-outline-gray-1">
+              <div
+                v-for="(task, idx) in mod.tasks"
+                :key="idx"
+                class="px-4 py-2 flex items-center justify-between text-xs hover:bg-surface-gray-1/50 transition"
+              >
+                <div class="flex items-center gap-2.5">
+                  <span class="text-[11px] text-ink-gray-4 font-mono w-4">{{ idx + 1 }}</span>
+                  <div>
+                    <div class="font-medium text-ink-gray-8">{{ task.subject }}</div>
+                    <div class="text-[11px] text-ink-gray-5 line-clamp-1">{{ task.description }}</div>
                   </div>
-                  <div class="flex items-center gap-2 shrink-0">
-                    <span
-                      v-if="task.is_milestone"
-                      class="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-amber-100 text-amber-800"
-                    >
-                      Milestone
-                    </span>
-                    <span
-                      class="px-1.5 py-0.5 rounded text-[10px] font-medium"
-                      :class="task.priority === 'High' || task.priority === 'Urgent' ? 'bg-red-50 text-red-600' : 'bg-surface-gray-2 text-ink-gray-6'"
-                    >
-                      {{ task.priority || 'Medium' }}
-                    </span>
-                    <span class="text-[11px] text-ink-gray-5 font-mono">+{{ task.day_offset }}d</span>
-                  </div>
+                </div>
+                <div class="flex items-center gap-2 shrink-0">
+                  <Badge
+                    v-if="task.is_milestone"
+                    theme="amber"
+                    variant="subtle"
+                    size="sm"
+                    label="Milestone"
+                  />
+                  <Badge
+                    :theme="task.priority === 'High' || task.priority === 'Urgent' ? 'red' : 'gray'"
+                    variant="subtle"
+                    size="sm"
+                    :label="task.priority || 'Medium'"
+                  />
+                  <span class="text-[11px] text-ink-gray-5 font-mono">+{{ task.day_offset }}d</span>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
+    </div>
 
-      <!-- Modal Footer -->
-      <div class="px-6 py-3.5 border-t border-outline-gray-2 flex items-center justify-between shrink-0 bg-white rounded-b-2xl">
+    <!-- Actions Footer Slot -->
+    <template #actions>
+      <div class="flex items-center justify-between w-full">
         <div>
           <Button
             v-if="activeTab !== 'details'"
             variant="ghost"
             size="sm"
-            class="rounded-xl"
             label="← Back"
             @click="activeTab = activeTab === 'preview' ? 'modules' : 'details'"
           />
@@ -371,7 +318,6 @@
           <Button
             variant="subtle"
             size="sm"
-            class="rounded-xl"
             label="Cancel"
             @click="$emit('close')"
           />
@@ -381,7 +327,6 @@
             theme="gray"
             variant="solid"
             size="sm"
-            class="rounded-xl"
             label="Next Step →"
             @click="activeTab = activeTab === 'details' ? 'modules' : 'preview'"
           />
@@ -391,7 +336,6 @@
             theme="gray"
             variant="solid"
             size="sm"
-            class="rounded-xl"
             :disabled="loading || !form.project_name || selectedModules.length === 0"
             :loading="loading"
             label="Create Project & Instantiate Tasks"
@@ -399,12 +343,23 @@
           />
         </div>
       </div>
-    </div>
-  </div>
+    </template>
+  </Dialog>
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import {
+  Dialog,
+  Button,
+  Badge,
+  Alert,
+  TextInput,
+  Select,
+  Checkbox,
+  TabButtons,
+  toast,
+} from 'frappe-ui'
 import Icon from './Icon.vue'
 import { createProject, getImplementationModules, getUsers } from '../api'
 
@@ -437,6 +392,16 @@ const form = ref({
   project_manager: '',
   implementation_stage: 'Discovery',
   auto_emails: true,
+})
+
+const userOptions = computed(() => {
+  return [
+    { label: '-- Select User --', value: '' },
+    ...users.value.map(u => ({
+      label: u.full_name || u.name,
+      value: u.name,
+    })),
+  ]
 })
 
 onMounted(async () => {
@@ -483,10 +448,12 @@ const totalPreviewTasks = computed(() => {
 async function handleSubmit() {
   if (!form.value.project_name) {
     activeTab.value = 'details'
+    toast.error('Please enter a project name')
     return
   }
   if (selectedModules.value.length === 0) {
     activeTab.value = 'modules'
+    toast.error('Please select at least one module')
     return
   }
 
@@ -503,13 +470,13 @@ async function handleSubmit() {
     }
 
     const res = await createProject(payload)
+    toast.success('Project created successfully with implementation tasks!')
     emit('created', res)
     emit('close')
   } catch (e) {
-    alert('Error creating project: ' + e.message)
+    toast.error('Error creating project: ' + (e.message || e))
   } finally {
     loading.value = false
   }
 }
 </script>
-

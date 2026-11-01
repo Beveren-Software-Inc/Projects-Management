@@ -1,3 +1,4 @@
+import 'frappe-ui/style.css'
 import './index.css'
 
 import { createApp } from 'vue'
@@ -13,11 +14,20 @@ import {
   Dialog,
   Alert,
   TextInput,
+  Textarea,
+  Select,
+  Checkbox,
+  Switch,
+  Progress,
   FormControl,
+  FormLabel,
   ErrorMessage,
   Tooltip,
   Dropdown,
   TabButtons,
+  Spinner,
+  LoadingIndicator,
+  Breadcrumbs,
 } from 'frappe-ui'
 import { spritePlugin } from 'frappe-ui/experimental'
 
@@ -28,11 +38,20 @@ const globalComponents = {
   Dialog,
   Alert,
   TextInput,
+  Textarea,
+  Select,
+  Checkbox,
+  Switch,
+  Progress,
   FormControl,
+  FormLabel,
   ErrorMessage,
   Tooltip,
   Dropdown,
   TabButtons,
+  Spinner,
+  LoadingIndicator,
+  Breadcrumbs,
 }
 
 const pinia = createPinia()

@@ -62,11 +62,11 @@
       <!-- 1. KPI Metric Cards -->
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
         <!-- Active Projects -->
-        <div class="p-4 rounded-2xl border border-outline-gray-1 bg-surface-white shadow-2xs space-y-1.5 hover:shadow-xs transition">
+        <div class="p-4 rounded-2xl border border-outline-gray-2 bg-surface-white shadow-2xs space-y-1.5 hover:shadow-xs transition">
           <div class="flex items-center justify-between text-xs text-ink-gray-5">
             <span class="font-medium">Active Projects</span>
-            <div class="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 border border-blue-100 flex items-center justify-center shrink-0">
-              <Icon name="folder-kanban" size="16" class="text-blue-600" />
+            <div class="w-9 h-9 rounded-xl bg-surface-blue-2 text-ink-blue-7 flex items-center justify-center shrink-0">
+              <Icon name="folder-kanban" size="16" />
             </div>
           </div>
           <div class="text-2xl font-bold text-ink-gray-9">{{ data.kpis?.active_projects || 0 }}</div>
@@ -74,72 +74,113 @@
         </div>
 
         <!-- Overall Portfolio Progress -->
-        <div class="p-4 rounded-2xl border border-outline-gray-1 bg-surface-white shadow-2xs space-y-1.5 hover:shadow-xs transition">
+        <div class="p-4 rounded-2xl border border-outline-gray-2 bg-surface-white shadow-2xs space-y-2 hover:shadow-xs transition">
           <div class="flex items-center justify-between text-xs text-ink-gray-5">
             <span class="font-medium">Portfolio Progress</span>
-            <div class="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 border border-indigo-100 flex items-center justify-center shrink-0">
-              <Icon name="trending-up" size="16" class="text-indigo-600" />
+            <div class="w-9 h-9 rounded-xl bg-surface-gray-2 text-ink-gray-7 flex items-center justify-center shrink-0">
+              <Icon name="trending-up" size="16" />
             </div>
           </div>
           <div class="text-2xl font-bold text-ink-gray-9">{{ data.kpis?.overall_completion_pct || 0 }}%</div>
-          <div class="w-full h-1.5 bg-surface-gray-2 rounded-full overflow-hidden">
-            <div
-              class="h-full bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-600 rounded-full transition-all duration-500"
-              :style="{ width: (data.kpis?.overall_completion_pct || 0) + '%' }"
-            ></div>
-          </div>
+          <Progress :value="data.kpis?.overall_completion_pct || 0" size="sm" />
         </div>
 
         <!-- Completed Tasks -->
-        <div class="p-4 rounded-2xl border border-outline-gray-1 bg-surface-white shadow-2xs space-y-1.5 hover:shadow-xs transition">
+        <div class="p-4 rounded-2xl border border-outline-gray-2 bg-surface-white shadow-2xs space-y-1.5 hover:shadow-xs transition">
           <div class="flex items-center justify-between text-xs text-ink-gray-5">
             <span class="font-medium">Completed Tasks</span>
-            <div class="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center shrink-0">
-              <Icon name="check-circle" size="16" class="text-emerald-600" />
+            <div class="w-9 h-9 rounded-xl bg-surface-green-2 text-ink-green-7 flex items-center justify-center shrink-0">
+              <Icon name="check-circle" size="16" />
             </div>
           </div>
-          <div class="text-2xl font-bold text-emerald-600">{{ data.kpis?.completed_tasks || 0 }}</div>
+          <div class="text-2xl font-bold text-ink-green-7">{{ data.kpis?.completed_tasks || 0 }}</div>
           <div class="text-[11px] text-ink-gray-4">Out of {{ data.kpis?.total_tasks || 0 }} tasks</div>
         </div>
 
         <!-- Overdue Tasks -->
         <div
           class="p-4 rounded-2xl border shadow-2xs space-y-1.5 transition hover:shadow-xs"
-          :class="(data.kpis?.overdue_tasks || 0) > 0 ? 'border-red-200 bg-red-50/20' : 'border-outline-gray-1 bg-surface-white'"
+          :class="(data.kpis?.overdue_tasks || 0) > 0 ? 'border-outline-red-3 bg-surface-red-2/30' : 'border-outline-gray-2 bg-surface-white'"
         >
-          <div class="flex items-center justify-between text-xs" :class="(data.kpis?.overdue_tasks || 0) > 0 ? 'text-red-700' : 'text-ink-gray-5'">
+          <div class="flex items-center justify-between text-xs" :class="(data.kpis?.overdue_tasks || 0) > 0 ? 'text-ink-red-7' : 'text-ink-gray-5'">
             <span class="font-medium">Overdue Tasks</span>
             <div
               class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-              :class="(data.kpis?.overdue_tasks || 0) > 0 ? 'bg-red-100 text-red-600 border border-red-200' : 'bg-rose-50 text-rose-500 border border-rose-100'"
+              :class="(data.kpis?.overdue_tasks || 0) > 0 ? 'bg-surface-red-2 text-ink-red-7' : 'bg-surface-gray-2 text-ink-gray-6'"
             >
               <Icon name="alert-circle" size="16" />
             </div>
           </div>
-          <div class="text-2xl font-bold" :class="(data.kpis?.overdue_tasks || 0) > 0 ? 'text-red-600' : 'text-ink-gray-9'">
+          <div class="text-2xl font-bold" :class="(data.kpis?.overdue_tasks || 0) > 0 ? 'text-ink-red-7' : 'text-ink-gray-9'">
             {{ data.kpis?.overdue_tasks || 0 }}
           </div>
           <div class="text-[11px] text-ink-gray-4">Requires attention</div>
         </div>
 
         <!-- Milestones Completed -->
-        <div class="p-4 rounded-2xl border border-outline-gray-1 bg-surface-white shadow-2xs space-y-1.5 hover:shadow-xs transition">
+        <div class="p-4 rounded-2xl border border-outline-gray-2 bg-surface-white shadow-2xs space-y-1.5 hover:shadow-xs transition">
           <div class="flex items-center justify-between text-xs text-ink-gray-5">
             <span class="font-medium">Milestones Signed</span>
-            <div class="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 border border-amber-100 flex items-center justify-center shrink-0">
-              <Icon name="flag" size="16" class="text-amber-600" />
+            <div class="w-9 h-9 rounded-xl bg-surface-amber-2 text-ink-amber-7 flex items-center justify-center shrink-0">
+              <Icon name="flag" size="16" />
             </div>
           </div>
-          <div class="text-2xl font-bold text-amber-600">
+          <div class="text-2xl font-bold text-ink-amber-7">
             {{ data.kpis?.completed_milestones || 0 }} <span class="text-ink-gray-4 text-base font-normal">/ {{ data.kpis?.total_milestones || 0 }}</span>
           </div>
           <div class="text-[11px] text-ink-gray-4">UAT and Go-Live checkpoints</div>
         </div>
       </div>
 
-      <!-- 2. Projects Tracking Table / Portfolio View -->
-      <div class="bg-surface-white rounded-2xl border border-outline-gray-1 shadow-2xs overflow-hidden">
-        <div class="px-5 py-3 border-b border-outline-gray-1 flex items-center justify-between">
+      <!-- 2. Interactive Charts Row -->
+      <div v-if="stageChartData.length || moduleChartData.length" class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <!-- Donut Chart: Project Stage Distribution -->
+        <div class="p-4 bg-surface-white rounded-2xl border border-outline-gray-2 shadow-2xs space-y-3">
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="text-xs font-semibold text-ink-gray-9">Project Stage Distribution</h2>
+              <p class="text-[11px] text-ink-gray-5">Rollouts by implementation phase</p>
+            </div>
+            <Badge theme="blue" variant="subtle" size="sm" :label="(data.projects?.length || 0) + ' Projects'" />
+          </div>
+          <div class="h-64 flex items-center justify-center">
+            <DonutChart
+              v-if="stageChartData.length"
+              :data="stageChartData"
+              category="stage"
+              value="count"
+              class="w-full h-full"
+            />
+            <div v-else class="text-xs text-ink-gray-4">No project stage data</div>
+          </div>
+        </div>
+
+        <!-- Bar Chart: Module Completion Rates -->
+        <div class="p-4 bg-surface-white rounded-2xl border border-outline-gray-2 shadow-2xs space-y-3">
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="text-xs font-semibold text-ink-gray-9">Module Task Delivery</h2>
+              <p class="text-[11px] text-ink-gray-5">Completed vs remaining tasks by module</p>
+            </div>
+            <Badge theme="green" variant="subtle" size="sm" label="Task Breakdown" />
+          </div>
+          <div class="h-64 flex items-center justify-center">
+            <BarChart
+              v-if="moduleChartData.length"
+              :data="moduleChartData"
+              x="module"
+              :y="['completed', 'open']"
+              stacked
+              class="w-full h-full"
+            />
+            <div v-else class="text-xs text-ink-gray-4">No module task data</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Projects Tracking Table / Portfolio View -->
+      <div class="bg-surface-white rounded-2xl border border-outline-gray-2 shadow-2xs overflow-hidden">
+        <div class="px-5 py-3 border-b border-outline-gray-2 flex items-center justify-between">
           <div>
             <h2 class="text-xs font-semibold text-ink-gray-9">Implementation Projects Tracking</h2>
             <p class="text-[11px] text-ink-gray-5 mt-0.5">Real-time status, module breakdown, stakeholders, and completion percentage.</p>
@@ -151,56 +192,46 @@
         </div>
 
         <div class="overflow-x-auto">
-          <table class="w-full text-left border-collapse">
-            <thead class="bg-surface-gray-1 border-b border-outline-gray-1 text-[11px] font-semibold uppercase tracking-wider text-ink-gray-5 select-none">
-              <tr>
+          <table class="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr class="bg-surface-gray-1 text-ink-gray-5 font-medium border-b border-outline-gray-2 select-none">
                 <th class="py-2.5 px-4">Project</th>
                 <th class="py-2.5 px-3">Stage</th>
                 <th class="py-2.5 px-3">Client PoC</th>
                 <th class="py-2.5 px-3">Modules in Scope</th>
-                <th class="py-2.5 px-3">Completion %</th>
+                <th class="py-2.5 px-3">Progress</th>
                 <th class="py-2.5 px-3">Timeline</th>
                 <th class="py-2.5 px-4 text-right">Action</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-outline-gray-1 text-xs">
+            <tbody class="divide-y divide-outline-gray-1">
               <tr v-if="!data.projects || data.projects.length === 0">
-                <td colspan="7" class="py-12 text-center text-ink-gray-4">
-                  No implementation projects created yet.
+                <td colspan="7" class="py-12 text-center text-ink-gray-4 text-xs">
+                  No active implementation projects found.
                 </td>
               </tr>
-
               <tr
                 v-for="p in data.projects"
                 :key="p.name"
+                class="hover:bg-surface-gray-1/60 transition group cursor-pointer"
                 @click="$router.push('/projects/' + p.name)"
-                class="hover:bg-surface-gray-2 cursor-pointer transition select-none group"
               >
-                <!-- Name & Status -->
+                <!-- Project Name & ID -->
                 <td class="py-3 px-4">
-                  <div>
-                    <div class="font-medium text-ink-gray-9 group-hover:text-ink-black transition flex items-center gap-1.5">
-                      <span>{{ p.project_name }}</span>
-                      <Badge
-                        v-if="p.is_at_risk"
-                        theme="red"
-                        variant="subtle"
-                        size="sm"
-                        label="DELAYED"
-                      />
-                    </div>
-                    <div class="text-[11px] text-ink-gray-4 mt-0.5 font-mono">#{{ p.name }}</div>
+                  <div class="font-semibold text-ink-gray-9 group-hover:text-ink-blue-7 transition">
+                    {{ p.project_name }}
                   </div>
+                  <div class="text-[11px] text-ink-gray-4 font-mono">{{ p.name }}</div>
                 </td>
 
                 <!-- Stage -->
                 <td class="py-3 px-3">
-                  <span
-                    class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium border"
-                    :class="getStageBadgeClasses(p.implementation_stage)"
-                  >
-                    {{ p.implementation_stage || 'Discovery' }}
-                  </span>
+                  <Badge
+                    :theme="getStageTheme(p.implementation_stage)"
+                    variant="subtle"
+                    size="sm"
+                    :label="p.implementation_stage || 'Discovery'"
+                  />
                 </td>
 
                 <!-- Client PoC -->
@@ -218,23 +249,14 @@
                 <!-- Modules in Scope -->
                 <td class="py-3 px-3">
                   <div class="flex flex-wrap gap-1.5 max-w-xs">
-                    <span
+                    <Badge
                       v-for="m in p.modules"
                       :key="m.module"
-                      class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-medium border transition select-none"
-                      :style="{
-                        backgroundColor: (m.color || getModuleColor(m.module_name)) + '14',
-                        borderColor: (m.color || getModuleColor(m.module_name)) + '30',
-                        color: m.color || getModuleColor(m.module_name)
-                      }"
-                    >
-                      <Icon
-                        :name="m.icon || getModuleIcon(m.module_name)"
-                        size="11"
-                        :color="m.color || getModuleColor(m.module_name)"
-                      />
-                      <span>{{ m.module_name }} {{ m.progress || 0 }}%</span>
-                    </span>
+                      theme="gray"
+                      variant="subtle"
+                      size="sm"
+                      :label="`${m.module_name} ${m.progress || 0}%`"
+                    />
                   </div>
                 </td>
 
@@ -245,13 +267,7 @@
                       <span class="font-medium text-ink-gray-9">{{ p.percent_complete || 0 }}%</span>
                       <span class="text-ink-gray-4">{{ p.completed_tasks || 0 }}/{{ p.total_tasks || 0 }}</span>
                     </div>
-                    <div class="w-full h-1.5 bg-surface-gray-2 rounded-full overflow-hidden">
-                      <div
-                        class="h-full rounded-full transition-all duration-300"
-                        :class="p.percent_complete === 100 ? 'bg-emerald-500' : 'bg-gradient-to-r from-blue-500 to-indigo-600'"
-                        :style="{ width: (p.percent_complete || 0) + '%' }"
-                      ></div>
-                    </div>
+                    <Progress :value="p.percent_complete || 0" size="sm" />
                   </div>
                 </td>
 
@@ -280,8 +296,8 @@
         </div>
       </div>
 
-      <!-- 3. Module Health Matrix -->
-      <div class="bg-surface-white rounded-2xl border border-outline-gray-1 shadow-2xs p-5 space-y-4">
+      <!-- 4. Module Health Matrix -->
+      <div class="bg-surface-white rounded-2xl border border-outline-gray-2 shadow-2xs p-5 space-y-4">
         <div class="flex items-center justify-between">
           <div>
             <h2 class="text-xs font-semibold text-ink-gray-9">Module Implementation Health</h2>
@@ -297,7 +313,7 @@
           <div
             v-for="mod in data.modules_health"
             :key="mod.module_code"
-            class="p-4 rounded-2xl border border-outline-gray-1 bg-surface-white hover:border-outline-gray-2 hover:shadow-xs transition space-y-3"
+            class="p-4 rounded-2xl border border-outline-gray-2 bg-surface-white hover:shadow-xs transition space-y-3"
           >
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-3">
@@ -320,38 +336,27 @@
                   <div class="text-[11px] text-ink-gray-5">{{ mod.active_in_projects || 0 }} {{ mod.active_in_projects === 1 ? 'project' : 'projects' }}</div>
                 </div>
               </div>
-              <span
-                class="text-xs font-bold font-mono px-2 py-0.5 rounded-md"
-                :style="{
-                  backgroundColor: (mod.color || getModuleColor(mod.module_name)) + '15',
-                  color: mod.color || getModuleColor(mod.module_name)
-                }"
-              >
-                {{ mod.progress || 0 }}%
-              </span>
+              <Badge
+                theme="gray"
+                variant="subtle"
+                size="sm"
+                :label="(mod.progress || 0) + '%'"
+              />
             </div>
 
             <!-- Progress bar -->
-            <div class="w-full h-1.5 bg-surface-gray-2 rounded-full overflow-hidden">
-              <div
-                class="h-full rounded-full transition-all duration-500"
-                :style="{
-                  width: (mod.progress || 0) + '%',
-                  backgroundColor: mod.color || getModuleColor(mod.module_name)
-                }"
-              ></div>
-            </div>
+            <Progress :value="mod.progress || 0" size="sm" />
 
             <div class="flex items-center justify-between text-[11px] text-ink-gray-5 pt-0.5">
               <span>{{ mod.completed_tasks || 0 }} of {{ mod.total_tasks || 0 }} tasks</span>
-              <span
+              <Badge
                 v-if="mod.overdue_tasks > 0"
-                class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-red-50 text-red-600 border border-red-200"
-              >
-                <Icon name="alert-circle" size="10" />
-                <span>{{ mod.overdue_tasks }} overdue</span>
-              </span>
-              <span v-else class="text-[10px] text-emerald-600 flex items-center gap-1">
+                theme="red"
+                variant="subtle"
+                size="sm"
+                :label="mod.overdue_tasks + ' overdue'"
+              />
+              <span v-else class="text-[10px] text-ink-green-7 flex items-center gap-1">
                 <Icon name="check-circle" size="11" />
                 <span>On track</span>
               </span>
@@ -364,10 +369,19 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
+import {
+  Button,
+  Badge,
+  Avatar,
+  Progress,
+  Alert,
+} from 'frappe-ui'
+import { DonutChart, BarChart } from 'frappe-ui/charts'
 import Icon from '../components/Icon.vue'
 import LayoutHeader from '../components/LayoutHeader.vue'
 
-defineProps({
+const props = defineProps({
   data: {
     type: Object,
     default: () => ({}),
@@ -375,6 +389,30 @@ defineProps({
 })
 
 defineEmits(['refresh', 'open-new-project', 'open-new-task', 'select-task'])
+
+const stageChartData = computed(() => {
+  const projects = props.data.projects || []
+  if (!projects.length) return []
+  const counts = {}
+  projects.forEach(p => {
+    const stage = p.implementation_stage || 'Discovery'
+    counts[stage] = (counts[stage] || 0) + 1
+  })
+  return Object.entries(counts).map(([stage, count]) => ({
+    stage,
+    count,
+  }))
+})
+
+const moduleChartData = computed(() => {
+  const modules = props.data.modules_health || []
+  if (!modules.length) return []
+  return modules.slice(0, 8).map(m => ({
+    module: m.module_name,
+    completed: m.completed_tasks || 0,
+    open: Math.max(0, (m.total_tasks || 0) - (m.completed_tasks || 0)),
+  }))
+})
 
 const MODULE_META = {
   accounts: { color: '#10B981', icon: 'CreditCard' },
@@ -406,25 +444,24 @@ function getModuleIcon(nameOrCode) {
   return 'package'
 }
 
-function getStageBadgeClasses(stage) {
+function getStageTheme(stage) {
   switch (stage) {
     case 'Discovery':
     case 'Design':
-      return 'bg-purple-50 text-purple-700 border-purple-200'
+      return 'purple'
     case 'Configuration & Customization':
     case 'Configuration':
-      return 'bg-blue-50 text-blue-700 border-blue-200'
+      return 'blue'
     case 'Data Migration':
-      return 'bg-amber-50 text-amber-700 border-amber-200'
     case 'UAT & Training':
-      return 'bg-orange-50 text-orange-700 border-orange-200'
+      return 'amber'
     case 'Go-Live':
     case 'Hypercare Support':
-      return 'bg-emerald-50 text-emerald-700 border-emerald-200'
+      return 'green'
     case 'Closed':
-      return 'bg-surface-gray-2 text-ink-gray-6 border-outline-gray-2'
+      return 'gray'
     default:
-      return 'bg-surface-gray-1 text-ink-gray-7 border-outline-gray-1'
+      return 'gray'
   }
 }
 

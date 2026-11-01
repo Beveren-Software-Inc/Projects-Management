@@ -5,66 +5,58 @@
       <!-- Left: Quick filter search fields (ID, Subject, Project, Module, Status, Priority) -->
       <div class="flex items-center gap-2 overflow-x-auto min-w-0 flex-1 py-0.5">
         <!-- ID Filter Input -->
-        <input
-          v-model="searchId"
-          type="text"
-          placeholder="ID"
-          class="w-20 px-3 py-1.5 text-xs bg-surface-gray-1 hover:bg-surface-gray-2 focus:bg-white rounded-xl border border-outline-gray-2 focus:border-outline-gray-4 focus:outline-none placeholder:text-ink-gray-4 text-ink-gray-9 transition shadow-2xs font-mono"
-        />
+        <div class="w-24">
+          <TextInput
+            v-model="searchId"
+            placeholder="ID"
+            size="sm"
+          />
+        </div>
 
         <!-- Subject Filter Input -->
-        <input
-          v-model="searchSubject"
-          type="text"
-          placeholder="Subject"
-          class="w-48 sm:w-56 px-3 py-1.5 text-xs bg-surface-gray-1 hover:bg-surface-gray-2 focus:bg-white rounded-xl border border-outline-gray-2 focus:border-outline-gray-4 focus:outline-none placeholder:text-ink-gray-4 text-ink-gray-9 transition shadow-2xs"
-        />
+        <div class="w-48 sm:w-56">
+          <TextInput
+            v-model="searchSubject"
+            placeholder="Subject"
+            size="sm"
+          />
+        </div>
 
         <!-- Project Link/Select -->
-        <select
-          v-model="selectedProject"
-          class="w-40 px-3 py-1.5 text-xs bg-surface-gray-1 hover:bg-surface-gray-2 focus:bg-white rounded-xl border border-outline-gray-2 focus:border-outline-gray-4 focus:outline-none text-ink-gray-8 transition cursor-pointer shadow-2xs"
-        >
-          <option value="All">All Projects</option>
-          <option v-for="p in projects" :key="p.name" :value="p.name">
-            {{ p.project_name }}
-          </option>
-        </select>
+        <div class="w-44">
+          <Select
+            v-model="selectedProject"
+            :options="projectOptions"
+            size="sm"
+          />
+        </div>
 
         <!-- Module Select Filter -->
-        <select
-          v-model="selectedModule"
-          class="w-40 px-3 py-1.5 text-xs bg-surface-gray-1 hover:bg-surface-gray-2 focus:bg-white rounded-xl border border-outline-gray-2 focus:border-outline-gray-4 focus:outline-none text-ink-gray-8 transition cursor-pointer shadow-2xs"
-        >
-          <option value="All">All Modules</option>
-          <option v-for="m in modules" :key="m.name || m.module_code" :value="m.name || m.module_code">
-            {{ m.module_name }}
-          </option>
-        </select>
+        <div class="w-44">
+          <Select
+            v-model="selectedModule"
+            :options="moduleOptions"
+            size="sm"
+          />
+        </div>
 
         <!-- Status Select -->
-        <select
-          v-model="selectedStatus"
-          class="w-32 px-3 py-1.5 text-xs bg-surface-gray-1 hover:bg-surface-gray-2 focus:bg-white rounded-xl border border-outline-gray-2 focus:border-outline-gray-4 focus:outline-none text-ink-gray-8 transition cursor-pointer shadow-2xs"
-        >
-          <option value="All">All Statuses</option>
-          <option value="Open">Open</option>
-          <option value="Working">Working</option>
-          <option value="Pending Review">Pending Review</option>
-          <option value="Completed">Completed</option>
-        </select>
+        <div class="w-36">
+          <Select
+            v-model="selectedStatus"
+            :options="statusFilterOptions"
+            size="sm"
+          />
+        </div>
 
         <!-- Priority Select -->
-        <select
-          v-model="selectedPriority"
-          class="w-28 px-3 py-1.5 text-xs bg-surface-gray-1 hover:bg-surface-gray-2 focus:bg-white rounded-xl border border-outline-gray-2 focus:border-outline-gray-4 focus:outline-none text-ink-gray-8 transition cursor-pointer shadow-2xs"
-        >
-          <option value="All">All Priorities</option>
-          <option value="Urgent">Urgent</option>
-          <option value="High">High</option>
-          <option value="Medium">Medium</option>
-          <option value="Low">Low</option>
-        </select>
+        <div class="w-32">
+          <Select
+            v-model="selectedPriority"
+            :options="priorityFilterOptions"
+            size="sm"
+          />
+        </div>
 
         <!-- Clear filters button if active -->
         <button
@@ -391,7 +383,7 @@
 
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue'
-import { Badge, Tooltip, Avatar, Dropdown, Button, Checkbox } from 'frappe-ui'
+import { Badge, Tooltip, Avatar, Dropdown, Button, Checkbox, TextInput, Select } from 'frappe-ui'
 import Icon from './Icon.vue'
 import TicketPriority from './TicketPriority.vue'
 
@@ -439,6 +431,32 @@ const selectedPriority = ref('All')
 const sortKey = ref('exp_end_date')
 const sortOrder = ref('asc')
 const pageSize = ref(20)
+
+const projectOptions = computed(() => [
+  { label: 'All Projects', value: 'All' },
+  ...props.projects.map(p => ({ label: p.project_name, value: p.name })),
+])
+
+const moduleOptions = computed(() => [
+  { label: 'All Modules', value: 'All' },
+  ...props.modules.map(m => ({ label: m.module_name, value: m.name || m.module_code })),
+])
+
+const statusFilterOptions = [
+  { label: 'All Statuses', value: 'All' },
+  { label: 'Open', value: 'Open' },
+  { label: 'Working', value: 'Working' },
+  { label: 'Pending Review', value: 'Pending Review' },
+  { label: 'Completed', value: 'Completed' },
+]
+
+const priorityFilterOptions = [
+  { label: 'All Priorities', value: 'All' },
+  { label: 'Urgent', value: 'Urgent' },
+  { label: 'High', value: 'High' },
+  { label: 'Medium', value: 'Medium' },
+  { label: 'Low', value: 'Low' },
+]
 
 // Advanced filter panel toggle & states
 const showAdvancedFilter = ref(false)

@@ -888,6 +888,7 @@
 
 <script setup>
 import { ref, computed, onMounted, watch, nextTick } from 'vue'
+import { toast } from 'frappe-ui'
 import Icon from './Icon.vue'
 import ActivityIcon from './icons/ActivityIcon.vue'
 import EmailIcon from './icons/EmailIcon.vue'
@@ -1093,8 +1094,9 @@ async function toggleAssignee(user) {
       task.value.assignee_emails.push(email)
     }
     emit('updated')
+    toast.success('Assignee updated')
   } catch (e) {
-    alert('Failed to update assignee: ' + e.message)
+    toast.error('Failed to update assignee: ' + (e.message || e))
   }
 }
 
@@ -1103,8 +1105,9 @@ async function handleGenericUpdate(fieldName, value) {
     await updateTask(task.value.name, { [fieldName]: value })
     task.value[fieldName] = value
     emit('updated')
+    toast.success('Task updated')
   } catch (e) {
-    alert(`Failed to update ${fieldName}: ` + e.message)
+    toast.error(`Failed to update ${fieldName}: ` + (e.message || e))
   }
 }
 
@@ -1116,8 +1119,9 @@ async function handleModuleSelect(m) {
     task.value.module_icon = m.icon
     task.value.module_color = m.color
     emit('updated')
+    toast.success('Module updated')
   } catch (e) {
-    alert('Failed to update module: ' + e.message)
+    toast.error('Failed to update module: ' + (e.message || e))
   }
 }
 
@@ -1128,8 +1132,9 @@ async function handleProjectSelect(p) {
     task.value.project_title = p.project_name
     task.value.client_poc_name = p.client_poc_name
     emit('updated')
+    toast.success('Project updated')
   } catch (e) {
-    alert('Failed to update project: ' + e.message)
+    toast.error('Failed to update project: ' + (e.message || e))
   }
 }
 
@@ -1169,8 +1174,9 @@ async function handleAddTag() {
     try {
       await updateTask(task.value.name, { tags: task.value.tags })
       emit('updated')
+      toast.success('Tag added')
     } catch (e) {
-      alert('Failed to add tag: ' + e.message)
+      toast.error('Failed to add tag: ' + (e.message || e))
     }
   }
   newTagText.value = ''
@@ -1182,8 +1188,9 @@ async function handleRemoveTag(tagToRemove) {
   try {
     await updateTask(task.value.name, { tags: task.value.tags })
     emit('updated')
+    toast.success('Tag removed')
   } catch (e) {
-    alert('Failed to remove tag: ' + e.message)
+    toast.error('Failed to remove tag: ' + (e.message || e))
   }
 }
 
@@ -1192,8 +1199,9 @@ async function updateStatus(s) {
     await updateTask(task.value.name, { status: s })
     task.value.status = s
     emit('updated')
+    toast.success('Status updated to ' + s)
   } catch (e) {
-    alert('Failed to update status: ' + e.message)
+    toast.error('Failed to update status: ' + (e.message || e))
   }
 }
 

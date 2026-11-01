@@ -401,7 +401,7 @@
 
 <script setup>
 import { ref, computed, watch, nextTick, onMounted } from 'vue'
-import { Button, Avatar } from 'frappe-ui'
+import { Button, Avatar, toast } from 'frappe-ui'
 import EmailIcon from './icons/EmailIcon.vue'
 import CommentIcon from './icons/CommentIcon.vue'
 import Icon from './Icon.vue'
@@ -712,9 +712,10 @@ async function handleSubmit() {
     messageContent.value = ''
     attachments.value = []
     isCollapsed.value = true
+    toast.success(activeMode.value === 'reply' ? 'Email sent successfully' : 'Comment added')
     emit('submitted')
   } catch (e) {
-    alert('Failed to send: ' + e.message)
+    toast.error('Failed to send: ' + (e.message || e))
   } finally {
     submitting.value = false
   }

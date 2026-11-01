@@ -1,6 +1,7 @@
 <template>
   <FrappeUIProvider>
-    <div class="h-screen w-screen flex bg-surface-white text-ink-gray-9 overflow-hidden antialiased select-none">
+    <ToastProvider>
+      <div class="h-screen w-screen flex bg-surface-white text-ink-gray-9 overflow-hidden antialiased select-none">
       <!-- Helpdesk-styled Sidebar -->
       <Sidebar
         :unread-count="unreadCount"
@@ -60,13 +61,14 @@
         @close="showAppSettings = false"
       />
     </div>
+    </ToastProvider>
   </FrappeUIProvider>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { FrappeUIProvider } from 'frappe-ui'
+import { FrappeUIProvider, ToastProvider } from 'frappe-ui'
 import Sidebar from './components/Sidebar.vue'
 import NewProjectModal from './components/NewProjectModal.vue'
 import NewTaskModal from './components/NewTaskModal.vue'

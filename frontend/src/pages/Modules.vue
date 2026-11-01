@@ -321,7 +321,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { Button, Badge } from 'frappe-ui'
+import { Button, Badge, toast } from 'frappe-ui'
 import Icon from '../components/Icon.vue'
 import LayoutHeader from '../components/LayoutHeader.vue'
 import NewModuleModal from '../components/NewModuleModal.vue'
@@ -446,8 +446,9 @@ async function handleDeleteModule(mod) {
     const list = await deleteImplementationModule(mod.module_code)
     modules.value = list || []
     selectedModule.value = modules.value.length > 0 ? modules.value[0] : null
+    toast.success('Module deleted successfully')
   } catch (e) {
-    alert('Failed to delete module: ' + (e.message || e))
+    toast.error('Failed to delete module: ' + (e.message || e))
   }
 }
 
@@ -477,10 +478,10 @@ async function handleSaveTemplate() {
     await saveModuleTemplate(selectedModule.value.module_code, {
       tasks: selectedModule.value.tasks,
     })
-    alert('Template saved successfully!')
+    toast.success('Template saved successfully!')
     await loadModules(selectedModule.value.module_code)
   } catch (e) {
-    alert('Failed to save template: ' + (e.message || e))
+    toast.error('Failed to save template: ' + (e.message || e))
   } finally {
     saving.value = false
   }

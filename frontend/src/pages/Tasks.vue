@@ -150,7 +150,7 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { Dropdown, Button } from 'frappe-ui'
+import { Dropdown, Button, toast } from 'frappe-ui'
 import Icon from '../components/Icon.vue'
 import LayoutHeader from '../components/LayoutHeader.vue'
 import TaskListView from '../components/TaskListView.vue'
@@ -254,10 +254,11 @@ async function handleBulkStatus(status) {
   if (selectedTaskIds.value.length === 0) return
   try {
     await bulkUpdateTasks(selectedTaskIds.value, { status })
+    toast.success(`Updated status for ${selectedTaskIds.value.length} tasks to ${status}`)
     selectedTaskIds.value = []
     await loadTasks()
   } catch (e) {
-    alert('Failed to update tasks: ' + (e.message || e))
+    toast.error('Failed to update tasks: ' + (e.message || e))
   }
 }
 
@@ -266,10 +267,11 @@ async function handleBulkDelete() {
   if (!confirm(`Are you sure you want to delete ${selectedTaskIds.value.length} selected tasks?`)) return
   try {
     await bulkDeleteTasks(selectedTaskIds.value)
+    toast.success(`Deleted ${selectedTaskIds.value.length} tasks`)
     selectedTaskIds.value = []
     await loadTasks()
   } catch (e) {
-    alert('Failed to delete tasks: ' + (e.message || e))
+    toast.error('Failed to delete tasks: ' + (e.message || e))
   }
 }
 
@@ -364,8 +366,9 @@ async function handleQuickStatus(taskId, status) {
       t.status = status
       if (status === 'Completed') t.progress = 100
     }
+    toast.success('Task status updated to ' + status)
   } catch (e) {
-    alert('Failed to update status: ' + e.message)
+    toast.error('Failed to update status: ' + (e.message || e))
   }
 }
 
