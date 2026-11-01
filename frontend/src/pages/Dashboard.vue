@@ -252,11 +252,13 @@
                     <Badge
                       v-for="m in p.modules"
                       :key="m.module"
-                      theme="gray"
+                      :theme="getModuleTheme(m.module_name)"
                       variant="subtle"
                       size="sm"
-                      :label="`${m.module_name} ${m.progress || 0}%`"
-                    />
+                    >
+                      <span class="font-medium">{{ m.module_name }}</span>
+                      <span class="ml-1 opacity-80 font-semibold">{{ m.progress || 0 }}%</span>
+                    </Badge>
                   </div>
                 </td>
 
@@ -444,11 +446,22 @@ function getModuleIcon(nameOrCode) {
   return 'package'
 }
 
+function getModuleTheme(nameOrCode) {
+  if (!nameOrCode) return 'blue'
+  const key = String(nameOrCode).toLowerCase()
+  if (key.includes('account') || key.includes('finance') || key.includes('asset')) return 'green'
+  if (key.includes('sell') || key.includes('order') || key.includes('crm') || key.includes('pipeline')) return 'blue'
+  if (key.includes('buy') || key.includes('procure') || key.includes('manufactur')) return 'amber'
+  if (key.includes('stock') || key.includes('inventory') || key.includes('support') || key.includes('helpdesk')) return 'violet'
+  if (key.includes('hr') || key.includes('payroll') || key.includes('employee')) return 'red'
+  return 'blue'
+}
+
 function getStageTheme(stage) {
   switch (stage) {
     case 'Discovery':
     case 'Design':
-      return 'purple'
+      return 'violet'
     case 'Configuration & Customization':
     case 'Configuration':
       return 'blue'

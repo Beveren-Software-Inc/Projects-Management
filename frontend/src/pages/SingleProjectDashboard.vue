@@ -268,7 +268,7 @@
       <div class="bg-surface-white rounded-2xl border border-outline-gray-2 shadow-2xs overflow-hidden">
         <div class="px-5 py-2 border-b border-outline-gray-2 bg-surface-gray-1">
           <TabButtons
-            :buttons="[
+            :options="[
               { label: `Modules (${project.modules?.length || 0})`, value: 'modules' },
               { label: `Tasks (${project.tasks?.length || 0})`, value: 'tasks' },
               { label: `Files & Scope Docs (${(project.governance?.documents?.length || 0) + (project.files?.length || 0)})`, value: 'files' },
@@ -308,7 +308,7 @@
                   </div>
                 </div>
                 <Badge
-                  theme="gray"
+                  :theme="getModuleTheme(mod.module_name)"
                   variant="subtle"
                   size="sm"
                   :label="(mod.progress || 0) + '%'"
@@ -775,6 +775,17 @@ const MODULE_META = {
   manufacturing: { color: '#6366F1', icon: 'Cpu' },
   support: { color: '#F97316', icon: 'LifeBuoy' },
   assets: { color: '#14B8A6', icon: 'Server' },
+}
+
+function getModuleTheme(nameOrCode) {
+  if (!nameOrCode) return 'blue'
+  const key = String(nameOrCode).toLowerCase()
+  if (key.includes('account') || key.includes('finance') || key.includes('asset')) return 'green'
+  if (key.includes('sell') || key.includes('order') || key.includes('crm') || key.includes('pipeline')) return 'blue'
+  if (key.includes('buy') || key.includes('procure') || key.includes('manufactur')) return 'amber'
+  if (key.includes('stock') || key.includes('inventory') || key.includes('support') || key.includes('helpdesk')) return 'violet'
+  if (key.includes('hr') || key.includes('payroll') || key.includes('employee')) return 'red'
+  return 'blue'
 }
 
 function getModuleColor(nameOrCode) {

@@ -38,7 +38,7 @@
         <div class="space-y-1.5">
           <label class="block text-xs font-medium text-ink-gray-7">Attachment Method</label>
           <TabButtons
-            :buttons="[
+            :options="[
               { label: 'File Upload', value: 'file' },
               { label: 'Drive / URL Link', value: 'link' },
             ]"

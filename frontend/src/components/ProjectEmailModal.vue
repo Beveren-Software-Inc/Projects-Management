@@ -26,7 +26,7 @@
       <div class="flex items-center gap-2 overflow-x-auto pb-1">
         <span class="text-ink-gray-5 font-medium text-[11px] uppercase tracking-wider shrink-0">Template:</span>
         <TabButtons
-          :buttons="templates.map(t => ({ label: t.label, value: t.id }))"
+          :options="templates.map(t => ({ label: t.label, value: t.id }))"
           v-model="selectedTemplate"
           @update:model-value="fetchTemplate"
         />
@@ -68,7 +68,7 @@
         <!-- Mode Toggle: Visual Preview vs Edit HTML -->
         <div class="flex items-center justify-between border-b border-outline-gray-2 pb-2">
           <TabButtons
-            :buttons="[
+            :options="[
               { label: 'Visual Email Preview', value: 'preview' },
               { label: 'Edit Email HTML / Notes', value: 'edit' },
             ]"

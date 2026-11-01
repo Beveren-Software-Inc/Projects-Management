@@ -18,7 +18,7 @@
     <div class="space-y-4 pt-1">
       <!-- Steps Navigation using TabButtons -->
       <TabButtons
-        :buttons="[
+        :options="[
           { label: '1. Project Details', value: 'details' },
           { label: `2. Select Modules (${selectedModules.length})`, value: 'modules' },
           { label: `3. Task Preview (${totalPreviewTasks})`, value: 'preview' },

@@ -194,11 +194,11 @@
           v-for="p in filteredProjects"
           :key="p.name"
           @click="$router.push('/projects/' + p.name)"
-          class="bg-white rounded-2xl border border-outline-gray-2 shadow-2xs hover:shadow-md hover:border-outline-blue-3 transition-all duration-200 p-5 flex flex-col justify-between group relative overflow-hidden cursor-pointer select-none space-y-4"
+          class="bg-white rounded-2xl border border-outline-gray-2 shadow-2xs hover:shadow-md hover:border-outline-blue-3 transition-all duration-200 p-5 flex flex-col justify-between group relative overflow-hidden cursor-pointer select-none space-y-4 hover:-translate-y-0.5"
         >
           <!-- Top Accent Color Bar tailored to Implementation Stage -->
           <div
-            class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r"
+            class="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r"
             :class="getStageGradient(p.implementation_stage)"
           ></div>
 
@@ -229,7 +229,7 @@
                 />
                 <Badge
                   v-else
-                  theme="gray"
+                  theme="blue"
                   variant="subtle"
                   size="sm"
                   label="Open"
@@ -237,25 +237,42 @@
               </div>
 
               <!-- Project ID Monospace Badge -->
-              <span class="text-[10px] font-mono text-ink-gray-5 bg-surface-gray-2 px-2 py-0.5 rounded-md border border-outline-gray-2 shrink-0">
+              <span class="text-[10px] font-mono font-semibold text-ink-blue-7 bg-surface-blue-2 px-2 py-0.5 rounded-md border border-outline-blue-2 shrink-0">
                 #{{ cleanId(p.name) }}
               </span>
             </div>
 
-            <!-- Project Title -->
-            <h2 class="text-sm font-semibold text-ink-gray-9 group-hover:text-ink-blue-7 transition line-clamp-1">
-              {{ p.project_name }}
-            </h2>
-            <div class="text-[11px] text-ink-gray-4 mt-0.5 flex items-center gap-1">
-              <span>{{ p.project_type || 'Implementation Rollout' }}</span>
-              <span v-if="p.customer">• {{ p.customer }}</span>
+            <!-- Project Title with Colorful Icon Badge -->
+            <div class="flex items-start gap-3">
+              <div
+                class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border transition-transform group-hover:scale-105"
+                :class="getStageIconBg(p.implementation_stage)"
+              >
+                <Icon
+                  :name="getStageIcon(p.implementation_stage)"
+                  size="18"
+                  :class="getStageIconColor(p.implementation_stage)"
+                />
+              </div>
+              <div class="min-w-0 flex-1">
+                <h2 class="text-sm font-semibold text-ink-gray-9 group-hover:text-ink-blue-7 transition line-clamp-1">
+                  {{ p.project_name }}
+                </h2>
+                <div class="text-[11px] text-ink-gray-5 mt-0.5 flex items-center gap-1.5">
+                  <span class="font-medium text-ink-gray-7">{{ p.project_type || 'Implementation' }}</span>
+                  <span v-if="p.customer" class="text-ink-gray-4">• {{ p.customer }}</span>
+                </div>
+              </div>
             </div>
           </div>
 
           <!-- Section 2: Stakeholders -->
           <div class="p-3 bg-surface-gray-1 rounded-xl border border-outline-gray-2/70 space-y-2 text-xs">
             <div class="flex items-center justify-between">
-              <span class="text-[11px] text-ink-gray-5 font-medium">Client Contact:</span>
+              <span class="text-[11px] text-ink-gray-5 font-medium flex items-center gap-1.5">
+                <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+                Client Contact:
+              </span>
               <div class="flex items-center gap-1.5 min-w-0">
                 <Avatar :label="p.client_poc_name || 'Client'" size="xs" />
                 <span class="font-medium text-ink-gray-8 truncate max-w-[140px]">
@@ -264,42 +281,48 @@
               </div>
             </div>
 
-            <div class="flex items-center justify-between pt-1 border-t border-outline-gray-2/50 text-[11px]">
-              <span class="text-ink-gray-5">Project Lead:</span>
+            <div class="flex items-center justify-between pt-1.5 border-t border-outline-gray-2/50 text-[11px]">
+              <span class="text-ink-gray-5 flex items-center gap-1.5">
+                <span class="w-1.5 h-1.5 rounded-full bg-purple-500"></span>
+                Project Lead:
+              </span>
               <span class="font-medium text-ink-gray-7 truncate max-w-[140px]">
                 {{ p.project_manager || p.owner || 'Lead PM' }}
               </span>
             </div>
           </div>
 
-          <!-- Section 3: Scope Modules -->
+          <!-- Section 3: Scope Modules (Colorful Badges) -->
           <div class="space-y-1.5">
             <div class="flex items-center justify-between text-[11px] text-ink-gray-5">
-              <span>Scope Modules ({{ (p.modules || []).length }})</span>
-              <span>{{ p.completed_tasks || 0 }}/{{ p.total_tasks || 0 }} tasks</span>
+              <span class="font-medium">Scope Modules ({{ (p.modules || []).length }})</span>
+              <span class="text-ink-gray-6 font-medium">{{ p.completed_tasks || 0 }}/{{ p.total_tasks || 0 }} tasks</span>
             </div>
-            <div class="flex flex-wrap gap-1 max-h-12 overflow-hidden">
+            <div class="flex flex-wrap gap-1 max-h-14 overflow-hidden">
               <Badge
                 v-for="m in (p.modules || []).slice(0, 4)"
                 :key="m.module"
-                theme="gray"
+                :theme="getModuleTheme(m.module_name)"
                 variant="subtle"
                 size="sm"
                 :label="m.module_name"
               />
-              <span v-if="(p.modules || []).length > 4" class="text-[10px] text-ink-gray-4 self-center font-mono">
+              <span v-if="(p.modules || []).length > 4" class="text-[10px] text-ink-gray-5 self-center font-mono font-medium pl-1">
                 +{{ (p.modules || []).length - 4 }} more
               </span>
             </div>
           </div>
 
           <!-- Section 4: Progress Bar & Timeline Footer -->
-          <div class="pt-3.5 border-t border-outline-gray-2 space-y-2">
+          <div class="pt-3 border-t border-outline-gray-2 space-y-2">
             <div class="flex items-center justify-between text-xs">
               <span class="text-[11px] text-ink-gray-5 font-medium">Rollout Completion</span>
-              <span class="font-bold text-xs text-ink-gray-9">
-                {{ p.percent_complete || 0 }}%
-              </span>
+              <Badge
+                :theme="(p.percent_complete || 0) >= 100 ? 'green' : (p.percent_complete || 0) > 0 ? 'blue' : 'gray'"
+                variant="subtle"
+                size="sm"
+                :label="`${p.percent_complete || 0}%`"
+              />
             </div>
 
             <Progress :value="p.percent_complete || 0" size="sm" />
@@ -313,7 +336,7 @@
                 <span>{{ formatDate(p.expected_end_date) }}</span>
               </div>
 
-              <div class="text-ink-blue-7 font-medium group-hover:translate-x-0.5 transition-transform flex items-center gap-0.5">
+              <div class="text-ink-blue-7 font-semibold group-hover:translate-x-0.5 transition-transform flex items-center gap-0.5">
                 <span>View</span>
                 <Icon name="chevron-right" size="12" />
               </div>
@@ -424,25 +447,65 @@ function cleanId(id) {
   return id.replace(/^PROJ-/, '')
 }
 
+function getModuleTheme(nameOrCode) {
+  if (!nameOrCode) return 'blue'
+  const key = String(nameOrCode).toLowerCase()
+  if (key.includes('account') || key.includes('finance') || key.includes('asset')) return 'green'
+  if (key.includes('sell') || key.includes('order') || key.includes('crm') || key.includes('pipeline')) return 'blue'
+  if (key.includes('buy') || key.includes('procure') || key.includes('manufactur')) return 'amber'
+  if (key.includes('stock') || key.includes('inventory') || key.includes('support') || key.includes('helpdesk')) return 'violet'
+  if (key.includes('hr') || key.includes('payroll') || key.includes('employee')) return 'red'
+  return 'blue'
+}
+
 function getStageGradient(stage) {
   const key = String(stage || '').toLowerCase()
-  if (key.includes('discovery')) return 'from-purple-500 to-indigo-500'
-  if (key.includes('design')) return 'from-indigo-500 to-blue-500'
-  if (key.includes('configuration')) return 'from-blue-500 to-cyan-500'
+  if (key.includes('discovery')) return 'from-violet-500 via-purple-500 to-indigo-500'
+  if (key.includes('design')) return 'from-indigo-500 via-blue-500 to-cyan-500'
+  if (key.includes('configuration')) return 'from-blue-500 to-teal-500'
   if (key.includes('data migration')) return 'from-amber-500 to-orange-500'
   if (key.includes('uat')) return 'from-orange-500 to-amber-600'
   if (key.includes('go-live')) return 'from-emerald-500 to-teal-500'
   if (key.includes('hypercare')) return 'from-teal-500 to-emerald-500'
-  return 'from-slate-400 to-slate-500'
+  return 'from-blue-500 to-indigo-500'
 }
 
 function getStageTheme(stage) {
   const key = String(stage || '').toLowerCase()
-  if (key.includes('discovery') || key.includes('design')) return 'purple'
+  if (key.includes('discovery') || key.includes('design')) return 'violet'
   if (key.includes('configuration')) return 'blue'
   if (key.includes('data') || key.includes('uat')) return 'amber'
   if (key.includes('go-live') || key.includes('hypercare')) return 'green'
   return 'gray'
+}
+
+function getStageIcon(stage) {
+  const key = String(stage || '').toLowerCase()
+  if (key.includes('design')) return 'layout'
+  if (key.includes('discovery')) return 'compass'
+  if (key.includes('configuration')) return 'sliders'
+  if (key.includes('data')) return 'database'
+  if (key.includes('uat')) return 'check-circle'
+  if (key.includes('go-live')) return 'rocket'
+  return 'folder-kanban'
+}
+
+function getStageIconBg(stage) {
+  const key = String(stage || '').toLowerCase()
+  if (key.includes('discovery') || key.includes('design')) return 'bg-surface-violet-2 border-outline-violet-2'
+  if (key.includes('configuration')) return 'bg-surface-blue-2 border-outline-blue-2'
+  if (key.includes('data') || key.includes('uat')) return 'bg-surface-amber-2 border-outline-amber-2'
+  if (key.includes('go-live') || key.includes('hypercare')) return 'bg-surface-green-2 border-outline-green-2'
+  return 'bg-surface-blue-2 border-outline-blue-2'
+}
+
+function getStageIconColor(stage) {
+  const key = String(stage || '').toLowerCase()
+  if (key.includes('discovery') || key.includes('design')) return 'text-ink-violet-7'
+  if (key.includes('configuration')) return 'text-ink-blue-7'
+  if (key.includes('data') || key.includes('uat')) return 'text-ink-amber-7'
+  if (key.includes('go-live') || key.includes('hypercare')) return 'text-ink-green-7'
+  return 'text-ink-blue-7'
 }
 
 function formatDate(dateStr) {
