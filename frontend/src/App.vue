@@ -1,8 +1,9 @@
 <template>
   <FrappeUIProvider>
     <div class="h-screen w-screen flex bg-surface-white text-ink-gray-9 overflow-hidden antialiased select-none">
-      <!-- Helpdesk-styled Sidebar -->
+      <!-- Sidebar -->
       <Sidebar
+        v-model:collapsed="isSidebarCollapsed"
         :unread-count="unreadCount"
         :is-search-open="showCommandPalette"
         :is-notifications-open="showNotifications"
@@ -16,7 +17,7 @@
       <!-- Notifications Slide-Over Panel -->
       <NotificationPanel
         :is-open="showNotifications"
-        :sidebar-width="220"
+        :sidebar-width="isSidebarCollapsed ? 48 : 240"
         @close="showNotifications = false"
         @count-changed="(count) => unreadCount = count"
       />
@@ -77,6 +78,7 @@ import { getPortfolioDashboard, getNotifications } from './api'
 
 const router = useRouter()
 
+const isSidebarCollapsed = ref(false)
 const showNewProjectModal = ref(false)
 const showNewTaskModal = ref(false)
 const showCommandPalette = ref(false)

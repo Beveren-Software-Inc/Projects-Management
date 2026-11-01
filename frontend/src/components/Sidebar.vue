@@ -1,9 +1,12 @@
 <template>
-  <Sidebar v-model:collapsed="collapsed" class="select-none border-r border-outline-gray-2 bg-[#f8f9fa] helpdesk-sidebar">
-    <!-- 1. Header: Beveren Software + Abid Khan with Beveren Logo -->
+  <Sidebar
+    v-model:collapsed="isCollapsed"
+    class="select-none border-r border-outline-gray-2 bg-surface-white"
+  >
+    <!-- 1. Header: Beveren Software + User/Subtitle with Beveren Logo -->
     <SidebarHeader
-      title="Beveren Software"
-      subtitle="Abid Khan"
+      :title="brandSettings.brandName || 'Beveren Software'"
+      :subtitle="brandSettings.brandSubtitle || 'Projects'"
       :menu-items="workspaceMenu"
     >
       <template #prefix>
@@ -12,7 +15,7 @@
     </SidebarHeader>
 
     <!-- 2. Scrollable Navigation List -->
-    <div class="flex-1 overflow-y-auto space-y-0.5 px-0.5">
+    <div class="flex-1 overflow-y-auto px-1 space-y-0.5">
       <!-- Search & Notifications Quick items -->
       <SidebarItem
         label="Search"
@@ -21,7 +24,7 @@
         @click="$emit('open-search')"
       >
         <template #suffix>
-          <kbd v-if="!collapsed" class="px-1.5 py-0.2 text-[10px] rounded bg-surface-gray-2 text-ink-gray-5 font-mono">^ K</kbd>
+          <kbd v-if="!isCollapsed" class="px-1.5 py-0.5 text-[10px] rounded bg-surface-gray-2 text-ink-gray-5 font-mono">⌘K</kbd>
         </template>
       </SidebarItem>
 
@@ -32,11 +35,17 @@
         @click="$emit('open-notifications')"
       >
         <template #suffix>
-          <Badge v-if="!collapsed && unreadCount > 0" theme="blue" variant="subtle" size="sm" :label="unreadCount" />
+          <Badge
+            v-if="!isCollapsed && unreadCount > 0"
+            theme="blue"
+            variant="subtle"
+            size="sm"
+            :label="unreadCount"
+          />
         </template>
       </SidebarItem>
 
-      <!-- Main Menu Items matching Frappe Helpdesk -->
+      <!-- Main Navigation Items -->
       <SidebarItem
         label="Home"
         icon="lucide-home"
@@ -57,7 +66,7 @@
       />
       <SidebarItem
         label="Tasks"
-        icon="lucide-ticket"
+        icon="lucide-check-square"
         route="/tasks"
         :active="isMainTasksActive()"
       />
@@ -68,7 +77,7 @@
         :active="route.path.startsWith('/modules')"
       />
 
-      <!-- Public Views (Collapsible Section matching Helpdesk) -->
+      <!-- Public Views (Collapsible Section) -->
       <SidebarSection label="Public Views" collapsible>
         <SidebarItem
           label="My Assigned Tasks"
@@ -103,19 +112,17 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import {
   Sidebar,
   SidebarHeader,
   SidebarItem,
-  SidebarLabel,
   SidebarSection,
   SidebarCollapseToggle,
   Badge,
 } from 'frappe-ui'
 import BrandLogo from './BrandLogo.vue'
-import Icon from './Icon.vue'
 
 defineProps({
   unreadCount: {
@@ -132,6 +139,8 @@ defineProps({
   },
 })
 
+const isCollapsed = defineModel('collapsed', { default: false })
+
 const emit = defineEmits([
   'open-search',
   'open-notifications',
@@ -141,7 +150,29 @@ const emit = defineEmits([
 ])
 
 const route = useRoute()
-const collapsed = ref(false)
+
+const brandSettings = ref({
+  brandName: 'Beveren Software',
+  brandSubtitle: 'Abid Khan',
+})
+
+onMounted(() => {
+  loadBrandSettings()
+  window.addEventListener('storage', loadBrandSettings)
+})
+
+function loadBrandSettings() {
+  try {
+    const raw = localStorage.getItem('projects_app_settings')
+    if (raw) {
+      const parsed = JSON.parse(raw)
+      brandSettings.value.brandName = parsed.brandName || 'Beveren Software'
+      brandSettings.value.brandSubtitle = parsed.brandSubtitle || 'Abid Khan'
+    } else if (window.frappe?.session?.user_fullname) {
+      brandSettings.value.brandSubtitle = window.frappe.session.user_fullname
+    }
+  } catch (e) {}
+}
 
 const workspaceMenu = [
   { label: 'App Settings', icon: 'lucide-settings', onClick: () => emit('open-settings') },
@@ -154,9 +185,5 @@ function isMainTasksActive() {
   if (route.path !== '/tasks') return false
   if (route.query.filter || route.query.assigned) return false
   return true
-}
-
-function openHelp() {
-  window.open('https://docs.frappe.io/erpnext', '_blank')
 }
 </script>
