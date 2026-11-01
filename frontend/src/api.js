@@ -99,6 +99,50 @@ export async function addModuleToProject(projectName, moduleCode) {
   return request('POST', 'projects.api.project.add_module_to_project', { project_name: projectName, module_code: moduleCode })
 }
 
+export async function getProjectEmailTemplate(projectName, templateType = 'weekly_update', customParams = {}) {
+  return request('POST', 'projects.api.project.get_project_email_template', {
+    project_name: projectName,
+    template_type: templateType,
+    custom_params: customParams,
+  })
+}
+
+export async function sendProjectEmail(projectName, data) {
+  return request('POST', 'projects.api.project.send_project_email', {
+    project_name: projectName,
+    data,
+  })
+}
+
+export async function attachProjectGovernanceDoc(projectName, data) {
+  return request('POST', 'projects.api.project.attach_project_governance_doc', {
+    project_name: projectName,
+    data,
+  })
+}
+
+export async function deleteProjectGovernanceDoc(projectName, docId) {
+  return request('POST', 'projects.api.project.delete_project_governance_doc', {
+    project_name: projectName,
+    doc_id: docId,
+  })
+}
+
+export async function updateProjectGovernance(projectName, data) {
+  return request('POST', 'projects.api.project.update_project_governance', {
+    project_name: projectName,
+    data,
+  })
+}
+
+export async function recordGovernanceItem(projectName, itemType, itemData) {
+  return request('POST', 'projects.api.project.record_governance_item', {
+    project_name: projectName,
+    item_type: itemType,
+    item_data: itemData,
+  })
+}
+
 // ---------------------------------------------------------------------------
 // Tasks
 // ---------------------------------------------------------------------------
@@ -128,6 +172,27 @@ export async function bulkUpdateTasks(taskIds, data) {
 
 export async function bulkDeleteTasks(taskIds) {
   return request('POST', 'projects.api.task.bulk_delete_tasks', { task_ids: taskIds })
+}
+
+export async function uploadFile(doctype, docname, file) {
+  const body = new FormData()
+  body.append('file', file)
+  body.append('doctype', doctype)
+  body.append('docname', docname)
+  body.append('is_private', '1')
+  const response = await fetch('/api/method/upload_file', {
+    method: 'POST',
+    headers: {
+      Accept: 'application/json',
+      'X-Frappe-CSRF-Token': getCsrfToken(),
+    },
+    body,
+  })
+  const json = await response.json()
+  if (!response.ok || json.exc) {
+    throw new Error('Could not upload the file')
+  }
+  return json.message !== undefined ? json.message : json
 }
 
 export async function addTaskComment(taskId, content) {
