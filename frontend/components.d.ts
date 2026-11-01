@@ -13,6 +13,7 @@ declare module 'vue' {
   export interface GlobalComponents {
     ActivityIcon: typeof import('./src/components/icons/ActivityIcon.vue')['default']
     AppSettingsModal: typeof import('./src/components/AppSettingsModal.vue')['default']
+    AttachProjectDocModal: typeof import('./src/components/AttachProjectDocModal.vue')['default']
     BrandLogo: typeof import('./src/components/BrandLogo.vue')['default']
     BulkEditModal: typeof import('./src/components/BulkEditModal.vue')['default']
     CommandPalette: typeof import('./src/components/CommandPalette.vue')['default']
@@ -27,6 +28,7 @@ declare module 'vue' {
     NewProjectModal: typeof import('./src/components/NewProjectModal.vue')['default']
     NewTaskModal: typeof import('./src/components/NewTaskModal.vue')['default']
     NotificationPanel: typeof import('./src/components/NotificationPanel.vue')['default']
+    ProjectEmailModal: typeof import('./src/components/ProjectEmailModal.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     Sidebar: typeof import('./src/components/Sidebar.vue')['default']

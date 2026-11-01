@@ -62,6 +62,14 @@
             >{{ person.initials }}</span>
             <span v-if="teamPeople.length > 4" class="team-more">+{{ teamPeople.length - 4 }}</span>
           </div>
+          <button type="button" class="share-button" @click="showAttachDocModal = true">
+            <Icon name="paperclip" :size="14" />
+            Attach Doc
+          </button>
+          <button type="button" class="share-button text-blue-600 border-blue-200 hover:bg-blue-50" @click="showEmailModal = true">
+            <Icon name="mail" :size="14" />
+            Send to Customer
+          </button>
           <button type="button" class="share-button" @click="copyLink">
             <Icon name="share" :size="14" />
             {{ copied ? 'Copied' : 'Share' }}
@@ -83,7 +91,14 @@
             <span :style="{ width: (project.stats?.percent_complete || 0) + '%' }" />
           </div>
           <div class="health-progress-foot">
-            <span>{{ project.stats?.completed_tasks || 0 }} of {{ project.stats?.total_tasks || 0 }} tasks complete</span>
+            <span v-if="project.stats?.progress_basis === 'hours'">
+              <strong>{{ project.stats?.completed_estimated_hours || 0 }}h</strong> of {{ project.stats?.total_estimated_hours || 0 }}h estimated
+              <span class="ms-1 px-1.5 py-0.5 text-[10px] bg-blue-100/80 text-blue-700 rounded-sm font-medium">Hours-based</span>
+            </span>
+            <span v-else>
+              <strong>{{ project.stats?.completed_tasks || 0 }}</strong> of {{ project.stats?.total_tasks || 0 }} tasks complete
+              <span class="ms-1 px-1.5 py-0.5 text-[10px] bg-slate-100 text-slate-700 rounded-sm font-medium">Task-based</span>
+            </span>
             <span v-if="!project.stats?.overdue_tasks" class="on-track-label">
               <Icon name="check-circle" :size="12" /> On track
             </span>
@@ -317,54 +332,169 @@
         <div class="secondary-view-heading">
           <div>
             <span class="panel-kicker">PROJECT LIBRARY</span>
-            <h2>Project files</h2>
-            <p>Files attached to this implementation and its tasks.</p>
+            <h2>Project files & Governed Documents</h2>
+            <p>Scope documents, discussion notes, governed Google Drive links, and task attachments.</p>
+          </div>
+          <button type="button" class="primary-action text-xs" @click="showAttachDocModal = true">
+            <Icon name="plus" :size="14" />
+            Attach Scope / MoM
+          </button>
+        </div>
+
+        <!-- Governed Documents Section -->
+        <div class="space-y-3 mb-6">
+          <h3 class="text-xs font-semibold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+            <Icon name="shield" :size="14" class="text-emerald-600" />
+            Governed Scope Documents & Discussion Notes
+          </h3>
+          <div v-if="project.governance?.documents?.length" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div
+              v-for="gDoc in project.governance.documents"
+              :key="gDoc.id"
+              class="p-3.5 bg-white rounded-xl border border-slate-200 shadow-2xs hover:border-slate-300 transition flex flex-col justify-between space-y-2"
+            >
+              <div class="flex items-start justify-between gap-2">
+                <div class="space-y-1">
+                  <div class="flex items-center gap-1.5 flex-wrap">
+                    <span class="px-2 py-0.5 text-[10px] font-semibold rounded-md bg-blue-50 text-blue-700 border border-blue-200/60">
+                      {{ gDoc.category }}
+                    </span>
+                    <span v-if="gDoc.drive_version" class="px-1.5 py-0.2 text-[10px] font-medium bg-slate-100 text-slate-600 rounded">
+                      {{ gDoc.drive_version }}
+                    </span>
+                    <span v-if="gDoc.access_level" class="px-1.5 py-0.2 text-[10px] font-medium bg-emerald-50 text-emerald-700 rounded">
+                      {{ gDoc.access_level }}
+                    </span>
+                  </div>
+                  <h4 class="text-xs font-semibold text-slate-800 leading-snug">{{ gDoc.title }}</h4>
+                </div>
+                <button
+                  type="button"
+                  class="text-slate-400 hover:text-red-600 p-1 rounded transition"
+                  title="Delete document"
+                  @click="removeDoc(gDoc.id)"
+                >
+                  <Icon name="trash-2" :size="13" />
+                </button>
+              </div>
+
+              <p v-if="gDoc.notes" class="text-[11px] text-slate-500 line-clamp-2">{{ gDoc.notes }}</p>
+
+              <div class="flex items-center justify-between pt-2 border-t border-slate-100 text-[11px] text-slate-400">
+                <span>Owner: {{ gDoc.drive_owner || gDoc.uploaded_by_name || 'Team' }}</span>
+                <a
+                  :href="gDoc.file_url || gDoc.drive_link || gDoc.url"
+                  target="_blank"
+                  class="font-medium text-blue-600 hover:text-blue-800 flex items-center gap-1"
+                >
+                  <span>{{ gDoc.drive_link || gDoc.url ? 'Open Drive Link' : 'View File' }}</span>
+                  <Icon name="external-link" :size="12" />
+                </a>
+              </div>
+            </div>
+          </div>
+          <div v-else class="p-4 bg-slate-50/70 border border-dashed border-slate-200 rounded-xl text-center text-xs text-slate-400">
+            No scope documents or meeting notes attached yet. Click "Attach Scope / MoM" above to add official documents.
           </div>
         </div>
-        <div v-if="project.files?.length" class="file-grid">
-          <a v-for="file in project.files" :key="file.name" class="project-file-card" :href="file.file_url" target="_blank">
-            <div class="file-preview" :class="filePreviewClass(file.file_name)">
-              <Icon :name="isSheet(file.file_name) ? 'file-text' : 'file-text'" :size="22" />
-              <span>{{ fileKind(file.file_name) }}</span>
-            </div>
-            <div class="project-file-copy">
-              <strong>{{ file.file_name }}</strong>
-              <span>{{ file.task_subject || formatBytes(file.file_size) }}</span>
-            </div>
-            <div class="project-file-footer"><span>{{ formatDate(file.creation) }}</span></div>
-          </a>
-        </div>
-        <div v-else class="detail-empty">
-          <h2>No files yet</h2>
-          <p>Attach a file on a task or a comment and it will be listed here.</p>
+
+        <!-- Standard Attachments Section -->
+        <div class="space-y-3">
+          <h3 class="text-xs font-semibold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+            <Icon name="paperclip" :size="14" class="text-slate-500" />
+            Task & Implementation Attachments
+          </h3>
+          <div v-if="project.files?.length" class="file-grid">
+            <a v-for="file in project.files" :key="file.name" class="project-file-card" :href="file.file_url" target="_blank">
+              <div class="file-preview" :class="filePreviewClass(file.file_name)">
+                <Icon :name="isSheet(file.file_name) ? 'file-text' : 'file-text'" :size="22" />
+                <span>{{ fileKind(file.file_name) }}</span>
+              </div>
+              <div class="project-file-copy">
+                <strong>{{ file.file_name }}</strong>
+                <span>{{ file.task_subject || formatBytes(file.file_size) }}</span>
+              </div>
+              <div class="project-file-footer"><span>{{ formatDate(file.creation) }}</span></div>
+            </a>
+          </div>
+          <div v-else class="detail-empty">
+            <h2>No task files yet</h2>
+            <p>Files attached on individual tasks will show up here.</p>
+          </div>
         </div>
       </section>
 
       <section v-else class="surface-panel secondary-view activity-view">
         <div class="secondary-view-heading">
           <div>
-            <span class="panel-kicker">TEAM UPDATES</span>
-            <h2>Project activity</h2>
-            <p>Comments and messages across this implementation.</p>
+            <span class="panel-kicker">COMMUNICATIONS & AUDIT</span>
+            <h2>Project activity & Customer Emails</h2>
+            <p>Unified record of customer updates, surveys, meeting notes, and team collaboration.</p>
           </div>
+          <button type="button" class="primary-action text-xs" @click="showEmailModal = true">
+            <Icon name="mail" :size="14" />
+            Send Update
+          </button>
         </div>
-        <div v-if="project.recent_activities?.length" class="activity-feed-list">
-          <article v-for="event in project.recent_activities" :key="event.name" class="feed-event">
-            <span class="avatar" :class="avatarTone(event.sender_name || event.sender)">{{ initials(event.sender_name || event.sender) }}</span>
-            <div class="feed-event-copy">
-              <p>
+        <div v-if="activityList.length" class="activity-feed-list">
+          <article v-for="event in activityList" :key="event.name || event.id" class="feed-event">
+            <span class="avatar" :class="avatarTone(event.sender_name || event.sender)">
+              {{ initials(event.sender_name || event.sender) }}
+            </span>
+            <div class="feed-event-copy flex-1 min-w-0">
+              <div class="flex items-center gap-2 flex-wrap">
                 <strong>{{ event.sender_name || event.sender || 'Someone' }}</strong>
-                {{ event.activity_type === 'Communication' ? 'sent a message on' : 'commented on' }}
-                <b>{{ taskSubject(event.task_name) }}</b>
-              </p>
-              <span>{{ plainText(event.content) }}</span>
+                <span
+                  v-if="event.badge"
+                  class="px-2 py-0.5 text-[10px] font-semibold rounded-md"
+                  :class="eventBadgeClass(event.badge_tone)"
+                >
+                  {{ event.badge }}
+                </span>
+                <span class="text-xs text-slate-400 ms-auto">
+                  {{ formatDateTime(event.creation || event.sent_at) }}
+                </span>
+              </div>
+
+              <!-- Communication Details -->
+              <div v-if="event.activity_type === 'Communication'" class="mt-1 space-y-1">
+                <p class="text-xs font-semibold text-slate-800">
+                  Subject: {{ event.subject || 'Customer Update' }}
+                </p>
+                <div class="text-[11px] text-slate-500 flex items-center gap-2 flex-wrap">
+                  <span>To: {{ event.recipients }}</span>
+                  <span v-if="event.cc">| CC: {{ event.cc }}</span>
+                </div>
+                <p class="text-xs text-slate-600 line-clamp-2 pt-0.5">
+                  {{ plainText(event.content) }}
+                </p>
+                <button
+                  type="button"
+                  class="text-xs font-medium text-blue-600 hover:text-blue-800 pt-1 flex items-center gap-1"
+                  @click="viewEmail(event)"
+                >
+                  <Icon name="eye" :size="12" /> View Full Message
+                </button>
+              </div>
+
+              <!-- Comment Details -->
+              <div v-else class="mt-1">
+                <p class="text-xs text-slate-700">
+                  {{ plainText(event.content) }}
+                </p>
+                <span v-if="event.task_name" class="text-[11px] text-slate-400">
+                  on task <b>{{ taskSubject(event.task_name) }}</b>
+                </span>
+              </div>
             </div>
-            <span class="feed-event-icon"><Icon name="message-square" :size="14" /></span>
+            <span class="feed-event-icon">
+              <Icon :name="event.activity_type === 'Communication' ? 'mail' : 'message-square'" :size="14" />
+            </span>
           </article>
         </div>
         <div v-else class="detail-empty">
           <h2>No activity yet</h2>
-          <p>Comments on tasks will show up here.</p>
+          <p>Weekly updates, customer feedback, and task comments will be recorded here.</p>
         </div>
       </section>
 
@@ -395,6 +525,55 @@
         </div>
       </div>
     </div>
+
+    <!-- Project Customer Email Modal -->
+    <ProjectEmailModal
+      v-if="showEmailModal"
+      :project="project"
+      :project-name="projectName"
+      @close="showEmailModal = false"
+      @sent="loadProject"
+    />
+
+    <!-- Attach Scope / MoM / Governed Doc Modal -->
+    <AttachProjectDocModal
+      v-if="showAttachDocModal"
+      :project-name="project.name || projectName"
+      @close="showAttachDocModal = false"
+      @attached="loadProject"
+    />
+
+    <!-- View Sent Communication Details Dialog -->
+    <div v-if="selectedEmailView" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs">
+      <div class="relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[85vh]">
+        <header class="flex items-center justify-between px-5 py-3.5 border-b border-slate-100 bg-slate-50">
+          <div>
+            <h3 class="text-sm font-semibold text-slate-900">{{ selectedEmailView.subject || 'Customer Communication' }}</h3>
+            <p class="text-xs text-slate-500">
+              Sent by {{ selectedEmailView.sender_name || selectedEmailView.sender }} · {{ formatDateTime(selectedEmailView.creation || selectedEmailView.sent_at) }}
+            </p>
+          </div>
+          <button
+            type="button"
+            class="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition"
+            @click="selectedEmailView = null"
+          >
+            <Icon name="x" :size="16" />
+          </button>
+        </header>
+        <div class="p-4 bg-slate-50/70 border-b border-slate-100 text-xs space-y-1">
+          <div><span class="font-medium text-slate-500">Recipients:</span> <span class="text-slate-800 font-mono">{{ selectedEmailView.recipients }}</span></div>
+          <div v-if="selectedEmailView.cc"><span class="font-medium text-slate-500">CC:</span> <span class="text-slate-800 font-mono">{{ selectedEmailView.cc }}</span></div>
+        </div>
+        <div class="flex-1 overflow-y-auto p-5 text-xs email-content-view">
+          <div v-html="selectedEmailView.content" />
+        </div>
+        <footer class="flex justify-end p-3 border-t border-slate-100 bg-slate-50">
+          <button type="button" class="share-button text-xs" @click="selectedEmailView = null">Close</button>
+        </footer>
+      </div>
+    </div>
+
   </div>
 </template>
 
@@ -403,9 +582,12 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import Icon from '../components/Icon.vue'
 import TaskTicketDetail from '../components/TaskTicketDetail.vue'
+import ProjectEmailModal from '../components/ProjectEmailModal.vue'
+import AttachProjectDocModal from '../components/AttachProjectDocModal.vue'
 import {
   addModuleToProject,
   createTask,
+  deleteProjectGovernanceDoc,
   getImplementationModules,
   getProject,
   updateProject,
@@ -797,6 +979,40 @@ function formatBytes(size) {
   if (value < 1024) return `${value} B`
   if (value < 1024 * 1024) return `${Math.round(value / 1024)} KB`
   return `${(value / (1024 * 1024)).toFixed(1)} MB`
+}
+
+const showEmailModal = ref(false)
+const showAttachDocModal = ref(false)
+const selectedEmailView = ref(null)
+
+const activityList = computed(() => {
+  return project.value.activity || project.value.recent_activities || []
+})
+
+function eventBadgeClass(tone) {
+  const map = {
+    blue: 'bg-blue-50 text-blue-700 border border-blue-200/70',
+    amber: 'bg-amber-50 text-amber-700 border border-amber-200/70',
+    teal: 'bg-teal-50 text-teal-700 border border-teal-200/70',
+    purple: 'bg-purple-50 text-purple-700 border border-purple-200/70',
+    coral: 'bg-rose-50 text-rose-700 border border-rose-200/70',
+    slate: 'bg-slate-100 text-slate-700 border border-slate-200',
+  }
+  return map[tone] || 'bg-slate-100 text-slate-700'
+}
+
+function viewEmail(event) {
+  selectedEmailView.value = event
+}
+
+async function removeDoc(docId) {
+  if (!confirm('Are you sure you want to remove this governance document?')) return
+  try {
+    await deleteProjectGovernanceDoc(project.value.name, docId)
+    await loadProject()
+  } catch (e) {
+    alert('Failed to remove document: ' + (e.message || e))
+  }
 }
 
 defineExpose({ loadProject })
