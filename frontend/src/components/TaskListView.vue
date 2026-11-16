@@ -229,7 +229,7 @@
             <th class="py-3 px-3 min-w-[280px]">Subject</th>
             <th class="py-3 px-3 w-32">Status</th>
             <th class="py-3 px-3 w-28">Priority</th>
-            <th class="py-3 px-3 w-40">Assigned To</th>
+            <th class="py-3 px-3 w-52">Assigned To</th>
             <th class="py-3 px-3 w-48">Project</th>
             <!-- Ample width for Due Date so it never wraps onto multiple lines -->
             <th class="py-3 px-3 w-40 min-w-[140px] whitespace-nowrap">Due Date</th>
@@ -309,35 +309,42 @@
             </td>
 
             <!-- 5. Assigned To Column (Helpdesk Avatar + Full Name) - click a user to filter by them -->
-            <td class="py-3 px-3 w-40" @click.stop>
-              <div v-if="task.assignees?.length > 0" class="flex items-center gap-1 min-w-0">
-                <div
-                  class="flex items-center gap-2 min-w-0 px-1.5 py-1 -ms-1.5 rounded-lg hover:bg-surface-gray-2 transition"
-                  :class="{ 'bg-surface-gray-2': selectedAssignee === task.assignees[0].email }"
-                  :title="`Filter by assignee: ${task.assignees[0].full_name || task.assignees[0].email}`"
-                  @click="applyCellFilter('assignee', task.assignees[0].email)"
-                >
-                  <Avatar
-                    size="sm"
-                    :image="task.assignees[0].user_image"
-                    :label="task.assignees[0].full_name || task.assignees[0].email"
-                  />
-                  <span class="text-base text-ink-gray-8 truncate max-w-[110px]">
-                    {{ task.assignees[0].full_name || task.assignees[0].email }}
-                  </span>
-                </div>
-                <!-- Additional assignees: each avatar filters by that user -->
-                <div
-                  v-for="a in task.assignees.slice(1)"
-                  :key="a.email"
-                  class="shrink-0 rounded-full p-0.5 hover:bg-surface-gray-3 transition"
-                  :class="{ 'ring-1 ring-outline-gray-4': selectedAssignee === a.email }"
-                  :title="`Filter by assignee: ${a.full_name || a.email}`"
-                  @click="applyCellFilter('assignee', a.email)"
-                >
-                  <Avatar size="xs" :image="a.user_image" :label="a.full_name || a.email" />
-                </div>
+            <td class="py-3 px-3 w-52 max-w-[208px]" @click.stop>
+              <!-- Single assignee: avatar + name (click to filter) -->
+              <div
+                v-if="task.assignees?.length === 1"
+                class="inline-flex items-center gap-2 min-w-0 max-w-full px-1.5 py-1 -ms-1.5 rounded-lg hover:bg-surface-gray-2 transition cursor-pointer"
+                :class="{ 'bg-surface-gray-2': selectedAssignee === task.assignees[0].email }"
+                :title="`Filter by assignee: ${userLabel(task.assignees[0])}`"
+                @click="applyCellFilter('assignee', task.assignees[0].email)"
+              >
+                <Avatar size="sm" :image="task.assignees[0].user_image" :label="userLabel(task.assignees[0])" />
+                <span class="text-base text-ink-gray-8 truncate">{{ userLabel(task.assignees[0]) }}</span>
               </div>
+
+              <!-- Multiple assignees: Helpdesk-style avatar stack + "Name +N"; click to choose whom to filter by -->
+              <Dropdown v-else-if="task.assignees?.length > 1" :options="assigneeMenu(task)" align="start">
+                <template #default>
+                  <div
+                    class="inline-flex items-center gap-2 min-w-0 max-w-full px-1.5 py-1 -ms-1.5 rounded-lg hover:bg-surface-gray-2 transition cursor-pointer"
+                    :class="{ 'bg-surface-gray-2': isFilteredAssignee(task) }"
+                    :title="orderedAssignees(task).map(userLabel).join(', ')"
+                  >
+                    <div class="flex -space-x-1.5 shrink-0">
+                      <Avatar
+                        v-for="a in orderedAssignees(task).slice(0, 3)"
+                        :key="a.email"
+                        size="sm"
+                        class="rounded-full ring-2 ring-white"
+                        :image="a.user_image"
+                        :label="userLabel(a)"
+                      />
+                    </div>
+                    <span class="text-base text-ink-gray-8 truncate">{{ userLabel(orderedAssignees(task)[0]) }}</span>
+                    <span class="text-sm text-ink-gray-5 shrink-0">+{{ task.assignees.length - 1 }}</span>
+                  </div>
+                </template>
+              </Dropdown>
               <span
                 v-else
                 class="text-base text-ink-gray-4 italic px-1.5 py-1 -ms-1.5 rounded-lg hover:bg-surface-gray-2 transition"
@@ -522,6 +529,34 @@ const assigneeFilterOptions = computed(() => {
     ...sorted.map(([email, name]) => ({ label: name, value: email })),
   ]
 })
+
+function userLabel(a) {
+  return a?.full_name || a?.email || ''
+}
+
+// Filtered user first, so the row shows who matched the filter
+function orderedAssignees(task) {
+  const list = [...(task.assignees || [])]
+  const idx = list.findIndex((a) => a.email === selectedAssignee.value)
+  if (idx > 0) list.unshift(list.splice(idx, 1)[0])
+  return list
+}
+
+function isFilteredAssignee(task) {
+  return (task.assignees || []).some((a) => a.email === selectedAssignee.value)
+}
+
+function assigneeMenu(task) {
+  return [
+    {
+      group: 'Filter by assignee',
+      options: orderedAssignees(task).map((a) => ({
+        label: selectedAssignee.value === a.email ? `${userLabel(a)}  ✓` : userLabel(a),
+        onClick: () => applyCellFilter('assignee', a.email),
+      })),
+    },
+  ]
+}
 
 // Helpdesk-style "click a cell value to filter by it"
 function applyCellFilter(field, value) {
