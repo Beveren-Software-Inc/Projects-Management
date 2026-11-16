@@ -24,7 +24,7 @@
             autocomplete="off"
           />
           <div class="flex items-center gap-1.5 shrink-0">
-            <kbd class="px-2 py-0.5 text-[10px] rounded-md bg-surface-gray-2 text-ink-gray-5 font-mono border border-outline-gray-2 shadow-2xs">
+            <kbd class="px-2 py-0.5 text-xs rounded-md bg-surface-gray-2 text-ink-gray-5 font-mono border border-outline-gray-2 shadow-2xs">
               ESC
             </kbd>
           </div>
@@ -34,13 +34,13 @@
       <!-- Search Results / Commands Body -->
       <div class="max-h-[380px] overflow-y-auto p-2 space-y-4 !bg-white">
         <!-- 1. Searching Spinner -->
-        <div v-if="searching" class="py-8 text-center text-xs text-ink-gray-4 flex items-center justify-center gap-2">
+        <div v-if="searching" class="py-8 text-center text-sm text-ink-gray-4 flex items-center justify-center gap-2">
           <Icon name="refresh" size="14" class="animate-spin text-ink-gray-6" />
           <span>Searching...</span>
         </div>
 
         <!-- 2. No Results State -->
-        <div v-else-if="query && flattenedItems.length === 0" class="py-12 text-center text-xs text-ink-gray-4">
+        <div v-else-if="query && flattenedItems.length === 0" class="py-12 text-center text-sm text-ink-gray-4">
           No matches found for "<span class="font-medium text-ink-gray-7">{{ query }}</span>"
         </div>
 
@@ -48,7 +48,7 @@
         <template v-else>
           <!-- Tasks Category -->
           <div v-if="results.tasks?.length > 0">
-            <div class="px-3 py-1 text-[11px] font-semibold text-ink-gray-4 uppercase tracking-wider">
+            <div class="px-3 py-1 text-xs font-semibold text-ink-gray-4 uppercase tracking-wider">
               Tasks
             </div>
             <div class="space-y-0.5 mt-1">
@@ -57,14 +57,14 @@
                 :key="item.name"
                 @click="handleSelect(item)"
                 @mouseenter="setActive(item)"
-                class="px-3 py-2 rounded-xl text-xs flex items-center justify-between cursor-pointer transition"
+                class="px-3 py-2 rounded-xl text-sm flex items-center justify-between cursor-pointer transition"
                 :class="activeItem?.id === item.id ? 'bg-surface-gray-2 text-ink-gray-9 font-medium' : 'text-ink-gray-7 hover:bg-surface-gray-1'"
               >
                 <div class="flex items-center gap-2.5 min-w-0">
                   <div class="w-6 h-6 rounded-lg bg-surface-gray-2 flex items-center justify-center shrink-0">
                     <Icon name="ticket" size="13" class="text-ink-gray-6" />
                   </div>
-                  <span class="font-mono text-[11px] text-ink-gray-4 shrink-0">#{{ item.name.split('-').pop() }}</span>
+                  <span class="font-mono text-xs text-ink-gray-4 shrink-0">#{{ item.name.split('-').pop() }}</span>
                   <span class="truncate">{{ item.subject }}</span>
                 </div>
                 <div class="flex items-center gap-2 shrink-0">
@@ -76,7 +76,7 @@
 
           <!-- Projects Category -->
           <div v-if="results.projects?.length > 0">
-            <div class="px-3 py-1 text-[11px] font-semibold text-ink-gray-4 uppercase tracking-wider">
+            <div class="px-3 py-1 text-xs font-semibold text-ink-gray-4 uppercase tracking-wider">
               Projects
             </div>
             <div class="space-y-0.5 mt-1">
@@ -85,7 +85,7 @@
                 :key="item.name"
                 @click="handleSelect(item)"
                 @mouseenter="setActive(item)"
-                class="px-3 py-2 rounded-xl text-xs flex items-center justify-between cursor-pointer transition"
+                class="px-3 py-2 rounded-xl text-sm flex items-center justify-between cursor-pointer transition"
                 :class="activeItem?.id === item.id ? 'bg-surface-gray-2 text-ink-gray-9 font-medium' : 'text-ink-gray-7 hover:bg-surface-gray-1'"
               >
                 <div class="flex items-center gap-2.5 min-w-0">
@@ -94,7 +94,7 @@
                   </div>
                   <span class="truncate">{{ item.project_name }}</span>
                 </div>
-                <div class="flex items-center gap-2 shrink-0 text-[11px] text-ink-gray-5">
+                <div class="flex items-center gap-2 shrink-0 text-xs text-ink-gray-5">
                   <span>{{ item.percent_complete || 0 }}% done</span>
                 </div>
               </div>
@@ -103,7 +103,7 @@
 
           <!-- Quick Navigation / Actions -->
           <div v-if="filteredActions.length > 0">
-            <div class="px-3 py-1 text-[11px] font-semibold text-ink-gray-4 uppercase tracking-wider">
+            <div class="px-3 py-1 text-xs font-semibold text-ink-gray-4 uppercase tracking-wider">
               Actions & Navigation
             </div>
             <div class="space-y-0.5 mt-1">
@@ -112,7 +112,7 @@
                 :key="action.id"
                 @click="handleSelect(action)"
                 @mouseenter="setActive(action)"
-                class="px-3 py-2 rounded-xl text-xs flex items-center justify-between cursor-pointer transition"
+                class="px-3 py-2 rounded-xl text-sm flex items-center justify-between cursor-pointer transition"
                 :class="activeItem?.id === action.id ? 'bg-surface-gray-2 text-ink-gray-9 font-medium' : 'text-ink-gray-7 hover:bg-surface-gray-1'"
               >
                 <div class="flex items-center gap-2.5">
@@ -121,7 +121,7 @@
                   </div>
                   <span>{{ action.label }}</span>
                 </div>
-                <span class="text-[11px] text-ink-gray-4 font-mono">{{ action.shortcut || '↵' }}</span>
+                <span class="text-xs text-ink-gray-4 font-mono">{{ action.shortcut || '↵' }}</span>
               </div>
             </div>
           </div>
@@ -129,7 +129,7 @@
       </div>
 
       <!-- Footer Toolbar -->
-      <div class="px-4 py-2.5 bg-surface-gray-1 border-t border-outline-gray-1 flex items-center justify-between text-[11px] text-ink-gray-5 rounded-b-2xl">
+      <div class="px-4 py-2.5 bg-surface-gray-1 border-t border-outline-gray-1 flex items-center justify-between text-xs text-ink-gray-5 rounded-b-2xl">
         <div class="flex items-center gap-3">
           <span class="flex items-center gap-1">
             <kbd class="px-1.5 py-0.5 rounded-md bg-white border border-outline-gray-2 font-mono shadow-2xs">↑</kbd>

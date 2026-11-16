@@ -21,7 +21,7 @@
           <h2 class="text-sm font-semibold text-ink-gray-9">
             {{ isEditing ? 'Edit Module Details' : 'Add New Module / Custom Module' }}
           </h2>
-          <p class="text-[11px] text-ink-gray-5">
+          <p class="text-xs text-ink-gray-5">
             {{ isEditing ? 'Update module name, icon, color, and description.' : 'Create a custom ERPNext implementation module with standard task templates.' }}
           </p>
         </div>
@@ -50,7 +50,7 @@
       </div>
 
       <div class="space-y-1">
-        <label class="block text-xs font-medium text-ink-gray-7">Description</label>
+        <label class="block text-sm font-medium text-ink-gray-7">Description</label>
         <Textarea
           v-model="form.description"
           rows="2"
@@ -61,7 +61,7 @@
 
       <!-- Color Palette Selection -->
       <div>
-        <label class="block text-xs font-medium text-ink-gray-7 mb-1.5">
+        <label class="block text-sm font-medium text-ink-gray-7 mb-1.5">
           Module Theme Color
         </label>
         <div class="flex flex-wrap items-center gap-2">
@@ -78,14 +78,14 @@
             }"
             :title="c"
           >
-            <span v-if="form.color === c" class="text-white text-[10px] font-bold">✓</span>
+            <span v-if="form.color === c" class="text-white text-xs font-bold">✓</span>
           </button>
         </div>
       </div>
 
       <!-- Icon Selection -->
       <div>
-        <label class="block text-xs font-medium text-ink-gray-7 mb-1.5">
+        <label class="block text-sm font-medium text-ink-gray-7 mb-1.5">
           Module Icon
         </label>
         <div class="grid grid-cols-10 gap-1.5 p-2 bg-surface-gray-1 rounded-xl border border-outline-gray-2 max-h-36 overflow-y-auto">

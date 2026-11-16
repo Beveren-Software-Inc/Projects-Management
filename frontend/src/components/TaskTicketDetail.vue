@@ -3,7 +3,7 @@
     <!-- 1. Layout Header (Matching Frappe Helpdesk TicketHeader) -->
     <div class="h-11 px-5 border-b border-outline-gray-1 flex items-center justify-between shrink-0 bg-surface-white">
       <!-- Left Breadcrumbs -->
-      <div class="flex items-center gap-1.5 min-w-0 flex-1 text-sm">
+      <div class="flex items-center gap-1.5 min-w-0 flex-1 text-lg">
         <Button
           v-if="showBack"
           variant="ghost"
@@ -81,7 +81,7 @@
       <div class="flex gap-4">
         <button
           @click="activeTab = 'activity'"
-          class="flex items-center gap-1.5 py-2.5 text-xs font-medium border-b-2 transition cursor-pointer"
+          class="flex items-center gap-1.5 py-2.5 text-sm font-medium border-b-2 transition cursor-pointer"
           :class="activeTab === 'activity' ? 'border-ink-gray-9 text-ink-gray-9 font-semibold' : 'border-transparent text-ink-gray-5 hover:text-ink-gray-8'"
         >
           <ActivityIcon class="size-3.5" :class="activeTab === 'activity' ? 'text-ink-gray-9' : 'text-ink-gray-5'" />
@@ -90,14 +90,14 @@
 
         <button
           @click="activeTab = 'emails'"
-          class="flex items-center gap-1.5 py-2.5 text-xs font-medium border-b-2 transition cursor-pointer"
+          class="flex items-center gap-1.5 py-2.5 text-sm font-medium border-b-2 transition cursor-pointer"
           :class="activeTab === 'emails' ? 'border-ink-gray-9 text-ink-gray-9 font-semibold' : 'border-transparent text-ink-gray-5 hover:text-ink-gray-8'"
         >
           <EmailIcon class="size-3.5" :class="activeTab === 'emails' ? 'text-ink-gray-9' : 'text-ink-gray-5'" />
           <span>Emails</span>
           <span
             v-if="emailCount > 0"
-            class="text-[10px] px-1.5 py-0.5 rounded-full font-medium"
+            class="text-xs px-1.5 py-0.5 rounded-full font-medium"
             :class="activeTab === 'emails' ? 'bg-surface-gray-3 text-ink-gray-9' : 'bg-surface-gray-2 text-ink-gray-6'"
           >
             {{ emailCount }}
@@ -106,14 +106,14 @@
 
         <button
           @click="activeTab = 'comments'"
-          class="flex items-center gap-1.5 py-2.5 text-xs font-medium border-b-2 transition cursor-pointer"
+          class="flex items-center gap-1.5 py-2.5 text-sm font-medium border-b-2 transition cursor-pointer"
           :class="activeTab === 'comments' ? 'border-ink-gray-9 text-ink-gray-9 font-semibold' : 'border-transparent text-ink-gray-5 hover:text-ink-gray-8'"
         >
           <CommentIcon class="size-3.5" :class="activeTab === 'comments' ? 'text-ink-gray-9' : 'text-ink-gray-5'" />
           <span>Comments</span>
           <span
             v-if="commentCount > 0"
-            class="text-[10px] px-1.5 py-0.5 rounded-full font-medium"
+            class="text-xs px-1.5 py-0.5 rounded-full font-medium"
             :class="activeTab === 'comments' ? 'bg-surface-gray-3 text-ink-gray-9' : 'bg-surface-gray-2 text-ink-gray-6'"
           >
             {{ commentCount }}
@@ -122,7 +122,7 @@
 
         <button
           @click="activeTab = 'analytics'"
-          class="flex items-center gap-1.5 py-2.5 text-xs font-medium border-b-2 transition cursor-pointer"
+          class="flex items-center gap-1.5 py-2.5 text-sm font-medium border-b-2 transition cursor-pointer"
           :class="activeTab === 'analytics' ? 'border-ink-gray-9 text-ink-gray-9 font-semibold' : 'border-transparent text-ink-gray-5 hover:text-ink-gray-8'"
         >
           <Icon name="chart-no-axes-column" size="14" :class="activeTab === 'analytics' ? 'text-ink-gray-9' : 'text-ink-gray-5'" />
@@ -210,34 +210,34 @@
               <!-- KPI Metric Cards Grid -->
               <div class="grid grid-cols-2 md:grid-cols-4 gap-3.5">
                 <div class="bg-surface-white rounded-2xl border border-outline-gray-1 p-4 shadow-2xs">
-                  <div class="text-[11px] font-medium text-ink-gray-5">Target Response</div>
+                  <div class="text-xs font-medium text-ink-gray-5">Target Response</div>
                   <div class="text-base font-bold text-emerald-600 mt-1">1h 38m</div>
-                  <div class="text-[10px] text-emerald-700 mt-0.5">✓ Target fulfilled</div>
+                  <div class="text-xs text-emerald-700 mt-0.5">✓ Target fulfilled</div>
                 </div>
 
                 <div class="bg-surface-white rounded-2xl border border-outline-gray-1 p-4 shadow-2xs">
-                  <div class="text-[11px] font-medium text-ink-gray-5">Delivery Target</div>
+                  <div class="text-xs font-medium text-ink-gray-5">Delivery Target</div>
                   <div class="text-base font-bold text-blue-600 mt-1">{{ task.status === 'Completed' ? 'Delivered' : 'On Schedule' }}</div>
-                  <div class="text-[10px] text-ink-gray-4 mt-0.5">Active milestone track</div>
+                  <div class="text-xs text-ink-gray-4 mt-0.5">Active milestone track</div>
                 </div>
 
                 <div class="bg-surface-white rounded-2xl border border-outline-gray-1 p-4 shadow-2xs">
-                  <div class="text-[11px] font-medium text-ink-gray-5">Total Emails</div>
+                  <div class="text-xs font-medium text-ink-gray-5">Total Emails</div>
                   <div class="text-base font-bold text-ink-gray-9 mt-1">{{ emailCount }}</div>
-                  <div class="text-[10px] text-ink-gray-4 mt-0.5">Client communications</div>
+                  <div class="text-xs text-ink-gray-4 mt-0.5">Client communications</div>
                 </div>
 
                 <div class="bg-surface-white rounded-2xl border border-outline-gray-1 p-4 shadow-2xs">
-                  <div class="text-[11px] font-medium text-ink-gray-5">Internal Notes</div>
+                  <div class="text-xs font-medium text-ink-gray-5">Internal Notes</div>
                   <div class="text-base font-bold text-amber-600 mt-1">{{ commentCount }}</div>
-                  <div class="text-[10px] text-ink-gray-4 mt-0.5">Team collaboration logs</div>
+                  <div class="text-xs text-ink-gray-4 mt-0.5">Team collaboration logs</div>
                 </div>
               </div>
 
               <!-- Lifecycle Details Card -->
               <div class="bg-surface-white rounded-2xl border border-outline-gray-1 p-5 shadow-2xs space-y-4">
-                <h3 class="text-xs font-semibold text-ink-gray-9">Task Lifecycle & Milestone Schedule</h3>
-                <div class="grid grid-cols-2 gap-4 text-xs">
+                <h3 class="text-sm font-semibold text-ink-gray-9">Task Lifecycle & Milestone Schedule</h3>
+                <div class="grid grid-cols-2 gap-4 text-sm">
                   <div class="space-y-2">
                     <div class="flex justify-between py-1 border-b border-outline-gray-1">
                       <span class="text-ink-gray-5">Created By</span>
@@ -271,8 +271,8 @@
 
               <!-- SLA Service Commitment Details -->
               <div class="bg-surface-white rounded-2xl border border-outline-gray-1 p-5 shadow-2xs space-y-3">
-                <h3 class="text-xs font-semibold text-ink-gray-9">SLA Service Level Agreement</h3>
-                <div class="space-y-2 text-xs text-ink-gray-7">
+                <h3 class="text-sm font-semibold text-ink-gray-9">SLA Service Level Agreement</h3>
+                <div class="space-y-2 text-sm text-ink-gray-7">
                   <div class="flex items-center justify-between p-2.5 rounded-xl bg-surface-gray-2">
                     <span class="font-medium">Response Target (4h)</span>
                     <span class="text-emerald-600 font-semibold">Fulfilled in 1h 38m</span>
@@ -318,7 +318,7 @@
               <p class="truncate text-sm font-medium text-ink-gray-8">
                 {{ task.client_poc_name || 'Client Point of Contact' }}
               </p>
-              <div class="flex items-center gap-1.5 text-xs text-ink-gray-5">
+              <div class="flex items-center gap-1.5 text-sm text-ink-gray-5">
                 <span class="font-mono">#{{ task.name?.split('-')?.pop() || '0202' }}</span>
                 <span>•</span>
                 <span>via Portal</span>
@@ -327,13 +327,13 @@
           </div>
 
           <!-- TaskSLA / Delivery Target -->
-          <div class="space-y-1.5 text-xs pt-1">
+          <div class="space-y-1.5 text-sm pt-1">
             <!-- Target Response -->
             <div class="flex items-center justify-between">
               <span class="w-[106px] shrink-0 text-ink-gray-5">Target Response</span>
               <div class="flex min-w-0 flex-1 items-center gap-1 ps-2">
                 <span class="text-emerald-600 font-medium truncate">Fulfilled in 1h 38m</span>
-                <span class="text-ink-gray-4 text-[11px] cursor-pointer" title="Response Target Met">ⓘ</span>
+                <span class="text-ink-gray-4 text-xs cursor-pointer" title="Response Target Met">ⓘ</span>
               </div>
             </div>
 
@@ -347,7 +347,7 @@
                 >
                   {{ task.status === 'Completed' ? 'Delivered' : task.is_overdue ? 'Overdue Deadline' : 'On Schedule' }}
                 </span>
-                <span class="text-ink-gray-4 text-[11px] cursor-pointer" title="Delivery Status">ⓘ</span>
+                <span class="text-ink-gray-4 text-xs cursor-pointer" title="Delivery Status">ⓘ</span>
               </div>
             </div>
           </div>
@@ -361,7 +361,7 @@
               class="flex items-center justify-between cursor-pointer select-none"
               @click="overviewOpen = !overviewOpen"
             >
-              <span class="text-xs font-semibold text-ink-gray-9">Overview</span>
+              <span class="text-sm font-semibold text-ink-gray-9">Overview</span>
               <Icon
                 name="chevron-down"
                 size="13"
@@ -370,7 +370,7 @@
               />
             </div>
 
-            <div v-show="overviewOpen" class="space-y-2.5 text-xs pt-1">
+            <div v-show="overviewOpen" class="space-y-2.5 text-sm pt-1">
               <!-- 1. Assignee Row with Interactive Picker -->
               <div class="flex items-center gap-2 relative">
                 <span class="w-[106px] shrink-0 text-ink-gray-5">Assignee</span>
@@ -385,7 +385,7 @@
                         <span class="font-medium text-ink-gray-8 truncate">
                           {{ task.assignees[0].full_name || task.assignees[0].email }}
                         </span>
-                        <span v-if="task.assignees.length > 1" class="text-[10px] text-ink-gray-5 font-mono">
+                        <span v-if="task.assignees.length > 1" class="text-xs text-ink-gray-5 font-mono">
                           +{{ task.assignees.length - 1 }}
                         </span>
                       </template>
@@ -407,7 +407,7 @@
                         v-model="assigneeSearch"
                         type="text"
                         placeholder="Search users..."
-                        class="w-full px-3 py-1.5 text-xs rounded-xl border border-outline-gray-2 bg-surface-gray-1 focus:outline-none focus:bg-surface-white transition shadow-2xs"
+                        class="w-full px-3 py-1.5 text-sm rounded-xl border border-outline-gray-2 bg-surface-gray-1 focus:outline-none focus:bg-surface-white transition shadow-2xs"
                         @click.stop
                       />
                     </div>
@@ -418,13 +418,13 @@
                         v-for="u in filteredUsers"
                         :key="u.name"
                         @click.stop="toggleAssignee(u)"
-                        class="px-2.5 py-1.5 rounded-xl flex items-center justify-between hover:bg-surface-gray-2 cursor-pointer transition text-xs"
+                        class="px-2.5 py-1.5 rounded-xl flex items-center justify-between hover:bg-surface-gray-2 cursor-pointer transition text-sm"
                       >
                         <div class="flex items-center gap-2 min-w-0">
                           <Avatar :label="u.full_name || u.name" size="sm" />
                           <div class="truncate">
                             <div class="font-medium text-ink-gray-9 truncate">{{ u.full_name || u.name }}</div>
-                            <div class="text-[10px] text-ink-gray-4 truncate">{{ u.name }}</div>
+                            <div class="text-xs text-ink-gray-4 truncate">{{ u.name }}</div>
                           </div>
                         </div>
 
@@ -494,10 +494,10 @@
                       v-model="customerText"
                       @keydown.enter="saveCustomerEdit"
                       @keydown.escape="editingCustomer = false"
-                      class="flex-1 px-3 py-1.5 text-xs rounded-xl border border-outline-gray-3 bg-surface-white focus:outline-none transition shadow-2xs"
+                      class="flex-1 px-3 py-1.5 text-sm rounded-xl border border-outline-gray-3 bg-surface-white focus:outline-none transition shadow-2xs"
                     />
-                    <button @click="saveCustomerEdit" class="text-xs text-emerald-600 font-bold px-2 py-1 rounded-lg hover:bg-emerald-50">✓</button>
-                    <button @click="editingCustomer = false" class="text-xs text-ink-gray-4 px-2 py-1 rounded-lg hover:bg-surface-gray-2">✕</button>
+                    <button @click="saveCustomerEdit" class="text-sm text-emerald-600 font-bold px-2 py-1 rounded-lg hover:bg-emerald-50">✓</button>
+                    <button @click="editingCustomer = false" class="text-sm text-ink-gray-4 px-2 py-1 rounded-lg hover:bg-surface-gray-2">✕</button>
                   </div>
                 </div>
               </div>
@@ -526,10 +526,10 @@
                   <span
                     v-for="tag in (task.tags || [])"
                     :key="tag"
-                    class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] bg-surface-gray-2 text-ink-gray-7 border border-outline-gray-2"
+                    class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs bg-surface-gray-2 text-ink-gray-7 border border-outline-gray-2"
                   >
                     <span>{{ tag }}</span>
-                    <button @click.stop="handleRemoveTag(tag)" class="text-ink-gray-4 hover:text-ink-gray-9 text-xs font-bold leading-none">×</button>
+                    <button @click.stop="handleRemoveTag(tag)" class="text-ink-gray-4 hover:text-ink-gray-9 text-sm font-bold leading-none">×</button>
                   </span>
 
                   <!-- Inline Add Tag Input -->
@@ -540,10 +540,10 @@
                       @keydown.enter.prevent="handleAddTag"
                       @keydown.escape="showTagInput = false"
                       placeholder="Tag..."
-                      class="w-24 px-2.5 py-1 text-[11px] rounded-xl border border-outline-gray-3 bg-surface-white focus:outline-none transition shadow-2xs"
+                      class="w-24 px-2.5 py-1 text-xs rounded-xl border border-outline-gray-3 bg-surface-white focus:outline-none transition shadow-2xs"
                     />
-                    <button @click="handleAddTag" class="text-[11px] text-ink-gray-8 font-medium px-2 py-0.5 rounded-lg hover:bg-surface-gray-2">Add</button>
-                    <button @click="showTagInput = false" class="text-[11px] text-ink-gray-4 px-1.5 py-0.5 rounded-lg hover:bg-surface-gray-2">✕</button>
+                    <button @click="handleAddTag" class="text-xs text-ink-gray-8 font-medium px-2 py-0.5 rounded-lg hover:bg-surface-gray-2">Add</button>
+                    <button @click="showTagInput = false" class="text-xs text-ink-gray-4 px-1.5 py-0.5 rounded-lg hover:bg-surface-gray-2">✕</button>
                   </div>
                   <Button
                     v-else
@@ -564,7 +564,7 @@
               class="flex items-center justify-between cursor-pointer select-none"
               @click="moreDetailsOpen = !moreDetailsOpen"
             >
-              <span class="text-xs font-semibold text-ink-gray-9">More Details</span>
+              <span class="text-sm font-semibold text-ink-gray-9">More Details</span>
               <Icon
                 name="chevron-down"
                 size="13"
@@ -573,7 +573,7 @@
               />
             </div>
 
-            <div v-show="moreDetailsOpen" class="space-y-2.5 text-xs pt-1">
+            <div v-show="moreDetailsOpen" class="space-y-2.5 text-sm pt-1">
               <!-- Due Date -->
               <div class="flex items-center gap-2">
                 <span class="w-[106px] shrink-0 text-ink-gray-5">Due Date</span>
@@ -581,7 +581,7 @@
                   type="date"
                   :value="cleanDate(task.exp_end_date)"
                   @change="e => handleGenericUpdate('exp_end_date', e.target.value)"
-                  class="flex-1 px-2.5 py-1 text-xs rounded-xl border border-outline-gray-2 bg-surface-white text-ink-gray-8 focus:outline-none focus:border-outline-gray-4"
+                  class="flex-1 px-2.5 py-1 text-sm rounded-xl border border-outline-gray-2 bg-surface-white text-ink-gray-8 focus:outline-none focus:border-outline-gray-4"
                 />
               </div>
 
@@ -592,7 +592,7 @@
                   type="date"
                   :value="cleanDate(task.exp_start_date)"
                   @change="e => handleGenericUpdate('exp_start_date', e.target.value)"
-                  class="flex-1 px-2.5 py-1 text-xs rounded-xl border border-outline-gray-2 bg-surface-white text-ink-gray-8 focus:outline-none focus:border-outline-gray-4"
+                  class="flex-1 px-2.5 py-1 text-sm rounded-xl border border-outline-gray-2 bg-surface-white text-ink-gray-8 focus:outline-none focus:border-outline-gray-4"
                 />
               </div>
 
@@ -603,7 +603,7 @@
                   type="number"
                   :value="task.expected_time || 0"
                   @change="e => handleGenericUpdate('expected_time', parseFloat(e.target.value) || 0)"
-                  class="w-20 px-2.5 py-1 text-xs rounded-xl border border-outline-gray-2 bg-surface-white text-ink-gray-8 focus:outline-none"
+                  class="w-20 px-2.5 py-1 text-sm rounded-xl border border-outline-gray-2 bg-surface-white text-ink-gray-8 focus:outline-none"
                 />
               </div>
 
@@ -637,7 +637,7 @@
               class="flex items-center justify-between cursor-pointer select-none"
               @click="recentTicketsOpen = !recentTicketsOpen"
             >
-              <span class="text-xs font-semibold text-ink-gray-9">Recent Tasks</span>
+              <span class="text-sm font-semibold text-ink-gray-9">Recent Tasks</span>
               <Icon
                 name="chevron-down"
                 size="13"
@@ -654,7 +654,7 @@
                 class="p-2.5 rounded-xl hover:bg-surface-gray-2 cursor-pointer transition space-y-1"
               >
                 <div class="flex items-start justify-between gap-1">
-                  <div class="font-medium text-xs text-ink-gray-9 truncate leading-snug">
+                  <div class="font-medium text-sm text-ink-gray-9 truncate leading-snug">
                     {{ item.subject }}
                   </div>
                   <Badge
@@ -664,7 +664,7 @@
                     :label="item.status === 'Working' ? 'Replied' : item.status"
                   />
                 </div>
-                <div class="text-[11px] text-ink-gray-4">
+                <div class="text-xs text-ink-gray-4">
                   {{ formatDate(item.exp_end_date) || '22-10-2026' }} • #{{ item.name?.split('-')?.pop() || '0200' }}
                 </div>
               </div>

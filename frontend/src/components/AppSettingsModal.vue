@@ -12,7 +12,7 @@
         </div>
         <div>
           <h2 class="text-sm font-semibold text-ink-gray-9">Projects App Settings</h2>
-          <p class="text-[11px] text-ink-gray-5">Configure branding, app icon, notification preferences, and default SLA targets.</p>
+          <p class="text-xs text-ink-gray-5">Configure branding, app icon, notification preferences, and default SLA targets.</p>
         </div>
       </div>
     </template>
@@ -26,7 +26,7 @@
           v-for="tab in SETTINGS_TABS"
           :key="tab.id"
           @click="activeTab = tab.id"
-          class="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium transition cursor-pointer text-left"
+          class="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm font-medium transition cursor-pointer text-left"
           :class="activeTab === tab.id
             ? 'bg-white text-ink-gray-9 font-semibold shadow-2xs border border-outline-gray-2'
             : 'text-ink-gray-6 hover:text-ink-gray-9 hover:bg-surface-gray-2 border border-transparent'"
@@ -37,17 +37,17 @@
       </div>
 
       <!-- Settings Content Area -->
-      <div class="flex-1 overflow-y-auto p-6 bg-surface-white text-xs">
+      <div class="flex-1 overflow-y-auto p-6 bg-surface-white text-sm">
         <!-- TAB 1: BRANDING & APP ICON -->
         <div v-if="activeTab === 'branding'" class="space-y-6">
           <div>
-            <h3 class="text-xs font-semibold text-ink-gray-9">App Identity & Logo</h3>
-            <p class="text-[11px] text-ink-gray-5 mt-0.5">Customize the workspace brand name, subtitle, and attached icon displayed in the sidebar.</p>
+            <h3 class="text-sm font-semibold text-ink-gray-9">App Identity & Logo</h3>
+            <p class="text-xs text-ink-gray-5 mt-0.5">Customize the workspace brand name, subtitle, and attached icon displayed in the sidebar.</p>
           </div>
 
           <!-- Live Sidebar Header Preview Card -->
           <div class="p-4 rounded-2xl border border-outline-gray-2 bg-surface-gray-1 space-y-2">
-            <div class="text-[10px] font-semibold uppercase tracking-wider text-ink-gray-4">Live Sidebar Header Preview</div>
+            <div class="text-xs font-semibold uppercase tracking-wider text-ink-gray-4">Live Sidebar Header Preview</div>
             <div class="flex items-center gap-3 p-3 rounded-xl bg-white border border-outline-gray-2 shadow-2xs max-w-xs">
               <div
                 class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 shadow-xs border transition"
@@ -59,8 +59,8 @@
                 <Icon :name="settings.brandIcon" size="20" color="#ffffff" />
               </div>
               <div class="truncate">
-                <div class="font-semibold text-xs text-ink-gray-9 truncate">{{ companyName }}</div>
-                <div class="text-[11px] text-ink-gray-5 truncate">{{ currentUserName }}</div>
+                <div class="font-semibold text-sm text-ink-gray-9 truncate">{{ companyName }}</div>
+                <div class="text-xs text-ink-gray-5 truncate">{{ currentUserName }}</div>
               </div>
             </div>
           </div>
@@ -68,17 +68,17 @@
           <!-- Inputs -->
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div class="space-y-1">
-              <label class="block text-xs font-medium text-ink-gray-7">Brand / Company Name</label>
-              <div class="px-2.5 py-1.5 rounded-xl bg-surface-gray-2 text-ink-gray-8 text-xs truncate">{{ companyName }}</div>
+              <label class="block text-sm font-medium text-ink-gray-7">Brand / Company Name</label>
+              <div class="px-2.5 py-1.5 rounded-xl bg-surface-gray-2 text-ink-gray-8 text-sm truncate">{{ companyName }}</div>
             </div>
-            <div class="text-[11px] text-ink-gray-5 self-end pb-1.5">
+            <div class="text-xs text-ink-gray-5 self-end pb-1.5">
               The name comes from your default Company, and the subtitle shows the logged-in user.
             </div>
           </div>
 
           <!-- Brand Color Theme -->
           <div class="space-y-1.5">
-            <label class="block text-xs font-medium text-ink-gray-7">Icon Background Color</label>
+            <label class="block text-sm font-medium text-ink-gray-7">Icon Background Color</label>
             <div class="flex flex-wrap items-center gap-2">
               <button
                 v-for="c in COLOR_OPTIONS"
@@ -93,14 +93,14 @@
                 }"
                 :title="c"
               >
-                <span v-if="settings.brandColor === c" class="text-white text-[10px] font-bold">✓</span>
+                <span v-if="settings.brandColor === c" class="text-white text-xs font-bold">✓</span>
               </button>
             </div>
           </div>
 
           <!-- Brand Icon Selection -->
           <div class="space-y-1.5">
-            <label class="block text-xs font-medium text-ink-gray-7">Select App Icon</label>
+            <label class="block text-sm font-medium text-ink-gray-7">Select App Icon</label>
             <div class="grid grid-cols-10 gap-2 p-3 bg-surface-gray-1 rounded-xl border border-outline-gray-2 max-h-40 overflow-y-auto">
               <button
                 v-for="iconItem in ICON_OPTIONS"
@@ -122,8 +122,8 @@
         <!-- TAB 2: EMAIL & NOTIFICATIONS -->
         <div v-else-if="activeTab === 'notifications'" class="space-y-6">
           <div>
-            <h3 class="text-xs font-semibold text-ink-gray-9">Email & In-App Notifications</h3>
-            <p class="text-[11px] text-ink-gray-5 mt-0.5">Control when and how you receive alerts for tasks, project milestones, and team comments.</p>
+            <h3 class="text-sm font-semibold text-ink-gray-9">Email & In-App Notifications</h3>
+            <p class="text-xs text-ink-gray-5 mt-0.5">Control when and how you receive alerts for tasks, project milestones, and team comments.</p>
           </div>
 
           <div class="p-5 rounded-2xl border border-outline-gray-2 bg-surface-gray-1/60 space-y-4 max-w-xl">
@@ -158,8 +158,8 @@
         <!-- TAB 3: SLA & WORKFLOW DEFAULTS -->
         <div v-else-if="activeTab === 'sla'" class="space-y-6">
           <div>
-            <h3 class="text-xs font-semibold text-ink-gray-9">SLA & Working Hours</h3>
-            <p class="text-[11px] text-ink-gray-5 mt-0.5">Configure target response times, resolution deadlines, and standard working schedules.</p>
+            <h3 class="text-sm font-semibold text-ink-gray-9">SLA & Working Hours</h3>
+            <p class="text-xs text-ink-gray-5 mt-0.5">Configure target response times, resolution deadlines, and standard working schedules.</p>
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -201,7 +201,7 @@
 
     <template #actions>
       <div class="flex items-center justify-between w-full">
-        <div class="text-[11px] text-ink-gray-5">
+        <div class="text-xs text-ink-gray-5">
           Changes take effect immediately across all project workspaces.
         </div>
         <div class="flex items-center gap-2">

@@ -3,7 +3,7 @@
     <!-- Header -->
     <LayoutHeader>
       <template #left-header>
-        <div class="flex items-center text-sm font-medium text-ink-gray-5 truncate">
+        <div class="flex items-center text-lg font-medium text-ink-gray-5 truncate">
           <router-link to="/projects" class="hover:text-ink-gray-8 transition">Projects</router-link>
           <span class="mx-1.5 text-ink-gray-4">/</span>
           <span class="text-ink-gray-9 font-semibold truncate">{{ project.project_name || projectName }}</span>
@@ -61,13 +61,13 @@
     </LayoutHeader>
 
     <div v-if="loading" class="flex-1 flex items-center justify-center">
-      <div class="flex items-center gap-2 text-xs text-ink-gray-5">
+      <div class="flex items-center gap-2 text-sm text-ink-gray-5">
         <Icon name="refresh" size="16" class="animate-spin text-ink-gray-7" />
         <span>Loading project dashboard...</span>
       </div>
     </div>
 
-    <div v-else-if="!project.name" class="p-12 text-center text-xs text-ink-gray-5">
+    <div v-else-if="!project.name" class="p-12 text-center text-sm text-ink-gray-5">
       Project not found.
     </div>
 
@@ -105,15 +105,15 @@
                 />
               </div>
             </h1>
-            <div class="text-[11px] text-ink-gray-4 font-mono mt-0.5">#{{ project.name }}</div>
+            <div class="text-xs text-ink-gray-4 font-mono mt-0.5">#{{ project.name }}</div>
           </div>
         </div>
 
         <!-- Stakeholders Grid with Frappe UI Avatars -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-3 border-t border-outline-gray-2 text-xs">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-3 border-t border-outline-gray-2 text-sm">
           <!-- Client PoC -->
           <div class="p-3 rounded-xl bg-surface-gray-1 border border-outline-gray-2 space-y-2">
-            <div class="text-[11px] font-medium text-ink-gray-5 flex items-center gap-1.5">
+            <div class="text-xs font-medium text-ink-gray-5 flex items-center gap-1.5">
               <div class="w-5 h-5 rounded-md bg-surface-blue-2 text-ink-blue-7 flex items-center justify-center shrink-0">
                 <Icon name="user" size="11" />
               </div>
@@ -123,14 +123,14 @@
               <Avatar :label="project.client_poc_name || 'Client'" size="sm" />
               <div>
                 <div class="font-medium text-ink-gray-9">{{ project.client_poc_name || 'Not assigned' }}</div>
-                <div class="text-[11px] text-ink-gray-5">{{ project.client_poc_email || '' }}</div>
+                <div class="text-xs text-ink-gray-5">{{ project.client_poc_email || '' }}</div>
               </div>
             </div>
           </div>
 
           <!-- Partner PoC -->
           <div class="p-3 rounded-xl bg-surface-gray-1 border border-outline-gray-2 space-y-2">
-            <div class="text-[11px] font-medium text-ink-gray-5 flex items-center gap-1.5">
+            <div class="text-xs font-medium text-ink-gray-5 flex items-center gap-1.5">
               <div class="w-5 h-5 rounded-md bg-surface-purple-2 text-ink-purple-7 flex items-center justify-center shrink-0">
                 <Icon name="briefcase" size="11" />
               </div>
@@ -140,14 +140,14 @@
               <Avatar :label="project.partner_poc_name || 'Partner'" size="sm" />
               <div>
                 <div class="font-medium text-ink-gray-9">{{ project.partner_poc_name || 'Not assigned' }}</div>
-                <div class="text-[11px] text-ink-gray-5">{{ project.partner_poc || '' }}</div>
+                <div class="text-xs text-ink-gray-5">{{ project.partner_poc || '' }}</div>
               </div>
             </div>
           </div>
 
           <!-- Project Manager -->
           <div class="p-3 rounded-xl bg-surface-gray-1 border border-outline-gray-2 space-y-2">
-            <div class="text-[11px] font-medium text-ink-gray-5 flex items-center gap-1.5">
+            <div class="text-xs font-medium text-ink-gray-5 flex items-center gap-1.5">
               <div class="w-5 h-5 rounded-md bg-surface-green-2 text-ink-green-7 flex items-center justify-center shrink-0">
                 <Icon name="target" size="11" />
               </div>
@@ -157,14 +157,14 @@
               <Avatar :label="project.project_manager_name || 'PM'" size="sm" />
               <div>
                 <div class="font-medium text-ink-gray-9">{{ project.project_manager_name || 'Not assigned' }}</div>
-                <div class="text-[11px] text-ink-gray-5">{{ project.project_manager || '' }}</div>
+                <div class="text-xs text-ink-gray-5">{{ project.project_manager || '' }}</div>
               </div>
             </div>
           </div>
 
           <!-- Timeline -->
           <div class="p-3 rounded-xl bg-surface-gray-1 border border-outline-gray-2 space-y-1">
-            <div class="text-[11px] font-medium text-ink-gray-5 flex items-center gap-1.5">
+            <div class="text-xs font-medium text-ink-gray-5 flex items-center gap-1.5">
               <div class="w-5 h-5 rounded-md bg-surface-amber-2 text-ink-amber-7 flex items-center justify-center shrink-0">
                 <Icon name="clock" size="11" />
               </div>
@@ -173,7 +173,7 @@
             <div class="font-medium text-ink-gray-9">
               {{ formatDate(project.expected_start_date) }} - {{ formatDate(project.expected_end_date) }}
             </div>
-            <div class="text-[11px] flex items-center gap-1" :class="project.auto_emails ? 'text-ink-green-7' : 'text-ink-gray-4'">
+            <div class="text-xs flex items-center gap-1" :class="project.auto_emails ? 'text-ink-green-7' : 'text-ink-gray-4'">
               <span>{{ project.auto_emails ? '✓ Auto-emails enabled' : 'Auto-emails disabled' }}</span>
             </div>
           </div>
@@ -183,7 +183,7 @@
       <!-- Stats row with Dual Progress calculation -->
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
         <div class="p-4 rounded-2xl border border-outline-gray-2 bg-surface-white shadow-2xs space-y-1.5 hover:shadow-xs transition">
-          <div class="flex items-center justify-between text-xs text-ink-gray-5">
+          <div class="flex items-center justify-between text-sm text-ink-gray-5">
             <span class="font-medium">Completion Rate</span>
             <div class="w-7 h-7 rounded-lg bg-surface-blue-2 text-ink-blue-7 flex items-center justify-center shrink-0">
               <Icon name="trending-up" size="13" />
@@ -199,7 +199,7 @@
             />
           </div>
           <Progress :value="project.stats?.percent_complete || 0" size="sm" />
-          <div class="text-[11px] text-ink-gray-4">
+          <div class="text-xs text-ink-gray-4">
             <span v-if="project.stats?.progress_basis === 'hours'">
               {{ project.stats?.completed_estimated_hours || 0 }}h of {{ project.stats?.total_estimated_hours || 0 }}h estimated
             </span>
@@ -210,32 +210,32 @@
         </div>
 
         <div class="p-4 rounded-2xl border border-outline-gray-2 bg-surface-white shadow-2xs space-y-1 hover:shadow-xs transition">
-          <div class="flex items-center justify-between text-xs text-ink-gray-5">
+          <div class="flex items-center justify-between text-sm text-ink-gray-5">
             <span class="font-medium">Total Tasks</span>
             <div class="w-7 h-7 rounded-lg bg-surface-gray-2 text-ink-gray-7 flex items-center justify-center shrink-0">
               <Icon name="check-square" size="13" />
             </div>
           </div>
           <div class="text-2xl font-bold text-ink-gray-9">{{ project.stats?.total_tasks || 0 }}</div>
-          <div class="text-[11px] text-ink-gray-4">{{ project.stats?.completed_tasks || 0 }} completed</div>
+          <div class="text-xs text-ink-gray-4">{{ project.stats?.completed_tasks || 0 }} completed</div>
         </div>
 
         <div class="p-4 rounded-2xl border border-outline-gray-2 bg-surface-white shadow-2xs space-y-1 hover:shadow-xs transition">
-          <div class="flex items-center justify-between text-xs text-ink-gray-5">
+          <div class="flex items-center justify-between text-sm text-ink-gray-5">
             <span class="font-medium">In Progress</span>
             <div class="w-7 h-7 rounded-lg bg-surface-green-2 text-ink-green-7 flex items-center justify-center shrink-0">
               <Icon name="refresh" size="13" />
             </div>
           </div>
           <div class="text-2xl font-bold text-ink-gray-9">{{ project.stats?.open_tasks || 0 }}</div>
-          <div class="text-[11px] text-ink-gray-4">Active workload</div>
+          <div class="text-xs text-ink-gray-4">Active workload</div>
         </div>
 
         <div
           class="p-4 rounded-2xl border shadow-2xs space-y-1 hover:shadow-xs transition"
           :class="(project.stats?.overdue_tasks || 0) > 0 ? 'border-outline-red-3 bg-surface-red-2/30' : 'border-outline-gray-2 bg-surface-white'"
         >
-          <div class="flex items-center justify-between text-xs" :class="(project.stats?.overdue_tasks || 0) > 0 ? 'text-ink-red-7 font-medium' : 'text-ink-gray-5'">
+          <div class="flex items-center justify-between text-sm" :class="(project.stats?.overdue_tasks || 0) > 0 ? 'text-ink-red-7 font-medium' : 'text-ink-gray-5'">
             <span class="font-medium">Overdue Tasks</span>
             <div
               class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
@@ -247,11 +247,11 @@
           <div class="text-2xl font-bold" :class="(project.stats?.overdue_tasks || 0) > 0 ? 'text-ink-red-7' : 'text-ink-gray-9'">
             {{ project.stats?.overdue_tasks || 0 }}
           </div>
-          <div class="text-[11px] text-ink-gray-4">Needs priority action</div>
+          <div class="text-xs text-ink-gray-4">Needs priority action</div>
         </div>
 
         <div class="p-4 rounded-2xl border border-outline-gray-2 bg-surface-white shadow-2xs space-y-1 hover:shadow-xs transition">
-          <div class="flex items-center justify-between text-xs text-ink-gray-5">
+          <div class="flex items-center justify-between text-sm text-ink-gray-5">
             <span class="font-medium">Milestones</span>
             <div class="w-7 h-7 rounded-lg bg-surface-amber-2 text-ink-amber-7 flex items-center justify-center shrink-0">
               <Icon name="flag" size="13" />
@@ -260,7 +260,7 @@
           <div class="text-2xl font-bold text-ink-amber-7">
             {{ project.stats?.completed_milestones || 0 }} <span class="text-ink-gray-4 text-base font-normal">/ {{ project.stats?.milestone_count || 0 }}</span>
           </div>
-          <div class="text-[11px] text-ink-gray-4">Signed-off</div>
+          <div class="text-xs text-ink-gray-4">Signed-off</div>
         </div>
       </div>
 
@@ -303,8 +303,8 @@
                     />
                   </div>
                   <div>
-                    <div class="font-semibold text-xs text-ink-gray-9">{{ mod.module_name }}</div>
-                    <div class="text-[11px] text-ink-gray-5">{{ mod.completed_tasks || 0 }}/{{ mod.total_tasks || 0 }} tasks done</div>
+                    <div class="font-semibold text-sm text-ink-gray-9">{{ mod.module_name }}</div>
+                    <div class="text-xs text-ink-gray-5">{{ mod.completed_tasks || 0 }}/{{ mod.total_tasks || 0 }} tasks done</div>
                   </div>
                 </div>
                 <Badge
@@ -318,7 +318,7 @@
               <!-- Progress bar -->
               <Progress :value="mod.progress || 0" size="sm" />
 
-              <div class="flex items-center justify-between text-[11px] text-ink-gray-5 pt-0.5">
+              <div class="flex items-center justify-between text-xs text-ink-gray-5 pt-0.5">
                 <span>{{ (mod.total_tasks || 0) - (mod.completed_tasks || 0) }} pending tasks</span>
                 <span class="text-ink-blue-7 font-medium cursor-pointer" @click="activeTab = 'tasks'">View tasks →</span>
               </div>
@@ -329,7 +329,7 @@
         <!-- Tab 2: Tasks Table -->
         <div v-show="activeTab === 'tasks'" class="p-5">
           <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse text-xs">
+            <table class="w-full text-left border-collapse text-sm">
               <thead>
                 <tr class="bg-surface-gray-1 text-ink-gray-5 font-medium border-b border-outline-gray-2">
                   <th class="py-2.5 px-3">Subject</th>
@@ -342,7 +342,7 @@
               </thead>
               <tbody class="divide-y divide-outline-gray-1">
                 <tr v-if="!project.tasks || project.tasks.length === 0">
-                  <td colspan="6" class="py-8 text-center text-ink-gray-4 text-xs">
+                  <td colspan="6" class="py-8 text-center text-ink-gray-4 text-sm">
                     No tasks found in this project.
                   </td>
                 </tr>
@@ -389,8 +389,8 @@
         <div v-show="activeTab === 'files'" class="p-5 space-y-4">
           <div class="flex items-center justify-between pb-2 border-b border-outline-gray-2">
             <div>
-              <h3 class="text-xs font-semibold text-ink-gray-9">Scope Documents, MoM & Governance Records</h3>
-              <p class="text-[11px] text-ink-gray-5">Official implementation artifacts, discussion notes, and governed links.</p>
+              <h3 class="text-sm font-semibold text-ink-gray-9">Scope Documents, MoM & Governance Records</h3>
+              <p class="text-xs text-ink-gray-5">Official implementation artifacts, discussion notes, and governed links.</p>
             </div>
             <Button
               variant="subtle"
@@ -416,8 +416,8 @@
                     <Icon name="file-text" :size="16" />
                   </div>
                   <div class="min-w-0">
-                    <div class="font-semibold text-xs text-ink-gray-9 truncate">{{ doc.title }}</div>
-                    <div class="text-[11px] text-ink-gray-4 flex items-center gap-1.5 mt-0.5">
+                    <div class="font-semibold text-sm text-ink-gray-9 truncate">{{ doc.title }}</div>
+                    <div class="text-xs text-ink-gray-4 flex items-center gap-1.5 mt-0.5">
                       <Badge theme="gray" variant="subtle" size="sm" :label="doc.category" />
                       <span v-if="doc.version">· {{ doc.version }}</span>
                       <span v-if="doc.access_level">· {{ doc.access_level }}</span>
@@ -447,14 +447,14 @@
                 </div>
               </div>
 
-              <p v-if="doc.notes" class="text-[11px] text-ink-gray-6 line-clamp-2">{{ doc.notes }}</p>
-              <div class="text-[10px] text-ink-gray-4 flex items-center justify-between pt-1 border-t border-outline-gray-1">
+              <p v-if="doc.notes" class="text-xs text-ink-gray-6 line-clamp-2">{{ doc.notes }}</p>
+              <div class="text-xs text-ink-gray-4 flex items-center justify-between pt-1 border-t border-outline-gray-1">
                 <span>By {{ doc.owner || doc.attached_by || 'Team' }}</span>
                 <span>{{ formatDate(doc.attached_at) }} · {{ formatBytes(doc.file_size) }}</span>
               </div>
             </div>
           </div>
-          <div v-else class="p-8 text-center text-xs text-ink-gray-4">
+          <div v-else class="p-8 text-center text-sm text-ink-gray-4">
             No scope or governance documents attached yet. Click "Attach Document" above to upload scope notes or links.
           </div>
         </div>
@@ -463,8 +463,8 @@
         <div v-show="activeTab === 'activity'" class="p-5 space-y-4">
           <div class="flex items-center justify-between pb-2 border-b border-outline-gray-2">
             <div>
-              <h3 class="text-xs font-semibold text-ink-gray-9">360° Project Activity & Customer Communications</h3>
-              <p class="text-[11px] text-ink-gray-5">Audit trail of weekly progress summaries, customer feedback, and milestones.</p>
+              <h3 class="text-sm font-semibold text-ink-gray-9">360° Project Activity & Customer Communications</h3>
+              <p class="text-xs text-ink-gray-5">Audit trail of weekly progress summaries, customer feedback, and milestones.</p>
             </div>
             <Button
               variant="subtle"
@@ -492,18 +492,18 @@
                     size="sm"
                     :label="event.label"
                   />
-                  <span class="text-xs font-semibold text-ink-gray-9">{{ event.subject || event.title }}</span>
+                  <span class="text-sm font-semibold text-ink-gray-9">{{ event.subject || event.title }}</span>
                 </div>
-                <div class="text-[11px] text-ink-gray-4 whitespace-nowrap">
+                <div class="text-xs text-ink-gray-4 whitespace-nowrap">
                   {{ formatDateTime(event.creation || event.timestamp) }}
                 </div>
               </div>
 
-              <p class="text-xs text-ink-gray-7 line-clamp-3 leading-relaxed">
+              <p class="text-sm text-ink-gray-7 line-clamp-3 leading-relaxed">
                 {{ plainText(event.content || event.description) }}
               </p>
 
-              <div class="flex items-center justify-between pt-1 border-t border-outline-gray-1 text-[11px]">
+              <div class="flex items-center justify-between pt-1 border-t border-outline-gray-1 text-xs">
                 <div class="text-ink-gray-5">
                   <span v-if="event.sender">By {{ event.sender }}</span>
                   <span v-if="event.recipients"> · To: {{ event.recipients }}</span>
@@ -518,7 +518,7 @@
               </div>
             </div>
           </div>
-          <div v-else class="p-8 text-center text-xs text-ink-gray-4">
+          <div v-else class="p-8 text-center text-sm text-ink-gray-4">
             No activity logged yet. Weekly updates and customer feedback emails will appear here.
           </div>
         </div>
@@ -532,7 +532,7 @@
         size="md"
       >
         <div class="space-y-3 pt-1">
-          <p class="text-xs text-ink-gray-5">Select a module to add. Standard tasks will be instantiated automatically.</p>
+          <p class="text-sm text-ink-gray-5">Select a module to add. Standard tasks will be instantiated automatically.</p>
           <Select
             v-model="moduleToAdd"
             label="Implementation Module *"
@@ -571,13 +571,13 @@
         size="2xl"
       >
         <div v-if="selectedEmailView" class="space-y-3 pt-1">
-          <div class="p-3 bg-surface-gray-1 rounded-xl border border-outline-gray-2 text-xs space-y-1">
+          <div class="p-3 bg-surface-gray-1 rounded-xl border border-outline-gray-2 text-sm space-y-1">
             <div><span class="font-medium text-ink-gray-5">Recipients:</span> <span class="text-ink-gray-9 font-mono">{{ selectedEmailView.recipients }}</span></div>
             <div v-if="selectedEmailView.cc"><span class="font-medium text-ink-gray-5">CC:</span> <span class="text-ink-gray-9 font-mono">{{ selectedEmailView.cc }}</span></div>
             <div><span class="font-medium text-ink-gray-5">Sent:</span> <span class="text-ink-gray-7">{{ formatDateTime(selectedEmailView.creation || selectedEmailView.sent_at) }}</span></div>
           </div>
 
-          <div class="p-4 border border-outline-gray-2 rounded-xl bg-surface-white text-xs max-h-[50vh] overflow-y-auto">
+          <div class="p-4 border border-outline-gray-2 rounded-xl bg-surface-white text-sm max-h-[50vh] overflow-y-auto">
             <div v-html="selectedEmailView.content" />
           </div>
         </div>

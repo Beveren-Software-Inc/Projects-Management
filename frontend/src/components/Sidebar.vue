@@ -24,7 +24,7 @@
         @click="$emit('open-search')"
       >
         <template #suffix>
-          <kbd v-if="!isCollapsed" class="px-1.5 py-0.5 text-[10px] rounded bg-surface-gray-2 text-ink-gray-5 font-mono">⌘K</kbd>
+          <kbd v-if="!isCollapsed" class="px-1.5 py-0.5 text-xs rounded bg-surface-gray-2 text-ink-gray-5 font-mono">⌘K</kbd>
         </template>
       </SidebarItem>
 

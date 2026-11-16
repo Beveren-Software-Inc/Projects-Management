@@ -14,7 +14,7 @@
             <h2 class="text-base font-semibold text-ink-gray-9">Send Customer Communication</h2>
             <Badge theme="blue" variant="subtle" size="sm" :label="project?.project_name || projectName" />
           </div>
-          <p class="text-xs text-ink-gray-5 mt-0.5">
+          <p class="text-sm text-ink-gray-5 mt-0.5">
             Auto-generate progress summaries, feedback requests, or kickoff notes and track them in Project Activity.
           </p>
         </div>
@@ -24,7 +24,7 @@
     <div class="space-y-4 pt-1">
       <!-- Template Selector Bar using TabButtons -->
       <div class="flex items-center gap-2 overflow-x-auto pb-1">
-        <span class="text-ink-gray-5 font-medium text-[11px] uppercase tracking-wider shrink-0">Template:</span>
+        <span class="text-ink-gray-5 font-medium text-xs uppercase tracking-wider shrink-0">Template:</span>
         <TabButtons
           :options="templates.map(t => ({ label: t.label, value: t.id }))"
           v-model="selectedTemplate"
@@ -35,12 +35,12 @@
       <!-- Loading State for Template Fetch -->
       <div v-if="templateLoading" class="py-12 flex flex-col items-center justify-center text-ink-gray-4 space-y-2">
         <LoadingIndicator class="w-6 h-6 text-ink-blue-7" />
-        <span class="text-xs">Preparing email content from project tasks and stats...</span>
+        <span class="text-sm">Preparing email content from project tasks and stats...</span>
       </div>
 
       <template v-else>
         <!-- Email Header Form (Recipients, CC, Subject) -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 bg-surface-gray-1 p-3.5 rounded-xl border border-outline-gray-2 text-xs">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 bg-surface-gray-1 p-3.5 rounded-xl border border-outline-gray-2 text-sm">
           <TextInput
             v-model="form.recipients"
             label="To Recipients * (comma-separated)"
@@ -74,7 +74,7 @@
             ]"
             v-model="viewMode"
           />
-          <span class="text-[11px] text-ink-gray-4">
+          <span class="text-xs text-ink-gray-4">
             {{ viewMode === 'preview' ? 'Customer inbox rendering' : 'Customize HTML markup directly' }}
           </span>
         </div>
@@ -93,7 +93,7 @@
             v-model="form.content"
             rows="12"
             placeholder="HTML Email template content..."
-            class="font-mono text-xs"
+            class="font-mono text-sm"
             size="sm"
           />
         </div>
@@ -101,18 +101,18 @@
         <!-- Attachments Selection -->
         <div class="border border-outline-gray-2 rounded-xl p-3.5 bg-surface-gray-1 space-y-2">
           <div class="flex items-center justify-between">
-            <div class="flex items-center gap-1.5 text-xs font-medium text-ink-gray-7">
+            <div class="flex items-center gap-1.5 text-sm font-medium text-ink-gray-7">
               <Icon name="paperclip" :size="14" />
               <span>Attach Project Documents</span>
             </div>
-            <span class="text-[11px] text-ink-gray-4">Included as email attachments</span>
+            <span class="text-xs text-ink-gray-4">Included as email attachments</span>
           </div>
 
           <div v-if="projectDocs.length" class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
             <label
               v-for="doc in projectDocs"
               :key="doc.id"
-              class="flex items-center gap-2 p-2 bg-surface-white rounded-lg border border-outline-gray-2 hover:border-outline-gray-3 cursor-pointer text-xs"
+              class="flex items-center gap-2 p-2 bg-surface-white rounded-lg border border-outline-gray-2 hover:border-outline-gray-3 cursor-pointer text-sm"
             >
               <input
                 type="checkbox"
@@ -124,7 +124,7 @@
               <Badge theme="gray" variant="subtle" size="sm" :label="doc.category" />
             </label>
           </div>
-          <div v-else class="text-xs text-ink-gray-4 italic">
+          <div v-else class="text-sm text-ink-gray-4 italic">
             No scope or governance documents attached yet. Use "Attach Doc" on the project page to add files.
           </div>
         </div>
@@ -133,7 +133,7 @@
 
     <template #actions>
       <div class="flex items-center justify-between w-full">
-        <div class="text-[11px] text-ink-gray-5 flex items-center gap-1">
+        <div class="text-xs text-ink-gray-5 flex items-center gap-1">
           <Icon name="info" :size="12" />
           <span>Logged in Project Activity and historical snapshots.</span>
         </div>

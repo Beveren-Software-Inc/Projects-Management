@@ -53,8 +53,8 @@
           <div v-if="activity.recipients" class="mb-2 truncate text-sm text-ink-gray-5">
             To: {{ activity.recipients }}
           </div>
-          <div v-if="activity.subject" class="mb-1 text-p-sm font-medium text-ink-gray-8">{{ activity.subject }}</div>
-          <div class="timeline-html text-p-sm text-ink-gray-7" v-html="activity.content"></div>
+          <div v-if="activity.subject" class="mb-1 text-p-base font-medium text-ink-gray-8">{{ activity.subject }}</div>
+          <div class="timeline-html text-p-base text-ink-gray-7" v-html="activity.content"></div>
         </div>
       </div>
 
@@ -96,7 +96,7 @@
             ref="editRef"
             v-model="editText"
             rows="4"
-            class="w-full resize-y border-0 bg-transparent p-1 text-p-sm text-ink-gray-8 focus:outline-none focus:ring-0"
+            class="w-full resize-y border-0 bg-transparent p-1 text-p-base text-ink-gray-8 focus:outline-none focus:ring-0"
             @keydown.esc="cancelEdit"
             @keydown.ctrl.enter="saveEdit(activity)"
             @keydown.meta.enter="saveEdit(activity)"
@@ -112,16 +112,16 @@
         >
           <div
             v-if="activity.content"
-            class="timeline-html text-p-sm text-ink-gray-7"
+            class="timeline-html text-p-base text-ink-gray-7"
             v-html="activity.content"
           ></div>
-          <div v-else class="text-p-sm italic text-ink-gray-4">No description added for this task.</div>
+          <div v-else class="text-p-base italic text-ink-gray-4">No description added for this task.</div>
         </div>
       </div>
 
       <!-- HISTORY (Helpdesk HistoryBox) -->
       <div v-else class="mb-4 flex min-w-0 items-center justify-between gap-2 pt-1.5 text-base">
-        <div class="min-w-0 text-p-sm text-ink-gray-5">
+        <div class="min-w-0 text-p-base text-ink-gray-5">
           <span class="font-medium text-ink-gray-8">{{ activity.userName }}</span>
           <span class="ms-1">{{ activity.action }}</span>
         </div>

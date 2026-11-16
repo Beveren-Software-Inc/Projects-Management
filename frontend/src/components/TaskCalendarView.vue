@@ -13,7 +13,7 @@
           </button>
           <button
             @click="goToToday"
-            class="px-3 py-1 text-xs font-medium text-ink-gray-7 hover:bg-surface-gray-2 transition"
+            class="px-3 py-1 text-sm font-medium text-ink-gray-7 hover:bg-surface-gray-2 transition"
           >
             Today
           </button>
@@ -27,7 +27,7 @@
       </div>
 
       <!-- Filters: My Tasks vs All -->
-      <div class="flex items-center gap-3 text-xs">
+      <div class="flex items-center gap-3 text-sm">
         <div class="flex items-center p-0.5 bg-surface-gray-2 rounded-xl border border-outline-gray-2">
           <button
             @click="filterMyTasks = false; emitFilter()"
@@ -53,7 +53,7 @@
     </div>
 
     <!-- Calendar Weekday Header -->
-    <div class="grid grid-cols-7 border-b border-outline-gray-2 bg-surface-gray-1 text-center text-[11px] font-semibold text-ink-gray-5 py-2 select-none shrink-0">
+    <div class="grid grid-cols-7 border-b border-outline-gray-2 bg-surface-gray-1 text-center text-xs font-semibold text-ink-gray-5 py-2 select-none shrink-0">
       <div>Sun</div>
       <div>Mon</div>
       <div>Tue</div>
@@ -77,12 +77,12 @@
         <!-- Date Number -->
         <div class="flex items-center justify-between mb-1.5 shrink-0 select-none">
           <span
-            class="text-xs font-semibold px-1.5 py-0.2 rounded-md"
+            class="text-sm font-semibold px-1.5 py-0.2 rounded-md"
             :class="cell.isToday ? 'bg-blue-600 text-white' : 'text-ink-gray-7'"
           >
             {{ cell.dayNumber }}
           </span>
-          <span v-if="cell.tasks.length > 0" class="text-[10px] text-ink-gray-4 font-medium">
+          <span v-if="cell.tasks.length > 0" class="text-xs text-ink-gray-4 font-medium">
             {{ cell.tasks.length }}
           </span>
         </div>
@@ -93,7 +93,7 @@
             v-for="task in cell.tasks"
             :key="task.name"
             @click.stop="$emit('select-task', task.name)"
-            class="px-2.5 py-1.5 rounded-xl text-[11px] font-medium border cursor-pointer hover:shadow-xs transition truncate select-none flex items-center justify-between group"
+            class="px-2.5 py-1.5 rounded-xl text-xs font-medium border cursor-pointer hover:shadow-xs transition truncate select-none flex items-center justify-between group"
             :style="{
               backgroundColor: (task.module_color || '#3B82F6') + '15',
               borderColor: (task.module_color || '#3B82F6') + '40',
