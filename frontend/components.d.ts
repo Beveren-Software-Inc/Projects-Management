@@ -32,6 +32,7 @@ declare module 'vue' {
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     Sidebar: typeof import('./src/components/Sidebar.vue')['default']
+    TaskActivities: typeof import('./src/components/TaskActivities.vue')['default']
     TaskCalendarView: typeof import('./src/components/TaskCalendarView.vue')['default']
     TaskKanbanView: typeof import('./src/components/TaskKanbanView.vue')['default']
     TaskListView: typeof import('./src/components/TaskListView.vue')['default']

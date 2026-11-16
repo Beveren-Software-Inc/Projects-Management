@@ -4,15 +4,15 @@
     <LayoutHeader>
       <template #left-header>
         <div class="flex items-center gap-2.5">
-          <h1 class="text-sm font-semibold text-ink-gray-9">Projects</h1>
+          <h1 class="text-lg font-semibold text-ink-gray-9">Projects</h1>
           <Badge theme="gray" variant="subtle" size="sm" :label="projects.length + ' Projects'" />
 
           <!-- Quick Stage / Status Filter Chips -->
-          <div class="hidden md:flex items-center gap-1.5 ml-2 pl-3 border-l border-outline-gray-2 text-xs">
+          <div class="hidden md:flex items-center gap-1.5 ml-2 pl-3 border-l border-outline-gray-2 text-sm">
             <button
               type="button"
               @click="quickFilter = 'all'"
-              class="px-2.5 py-0.5 rounded-full text-xs transition cursor-pointer font-medium"
+              class="px-2.5 py-0.5 rounded-full text-sm transition cursor-pointer font-medium"
               :class="quickFilter === 'all' ? 'bg-ink-gray-9 text-white shadow-2xs' : 'bg-surface-gray-2 text-ink-gray-6 hover:bg-surface-gray-3 hover:text-ink-gray-9'"
             >
               All ({{ projects.length }})
@@ -20,7 +20,7 @@
             <button
               type="button"
               @click="quickFilter = 'active'"
-              class="px-2.5 py-0.5 rounded-full text-xs transition cursor-pointer font-medium flex items-center gap-1"
+              class="px-2.5 py-0.5 rounded-full text-sm transition cursor-pointer font-medium flex items-center gap-1"
               :class="quickFilter === 'active' ? 'bg-surface-blue-7 text-white shadow-2xs' : 'bg-surface-blue-2 text-ink-blue-7 hover:bg-surface-blue-3 border border-outline-blue-2'"
             >
               <span class="w-1.5 h-1.5 rounded-full bg-blue-500" :class="{ 'bg-white': quickFilter === 'active' }"></span>
@@ -29,7 +29,7 @@
             <button
               type="button"
               @click="quickFilter = 'uat'"
-              class="px-2.5 py-0.5 rounded-full text-xs transition cursor-pointer font-medium flex items-center gap-1"
+              class="px-2.5 py-0.5 rounded-full text-sm transition cursor-pointer font-medium flex items-center gap-1"
               :class="quickFilter === 'uat' ? 'bg-surface-amber-7 text-white shadow-2xs' : 'bg-surface-amber-2 text-ink-amber-7 hover:bg-surface-amber-3 border border-outline-amber-2'"
             >
               <span class="w-1.5 h-1.5 rounded-full bg-amber-500" :class="{ 'bg-white': quickFilter === 'uat' }"></span>
@@ -38,7 +38,7 @@
             <button
               type="button"
               @click="quickFilter = 'completed'"
-              class="px-2.5 py-0.5 rounded-full text-xs transition cursor-pointer font-medium flex items-center gap-1"
+              class="px-2.5 py-0.5 rounded-full text-sm transition cursor-pointer font-medium flex items-center gap-1"
               :class="quickFilter === 'completed' ? 'bg-surface-green-7 text-white shadow-2xs' : 'bg-surface-green-2 text-ink-green-7 hover:bg-surface-green-3 border border-outline-green-2'"
             >
               <span class="w-1.5 h-1.5 rounded-full bg-green-500" :class="{ 'bg-white': quickFilter === 'completed' }"></span>
@@ -139,7 +139,7 @@
       </div>
 
       <!-- Right: Showing Count -->
-      <div class="text-xs text-ink-gray-5 shrink-0 hidden sm:block">
+      <div class="text-sm text-ink-gray-5 shrink-0 hidden sm:block">
         Showing <span class="font-semibold text-ink-gray-9">{{ filteredProjects.length }}</span> of {{ projects.length }} projects
       </div>
     </div>
@@ -147,10 +147,10 @@
     <!-- 3. Main Content Area: Scrollable Card Grid -->
     <div class="flex-1 overflow-y-auto p-6">
       <!-- Loading State -->
-      <div v-if="loading" class="py-20 text-center text-xs text-ink-gray-4">
+      <div v-if="loading" class="py-20 text-center text-sm text-ink-gray-4">
         <Icon name="refresh" size="20" class="animate-spin text-ink-gray-7 mb-2 mx-auto" />
         <div class="font-medium text-ink-gray-7">Loading implementation rollouts...</div>
-        <div class="text-[11px] text-ink-gray-4 mt-0.5">Fetching module progress and task completion rates.</div>
+        <div class="text-xs text-ink-gray-4 mt-0.5">Fetching module progress and task completion rates.</div>
       </div>
 
       <!-- Empty State -->
@@ -163,7 +163,7 @@
         </div>
         <div>
           <h3 class="text-sm font-semibold text-ink-gray-9">No Projects Found</h3>
-          <p class="text-xs text-ink-gray-5 mt-1">
+          <p class="text-sm text-ink-gray-5 mt-1">
             {{ searchQuery || stageFilter !== 'All' || statusFilter !== 'All'
               ? 'No implementation rollouts match the selected filter criteria. Try resetting your search filters.'
               : 'You have not added any client implementation projects yet. Click "New Project" to create your first rollout.' }}
@@ -237,7 +237,7 @@
               </div>
 
               <!-- Project ID Monospace Badge -->
-              <span class="text-[10px] font-mono font-semibold text-ink-blue-7 bg-surface-blue-2 px-2 py-0.5 rounded-md border border-outline-blue-2 shrink-0">
+              <span class="text-xs font-mono font-semibold text-ink-blue-7 bg-surface-blue-2 px-2 py-0.5 rounded-md border border-outline-blue-2 shrink-0">
                 #{{ cleanId(p.name) }}
               </span>
             </div>
@@ -258,7 +258,7 @@
                 <h2 class="text-sm font-semibold text-ink-gray-9 group-hover:text-ink-blue-7 transition line-clamp-1">
                   {{ p.project_name }}
                 </h2>
-                <div class="text-[11px] text-ink-gray-5 mt-0.5 flex items-center gap-1.5">
+                <div class="text-xs text-ink-gray-5 mt-0.5 flex items-center gap-1.5">
                   <span class="font-medium text-ink-gray-7">{{ p.project_type || 'Implementation' }}</span>
                   <span v-if="p.customer" class="text-ink-gray-4">• {{ p.customer }}</span>
                 </div>
@@ -267,9 +267,9 @@
           </div>
 
           <!-- Section 2: Stakeholders -->
-          <div class="p-3 bg-surface-gray-1 rounded-xl border border-outline-gray-2/70 space-y-2 text-xs">
+          <div class="p-3 bg-surface-gray-1 rounded-xl border border-outline-gray-2/70 space-y-2 text-sm">
             <div class="flex items-center justify-between">
-              <span class="text-[11px] text-ink-gray-5 font-medium flex items-center gap-1.5">
+              <span class="text-xs text-ink-gray-5 font-medium flex items-center gap-1.5">
                 <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
                 Client Contact:
               </span>
@@ -281,7 +281,7 @@
               </div>
             </div>
 
-            <div class="flex items-center justify-between pt-1.5 border-t border-outline-gray-2/50 text-[11px]">
+            <div class="flex items-center justify-between pt-1.5 border-t border-outline-gray-2/50 text-xs">
               <span class="text-ink-gray-5 flex items-center gap-1.5">
                 <span class="w-1.5 h-1.5 rounded-full bg-purple-500"></span>
                 Project Lead:
@@ -294,7 +294,7 @@
 
           <!-- Section 3: Scope Modules (Colorful Badges) -->
           <div class="space-y-1.5">
-            <div class="flex items-center justify-between text-[11px] text-ink-gray-5">
+            <div class="flex items-center justify-between text-xs text-ink-gray-5">
               <span class="font-medium">Scope Modules ({{ (p.modules || []).length }})</span>
               <span class="text-ink-gray-6 font-medium">{{ p.completed_tasks || 0 }}/{{ p.total_tasks || 0 }} tasks</span>
             </div>
@@ -307,7 +307,7 @@
                 size="sm"
                 :label="m.module_name"
               />
-              <span v-if="(p.modules || []).length > 4" class="text-[10px] text-ink-gray-5 self-center font-mono font-medium pl-1">
+              <span v-if="(p.modules || []).length > 4" class="text-xs text-ink-gray-5 self-center font-mono font-medium pl-1">
                 +{{ (p.modules || []).length - 4 }} more
               </span>
             </div>
@@ -315,8 +315,8 @@
 
           <!-- Section 4: Progress Bar & Timeline Footer -->
           <div class="pt-3 border-t border-outline-gray-2 space-y-2">
-            <div class="flex items-center justify-between text-xs">
-              <span class="text-[11px] text-ink-gray-5 font-medium">Rollout Completion</span>
+            <div class="flex items-center justify-between text-sm">
+              <span class="text-xs text-ink-gray-5 font-medium">Rollout Completion</span>
               <Badge
                 :theme="(p.percent_complete || 0) >= 100 ? 'green' : (p.percent_complete || 0) > 0 ? 'blue' : 'gray'"
                 variant="subtle"
@@ -328,7 +328,7 @@
             <Progress :value="p.percent_complete || 0" size="sm" />
 
             <!-- Dates & View Project Action -->
-            <div class="flex items-center justify-between text-[11px] text-ink-gray-5 pt-1">
+            <div class="flex items-center justify-between text-xs text-ink-gray-5 pt-1">
               <div class="flex items-center gap-1.5 text-ink-gray-5">
                 <Icon name="calendar" size="12" class="text-ink-gray-4" />
                 <span>{{ formatDate(p.expected_start_date) }}</span>

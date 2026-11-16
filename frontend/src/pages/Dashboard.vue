@@ -4,7 +4,7 @@
     <LayoutHeader>
       <template #left-header>
         <div class="flex items-center gap-2">
-          <h1 class="text-sm font-semibold text-ink-gray-9">Dashboard</h1>
+          <h1 class="text-lg font-semibold text-ink-gray-9">Dashboard</h1>
           <Badge theme="gray" variant="subtle" size="sm" label="Portfolio Overview" />
         </div>
       </template>
@@ -63,19 +63,19 @@
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
         <!-- Active Projects -->
         <div class="p-4 rounded-2xl border border-outline-gray-2 bg-surface-white shadow-2xs space-y-1.5 hover:shadow-xs transition">
-          <div class="flex items-center justify-between text-xs text-ink-gray-5">
+          <div class="flex items-center justify-between text-sm text-ink-gray-5">
             <span class="font-medium">Active Projects</span>
             <div class="w-9 h-9 rounded-xl bg-surface-blue-2 text-ink-blue-7 flex items-center justify-center shrink-0">
               <Icon name="folder-kanban" size="16" />
             </div>
           </div>
           <div class="text-2xl font-bold text-ink-gray-9">{{ data.kpis?.active_projects || 0 }}</div>
-          <div class="text-[11px] text-ink-gray-4">Out of {{ data.kpis?.total_projects || 0 }} total</div>
+          <div class="text-xs text-ink-gray-4">Out of {{ data.kpis?.total_projects || 0 }} total</div>
         </div>
 
         <!-- Overall Portfolio Progress -->
         <div class="p-4 rounded-2xl border border-outline-gray-2 bg-surface-white shadow-2xs space-y-2 hover:shadow-xs transition">
-          <div class="flex items-center justify-between text-xs text-ink-gray-5">
+          <div class="flex items-center justify-between text-sm text-ink-gray-5">
             <span class="font-medium">Portfolio Progress</span>
             <div class="w-9 h-9 rounded-xl bg-surface-gray-2 text-ink-gray-7 flex items-center justify-center shrink-0">
               <Icon name="trending-up" size="16" />
@@ -87,14 +87,14 @@
 
         <!-- Completed Tasks -->
         <div class="p-4 rounded-2xl border border-outline-gray-2 bg-surface-white shadow-2xs space-y-1.5 hover:shadow-xs transition">
-          <div class="flex items-center justify-between text-xs text-ink-gray-5">
+          <div class="flex items-center justify-between text-sm text-ink-gray-5">
             <span class="font-medium">Completed Tasks</span>
             <div class="w-9 h-9 rounded-xl bg-surface-green-2 text-ink-green-7 flex items-center justify-center shrink-0">
               <Icon name="check-circle" size="16" />
             </div>
           </div>
           <div class="text-2xl font-bold text-ink-green-7">{{ data.kpis?.completed_tasks || 0 }}</div>
-          <div class="text-[11px] text-ink-gray-4">Out of {{ data.kpis?.total_tasks || 0 }} tasks</div>
+          <div class="text-xs text-ink-gray-4">Out of {{ data.kpis?.total_tasks || 0 }} tasks</div>
         </div>
 
         <!-- Overdue Tasks -->
@@ -102,7 +102,7 @@
           class="p-4 rounded-2xl border shadow-2xs space-y-1.5 transition hover:shadow-xs"
           :class="(data.kpis?.overdue_tasks || 0) > 0 ? 'border-outline-red-3 bg-surface-red-2/30' : 'border-outline-gray-2 bg-surface-white'"
         >
-          <div class="flex items-center justify-between text-xs" :class="(data.kpis?.overdue_tasks || 0) > 0 ? 'text-ink-red-7' : 'text-ink-gray-5'">
+          <div class="flex items-center justify-between text-sm" :class="(data.kpis?.overdue_tasks || 0) > 0 ? 'text-ink-red-7' : 'text-ink-gray-5'">
             <span class="font-medium">Overdue Tasks</span>
             <div
               class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
@@ -114,12 +114,12 @@
           <div class="text-2xl font-bold" :class="(data.kpis?.overdue_tasks || 0) > 0 ? 'text-ink-red-7' : 'text-ink-gray-9'">
             {{ data.kpis?.overdue_tasks || 0 }}
           </div>
-          <div class="text-[11px] text-ink-gray-4">Requires attention</div>
+          <div class="text-xs text-ink-gray-4">Requires attention</div>
         </div>
 
         <!-- Milestones Completed -->
         <div class="p-4 rounded-2xl border border-outline-gray-2 bg-surface-white shadow-2xs space-y-1.5 hover:shadow-xs transition">
-          <div class="flex items-center justify-between text-xs text-ink-gray-5">
+          <div class="flex items-center justify-between text-sm text-ink-gray-5">
             <span class="font-medium">Milestones Signed</span>
             <div class="w-9 h-9 rounded-xl bg-surface-amber-2 text-ink-amber-7 flex items-center justify-center shrink-0">
               <Icon name="flag" size="16" />
@@ -128,7 +128,7 @@
           <div class="text-2xl font-bold text-ink-amber-7">
             {{ data.kpis?.completed_milestones || 0 }} <span class="text-ink-gray-4 text-base font-normal">/ {{ data.kpis?.total_milestones || 0 }}</span>
           </div>
-          <div class="text-[11px] text-ink-gray-4">UAT and Go-Live checkpoints</div>
+          <div class="text-xs text-ink-gray-4">UAT and Go-Live checkpoints</div>
         </div>
       </div>
 
@@ -138,8 +138,8 @@
         <div class="p-4 bg-surface-white rounded-2xl border border-outline-gray-2 shadow-2xs space-y-3">
           <div class="flex items-center justify-between">
             <div>
-              <h2 class="text-xs font-semibold text-ink-gray-9">Project Stage Distribution</h2>
-              <p class="text-[11px] text-ink-gray-5">Rollouts by implementation phase</p>
+              <h2 class="text-sm font-semibold text-ink-gray-9">Project Stage Distribution</h2>
+              <p class="text-xs text-ink-gray-5">Rollouts by implementation phase</p>
             </div>
             <Badge theme="blue" variant="subtle" size="sm" :label="(data.projects?.length || 0) + ' Projects'" />
           </div>
@@ -151,7 +151,7 @@
               value="count"
               class="w-full h-full"
             />
-            <div v-else class="text-xs text-ink-gray-4">No project stage data</div>
+            <div v-else class="text-sm text-ink-gray-4">No project stage data</div>
           </div>
         </div>
 
@@ -159,8 +159,8 @@
         <div class="p-4 bg-surface-white rounded-2xl border border-outline-gray-2 shadow-2xs space-y-3">
           <div class="flex items-center justify-between">
             <div>
-              <h2 class="text-xs font-semibold text-ink-gray-9">Module Task Delivery</h2>
-              <p class="text-[11px] text-ink-gray-5">Completed vs remaining tasks by module</p>
+              <h2 class="text-sm font-semibold text-ink-gray-9">Module Task Delivery</h2>
+              <p class="text-xs text-ink-gray-5">Completed vs remaining tasks by module</p>
             </div>
             <Badge theme="green" variant="subtle" size="sm" label="Task Breakdown" />
           </div>
@@ -173,7 +173,7 @@
               stacked
               class="w-full h-full"
             />
-            <div v-else class="text-xs text-ink-gray-4">No module task data</div>
+            <div v-else class="text-sm text-ink-gray-4">No module task data</div>
           </div>
         </div>
       </div>
@@ -182,17 +182,17 @@
       <div class="bg-surface-white rounded-2xl border border-outline-gray-2 shadow-2xs overflow-hidden">
         <div class="px-5 py-3 border-b border-outline-gray-2 flex items-center justify-between">
           <div>
-            <h2 class="text-xs font-semibold text-ink-gray-9">Implementation Projects Tracking</h2>
-            <p class="text-[11px] text-ink-gray-5 mt-0.5">Real-time status, module breakdown, stakeholders, and completion percentage.</p>
+            <h2 class="text-sm font-semibold text-ink-gray-9">Implementation Projects Tracking</h2>
+            <p class="text-xs text-ink-gray-5 mt-0.5">Real-time status, module breakdown, stakeholders, and completion percentage.</p>
           </div>
-          <router-link to="/projects" class="text-xs text-ink-gray-7 hover:text-ink-gray-9 font-medium flex items-center gap-1">
+          <router-link to="/projects" class="text-sm text-ink-gray-7 hover:text-ink-gray-9 font-medium flex items-center gap-1">
             <span>View All</span>
             <Icon name="chevron-right" size="12" />
           </router-link>
         </div>
 
         <div class="overflow-x-auto">
-          <table class="w-full text-left border-collapse text-xs">
+          <table class="w-full text-left border-collapse text-sm">
             <thead>
               <tr class="bg-surface-gray-1 text-ink-gray-5 font-medium border-b border-outline-gray-2 select-none">
                 <th class="py-2.5 px-4">Project</th>
@@ -206,7 +206,7 @@
             </thead>
             <tbody class="divide-y divide-outline-gray-1">
               <tr v-if="!data.projects || data.projects.length === 0">
-                <td colspan="7" class="py-12 text-center text-ink-gray-4 text-xs">
+                <td colspan="7" class="py-12 text-center text-ink-gray-4 text-sm">
                   No active implementation projects found.
                 </td>
               </tr>
@@ -221,7 +221,7 @@
                   <div class="font-semibold text-ink-gray-9 group-hover:text-ink-blue-7 transition">
                     {{ p.project_name }}
                   </div>
-                  <div class="text-[11px] text-ink-gray-4 font-mono">{{ p.name }}</div>
+                  <div class="text-xs text-ink-gray-4 font-mono">{{ p.name }}</div>
                 </td>
 
                 <!-- Stage -->
@@ -240,7 +240,7 @@
                     <Avatar :label="p.client_poc_name || 'Client'" size="sm" />
                     <div>
                       <div class="font-medium text-ink-gray-8">{{ p.client_poc_name || 'Contact Person' }}</div>
-                      <div class="text-[11px] text-ink-gray-4 truncate max-w-xs">{{ p.client_poc_email || '' }}</div>
+                      <div class="text-xs text-ink-gray-4 truncate max-w-xs">{{ p.client_poc_email || '' }}</div>
                     </div>
                   </div>
                   <span v-else class="text-ink-gray-4 italic">No PoC assigned</span>
@@ -265,7 +265,7 @@
                 <!-- Completion % -->
                 <td class="py-3 px-3">
                   <div class="w-28 space-y-1">
-                    <div class="flex items-center justify-between text-[11px]">
+                    <div class="flex items-center justify-between text-xs">
                       <span class="font-medium text-ink-gray-9">{{ p.percent_complete || 0 }}%</span>
                       <span class="text-ink-gray-4">{{ p.completed_tasks || 0 }}/{{ p.total_tasks || 0 }}</span>
                     </div>
@@ -274,9 +274,9 @@
                 </td>
 
                 <!-- Timeline -->
-                <td class="py-3 px-3 text-ink-gray-6 text-xs whitespace-nowrap">
+                <td class="py-3 px-3 text-ink-gray-6 text-sm whitespace-nowrap">
                   <div>{{ formatDate(p.expected_start_date) }}</div>
-                  <div class="text-[11px] text-ink-gray-4">to {{ formatDate(p.expected_end_date) }}</div>
+                  <div class="text-xs text-ink-gray-4">to {{ formatDate(p.expected_end_date) }}</div>
                 </td>
 
                 <!-- Action Link -->
@@ -302,10 +302,10 @@
       <div class="bg-surface-white rounded-2xl border border-outline-gray-2 shadow-2xs p-5 space-y-4">
         <div class="flex items-center justify-between">
           <div>
-            <h2 class="text-xs font-semibold text-ink-gray-9">Module Implementation Health</h2>
-            <p class="text-[11px] text-ink-gray-5 mt-0.5">Aggregate task completion rates across all client projects by ERPNext module.</p>
+            <h2 class="text-sm font-semibold text-ink-gray-9">Module Implementation Health</h2>
+            <p class="text-xs text-ink-gray-5 mt-0.5">Aggregate task completion rates across all client projects by ERPNext module.</p>
           </div>
-          <router-link to="/modules" class="text-xs text-ink-gray-7 hover:text-ink-gray-9 font-medium flex items-center gap-1">
+          <router-link to="/modules" class="text-sm text-ink-gray-7 hover:text-ink-gray-9 font-medium flex items-center gap-1">
             <span>Manage Modules</span>
             <Icon name="chevron-right" size="12" />
           </router-link>
@@ -334,8 +334,8 @@
                   />
                 </div>
                 <div>
-                  <div class="font-semibold text-xs text-ink-gray-9">{{ mod.module_name }}</div>
-                  <div class="text-[11px] text-ink-gray-5">{{ mod.active_in_projects || 0 }} {{ mod.active_in_projects === 1 ? 'project' : 'projects' }}</div>
+                  <div class="font-semibold text-sm text-ink-gray-9">{{ mod.module_name }}</div>
+                  <div class="text-xs text-ink-gray-5">{{ mod.active_in_projects || 0 }} {{ mod.active_in_projects === 1 ? 'project' : 'projects' }}</div>
                 </div>
               </div>
               <Badge
@@ -349,7 +349,7 @@
             <!-- Progress bar -->
             <Progress :value="mod.progress || 0" size="sm" />
 
-            <div class="flex items-center justify-between text-[11px] text-ink-gray-5 pt-0.5">
+            <div class="flex items-center justify-between text-xs text-ink-gray-5 pt-0.5">
               <span>{{ mod.completed_tasks || 0 }} of {{ mod.total_tasks || 0 }} tasks</span>
               <Badge
                 v-if="mod.overdue_tasks > 0"
@@ -358,7 +358,7 @@
                 size="sm"
                 :label="mod.overdue_tasks + ' overdue'"
               />
-              <span v-else class="text-[10px] text-ink-green-7 flex items-center gap-1">
+              <span v-else class="text-xs text-ink-green-7 flex items-center gap-1">
                 <Icon name="check-circle" size="11" />
                 <span>On track</span>
               </span>

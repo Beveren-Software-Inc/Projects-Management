@@ -6,7 +6,7 @@
         <button
           type="button"
           @click="toggleMode('reply')"
-          class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition cursor-pointer"
+          class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-medium transition cursor-pointer"
           :class="!isCollapsed && activeMode === 'reply'
             ? 'bg-surface-gray-3 text-ink-gray-9 font-semibold shadow-2xs'
             : 'text-ink-gray-6 hover:text-ink-gray-9 hover:bg-surface-gray-2'"
@@ -18,7 +18,7 @@
         <button
           type="button"
           @click="toggleMode('comment')"
-          class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition cursor-pointer"
+          class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-medium transition cursor-pointer"
           :class="!isCollapsed && activeMode === 'comment'
             ? 'bg-surface-gray-3 text-ink-gray-9 font-semibold shadow-2xs'
             : 'text-ink-gray-6 hover:text-ink-gray-9 hover:bg-surface-gray-2'"
@@ -32,7 +32,7 @@
       <div
         v-if="isCollapsed"
         @click="toggleMode('reply')"
-        class="flex items-center gap-1.5 text-xs text-ink-gray-4 hover:text-ink-gray-7 cursor-pointer transition select-none"
+        class="flex items-center gap-1.5 text-sm text-ink-gray-4 hover:text-ink-gray-7 cursor-pointer transition select-none"
       >
         <span>Write a reply or comment...</span>
         <Icon name="chevron-down" size="12" />
@@ -43,10 +43,10 @@
         v-else
         type="button"
         @click="isCollapsed = true"
-        class="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs text-ink-gray-5 hover:text-ink-gray-9 hover:bg-surface-gray-2 transition cursor-pointer"
+        class="flex items-center gap-1 px-2.5 py-1 rounded-lg text-sm text-ink-gray-5 hover:text-ink-gray-9 hover:bg-surface-gray-2 transition cursor-pointer"
         title="Collapse editor"
       >
-        <span class="text-[11px] font-medium">Collapse</span>
+        <span class="text-xs font-medium">Collapse</span>
         <Icon name="chevron-down" size="12" class="rotate-180" />
       </button>
     </div>
@@ -54,7 +54,7 @@
     <!-- 2. Expandable Editor Body -->
     <div v-show="!isCollapsed" class="border-t border-outline-gray-1">
       <!-- Email Header Rows (Only in Reply Mode - Matching Screenshot 1) -->
-      <div v-if="activeMode === 'reply'" class="!bg-white border-b border-outline-gray-1 text-xs">
+      <div v-if="activeMode === 'reply'" class="!bg-white border-b border-outline-gray-1 text-sm">
       <!-- To Row -->
       <div class="px-4 py-2 flex items-center gap-2">
         <span class="text-ink-gray-4 shrink-0 w-8">To:</span>
@@ -63,13 +63,13 @@
           <span
             v-for="email in toRecipients"
             :key="email"
-            class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-gray-2 text-ink-gray-8 text-xs border border-outline-gray-2"
+            class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-gray-2 text-ink-gray-8 text-sm border border-outline-gray-2"
           >
             <span>{{ email }}</span>
             <button
               type="button"
               @click="removeRecipient(email)"
-              class="text-ink-gray-4 hover:text-ink-gray-9 text-xs leading-none"
+              class="text-ink-gray-4 hover:text-ink-gray-9 text-sm leading-none"
             >
               ×
             </button>
@@ -82,7 +82,7 @@
             @keydown.comma.prevent="addRecipient"
             @blur="addRecipient"
             placeholder="Add recipient..."
-            class="flex-1 min-w-[140px] py-1 bg-transparent border-none text-xs text-ink-gray-9 placeholder:text-ink-gray-4 focus:outline-none"
+            class="flex-1 min-w-[140px] py-1 bg-transparent border-none text-sm text-ink-gray-9 placeholder:text-ink-gray-4 focus:outline-none"
           />
         </div>
 
@@ -91,7 +91,7 @@
           <button
             type="button"
             @click="showCC = !showCC"
-            class="text-xs transition px-1.5 py-0.5 rounded"
+            class="text-sm transition px-1.5 py-0.5 rounded"
             :class="showCC || ccRecipients.length > 0 ? 'bg-surface-gray-3 text-ink-gray-9 font-medium' : 'text-ink-gray-5 hover:text-ink-gray-8'"
           >
             Cc
@@ -99,7 +99,7 @@
           <button
             type="button"
             @click="showBCC = !showBCC"
-            class="text-xs transition px-1.5 py-0.5 rounded"
+            class="text-sm transition px-1.5 py-0.5 rounded"
             :class="showBCC || bccRecipients.length > 0 ? 'bg-surface-gray-3 text-ink-gray-9 font-medium' : 'text-ink-gray-5 hover:text-ink-gray-8'"
           >
             Bcc
@@ -114,7 +114,7 @@
           <span
             v-for="email in ccRecipients"
             :key="email"
-            class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-surface-gray-2 text-ink-gray-8 text-xs border border-outline-gray-2"
+            class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-surface-gray-2 text-ink-gray-8 text-sm border border-outline-gray-2"
           >
             <span>{{ email }}</span>
             <button type="button" @click="removeCC(email)" class="text-ink-gray-4 hover:text-ink-gray-8">×</button>
@@ -125,7 +125,7 @@
             @keydown.comma.prevent="addCC"
             @blur="addCC"
             placeholder="Cc recipients..."
-            class="flex-1 min-w-[120px] py-0.5 bg-transparent border-none text-xs text-ink-gray-9 placeholder:text-ink-gray-4 focus:outline-none"
+            class="flex-1 min-w-[120px] py-0.5 bg-transparent border-none text-sm text-ink-gray-9 placeholder:text-ink-gray-4 focus:outline-none"
           />
         </div>
       </div>
@@ -137,7 +137,7 @@
           <span
             v-for="email in bccRecipients"
             :key="email"
-            class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-surface-gray-2 text-ink-gray-8 text-xs border border-outline-gray-2"
+            class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-surface-gray-2 text-ink-gray-8 text-sm border border-outline-gray-2"
           >
             <span>{{ email }}</span>
             <button type="button" @click="removeBCC(email)" class="text-ink-gray-4 hover:text-ink-gray-8">×</button>
@@ -148,7 +148,7 @@
             @keydown.comma.prevent="addBCC"
             @blur="addBCC"
             placeholder="Bcc recipients..."
-            class="flex-1 min-w-[120px] py-0.5 bg-transparent border-none text-xs text-ink-gray-9 placeholder:text-ink-gray-4 focus:outline-none"
+            class="flex-1 min-w-[120px] py-0.5 bg-transparent border-none text-sm text-ink-gray-9 placeholder:text-ink-gray-4 focus:outline-none"
           />
         </div>
       </div>
@@ -162,7 +162,7 @@
           v-model="messageContent"
           :placeholder="activeMode === 'reply' ? 'Type your reply message...' : '@John could you please look into this?'"
           rows="6"
-          class="w-full px-4 py-3 text-xs text-ink-gray-9 leading-relaxed bg-transparent border-none focus:outline-none resize-none font-sans"
+          class="w-full px-4 py-3 text-sm text-ink-gray-9 leading-relaxed bg-transparent border-none focus:outline-none resize-none font-sans"
           @input="handleInput"
           @keydown="handleKeydown"
         ></textarea>
@@ -172,7 +172,7 @@
           <div
             v-for="(att, idx) in attachments"
             :key="idx"
-            class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-surface-gray-2 text-ink-gray-8 text-xs border border-outline-gray-2"
+            class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-surface-gray-2 text-ink-gray-8 text-sm border border-outline-gray-2"
           >
             <Icon name="tag" size="11" class="text-ink-gray-5" />
             <span class="truncate max-w-[150px]">{{ att.name }}</span>
@@ -186,7 +186,7 @@
         v-if="showMentionMenu"
         class="absolute left-6 top-10 z-50 w-60 !bg-white rounded-2xl shadow-xl border border-outline-gray-2 overflow-hidden animate-in fade-in duration-100"
       >
-        <div class="px-3.5 py-2 bg-surface-gray-1 border-b border-outline-gray-1 text-[11px] font-semibold text-ink-gray-5">
+        <div class="px-3.5 py-2 bg-surface-gray-1 border-b border-outline-gray-1 text-xs font-semibold text-ink-gray-5">
           Mention team member
         </div>
         <div class="max-h-48 overflow-y-auto p-1.5 space-y-0.5">
@@ -195,18 +195,18 @@
             :key="user.name"
             @click="selectMentionUser(user)"
             @mouseenter="mentionActiveIndex = uIdx"
-            class="px-2.5 py-1.5 rounded-xl text-xs flex items-center justify-between cursor-pointer transition"
+            class="px-2.5 py-1.5 rounded-xl text-sm flex items-center justify-between cursor-pointer transition"
             :class="mentionActiveIndex === uIdx ? 'bg-surface-gray-3 text-ink-gray-9 font-medium' : 'text-ink-gray-7 hover:bg-surface-gray-2'"
           >
             <div class="flex items-center gap-2 min-w-0">
               <Avatar :label="user.full_name || user.name" size="sm" />
               <div class="truncate">
                 <div class="font-medium truncate">{{ user.full_name || user.name }}</div>
-                <div class="text-[10px] text-ink-gray-4 truncate">{{ user.email || user.name }}</div>
+                <div class="text-xs text-ink-gray-4 truncate">{{ user.email || user.name }}</div>
               </div>
             </div>
           </div>
-          <div v-if="mentionUsersList.length === 0" class="p-3 text-center text-xs text-ink-gray-4">
+          <div v-if="mentionUsersList.length === 0" class="p-3 text-center text-sm text-ink-gray-4">
             No matching team members
           </div>
         </div>
@@ -254,7 +254,7 @@
         <button
           type="button"
           @click="insertFormat('\n## ', '')"
-          class="px-1.5 py-0.5 text-xs font-semibold rounded hover:bg-surface-gray-2 hover:text-ink-gray-9"
+          class="px-1.5 py-0.5 text-sm font-semibold rounded hover:bg-surface-gray-2 hover:text-ink-gray-9"
           title="Heading"
         >
           Heading
@@ -262,21 +262,21 @@
         <button
           type="button"
           @click="insertFormat('\n## ', '')"
-          class="px-1 py-0.5 text-[11px] font-semibold rounded hover:bg-surface-gray-2 hover:text-ink-gray-9"
+          class="px-1 py-0.5 text-xs font-semibold rounded hover:bg-surface-gray-2 hover:text-ink-gray-9"
         >
           H2
         </button>
         <button
           type="button"
           @click="insertFormat('\n### ', '')"
-          class="px-1 py-0.5 text-[11px] font-semibold rounded hover:bg-surface-gray-2 hover:text-ink-gray-9"
+          class="px-1 py-0.5 text-xs font-semibold rounded hover:bg-surface-gray-2 hover:text-ink-gray-9"
         >
           H3
         </button>
         <button
           type="button"
           @click="insertFormat('\n#### ', '')"
-          class="px-1 py-0.5 text-[11px] font-semibold rounded hover:bg-surface-gray-2 hover:text-ink-gray-9"
+          class="px-1 py-0.5 text-xs font-semibold rounded hover:bg-surface-gray-2 hover:text-ink-gray-9"
         >
           H4
         </button>
@@ -285,7 +285,7 @@
         <button
           type="button"
           @click="wrapFormat('**', '**')"
-          class="px-1.5 py-0.5 font-bold rounded hover:bg-surface-gray-2 hover:text-ink-gray-9 text-xs"
+          class="px-1.5 py-0.5 font-bold rounded hover:bg-surface-gray-2 hover:text-ink-gray-9 text-sm"
           title="Bold"
         >
           B
@@ -295,7 +295,7 @@
         <button
           type="button"
           @click="wrapFormat('*', '*')"
-          class="px-1.5 py-0.5 italic rounded hover:bg-surface-gray-2 hover:text-ink-gray-9 text-xs font-serif"
+          class="px-1.5 py-0.5 italic rounded hover:bg-surface-gray-2 hover:text-ink-gray-9 text-sm font-serif"
           title="Italic"
         >
           I
@@ -305,7 +305,7 @@
         <button
           type="button"
           @click="wrapFormat('~~', '~~')"
-          class="px-1.5 py-0.5 line-through rounded hover:bg-surface-gray-2 hover:text-ink-gray-9 text-xs"
+          class="px-1.5 py-0.5 line-through rounded hover:bg-surface-gray-2 hover:text-ink-gray-9 text-sm"
           title="Strikethrough"
         >
           S
@@ -314,7 +314,7 @@
         <!-- Text style A -->
         <button
           type="button"
-          class="px-1.5 py-0.5 rounded hover:bg-surface-gray-2 hover:text-ink-gray-9 text-xs font-medium"
+          class="px-1.5 py-0.5 rounded hover:bg-surface-gray-2 hover:text-ink-gray-9 text-sm font-medium"
         >
           A
         </button>
@@ -348,7 +348,7 @@
         <button
           type="button"
           @click="insertFormat('\n1. ', '')"
-          class="px-1 py-0.5 text-xs font-mono rounded hover:bg-surface-gray-2"
+          class="px-1 py-0.5 text-sm font-mono rounded hover:bg-surface-gray-2"
           title="Numbered List"
         >
           :=
@@ -356,7 +356,7 @@
         <button
           type="button"
           @click="insertFormat('\n- ', '')"
-          class="px-1 py-0.5 text-xs font-mono rounded hover:bg-surface-gray-2"
+          class="px-1 py-0.5 text-sm font-mono rounded hover:bg-surface-gray-2"
           title="Bullet List"
         >
           :≡
@@ -366,7 +366,7 @@
         <button
           type="button"
           @click="insertFormat('\n> ', '')"
-          class="px-1.5 py-0.5 text-xs font-serif font-bold rounded hover:bg-surface-gray-2"
+          class="px-1.5 py-0.5 text-sm font-serif font-bold rounded hover:bg-surface-gray-2"
           title="Quote"
         >
           ""
@@ -498,21 +498,15 @@ const mentionFilter = ref('')
 const mentionActiveIndex = ref(0)
 const teamUsers = ref([])
 
-const defaultMembers = [
-  { name: 'abdullah@beverensoftware.com', full_name: 'Abdullah', email: 'abdullah@beverensoftware.com' },
-  { name: 'abid@beverensoftware.com', full_name: 'Abid Khan', email: 'abid@beverensoftware.com' },
-  { name: 'balachandar@beverensoftware.com', full_name: 'Balachandar S', email: 'balachandar@beverensoftware.com' },
-  { name: 'saiyoni@beverensoftware.com', full_name: 'Saiyoni', email: 'saiyoni@beverensoftware.com' },
-  { name: 'shakir@beverensoftware.com', full_name: 'Shakir', email: 'shakir@beverensoftware.com' },
-]
 
 onMounted(async () => {
   initRecipients()
   try {
     const list = await getUsers()
-    teamUsers.value = list?.length ? list : defaultMembers
+    teamUsers.value = list || []
   } catch (e) {
-    teamUsers.value = defaultMembers
+    console.error('Failed to load team users for mentions', e)
+    teamUsers.value = []
   }
 })
 

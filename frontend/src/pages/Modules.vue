@@ -4,7 +4,7 @@
     <LayoutHeader>
       <template #left-header>
         <div class="flex items-center gap-2.5">
-          <h1 class="text-sm font-semibold text-ink-gray-9">Module Templates</h1>
+          <h1 class="text-lg font-semibold text-ink-gray-9">Module Templates</h1>
           <Badge theme="gray" variant="subtle" size="sm" :label="modules.length + ' Modules'" />
         </div>
       </template>
@@ -47,12 +47,12 @@
               v-model="searchQuery"
               type="text"
               placeholder="Search modules..."
-              class="w-full pl-8 pr-3 py-1.5 text-xs rounded-xl border border-outline-gray-2 bg-surface-gray-1 hover:bg-surface-gray-2 focus:bg-white focus:outline-none focus:border-outline-gray-4 transition placeholder:text-ink-gray-4"
+              class="w-full pl-8 pr-3 py-1.5 text-sm rounded-xl border border-outline-gray-2 bg-surface-gray-1 hover:bg-surface-gray-2 focus:bg-white focus:outline-none focus:border-outline-gray-4 transition placeholder:text-ink-gray-4"
             />
             <Icon name="search" size="13" class="absolute left-2.5 top-2.5 text-ink-gray-4" />
           </div>
 
-          <div class="flex items-center justify-between text-[11px] text-ink-gray-5 px-1">
+          <div class="flex items-center justify-between text-xs text-ink-gray-5 px-1">
             <span>{{ filteredModules.length }} modules listed</span>
             <button
               type="button"
@@ -69,7 +69,7 @@
         <div class="flex-1 overflow-y-auto p-3 space-y-1.5">
           <div
             v-if="filteredModules.length === 0"
-            class="text-center py-8 text-xs text-ink-gray-4 space-y-2"
+            class="text-center py-8 text-sm text-ink-gray-4 space-y-2"
           >
             <p>No modules match "{{ searchQuery }}"</p>
             <Button
@@ -106,15 +106,15 @@
               </div>
               <div class="truncate min-w-0">
                 <div class="flex items-center gap-1.5 truncate">
-                  <h3 class="font-medium text-xs text-ink-gray-9 truncate">{{ mod.module_name }}</h3>
+                  <h3 class="font-medium text-sm text-ink-gray-9 truncate">{{ mod.module_name }}</h3>
                   <span
                     v-if="isCustomModule(mod)"
-                    class="text-[9px] px-1.5 py-0.2 rounded-md bg-blue-50 text-blue-700 border border-blue-200/60 font-medium shrink-0"
+                    class="text-[11px] px-1.5 py-0.2 rounded-md bg-blue-50 text-blue-700 border border-blue-200/60 font-medium shrink-0"
                   >
                     Custom
                   </span>
                 </div>
-                <div class="text-[11px] text-ink-gray-5">{{ mod.tasks?.length || 0 }} standard tasks</div>
+                <div class="text-xs text-ink-gray-5">{{ mod.tasks?.length || 0 }} standard tasks</div>
               </div>
             </div>
             <Icon name="chevron-right" size="13" class="text-ink-gray-4 shrink-0 group-hover:text-ink-gray-6 transition" />
@@ -124,13 +124,13 @@
 
       <!-- Right: Task Templates Table -->
       <div class="flex-1 flex flex-col bg-surface-white overflow-hidden">
-        <div v-if="!selectedModule" class="flex-1 flex flex-col items-center justify-center p-12 text-center text-xs text-ink-gray-4 space-y-3">
+        <div v-if="!selectedModule" class="flex-1 flex flex-col items-center justify-center p-12 text-center text-sm text-ink-gray-4 space-y-3">
           <div class="w-12 h-12 rounded-2xl bg-surface-gray-2 flex items-center justify-center text-ink-gray-4">
             <Icon name="modules" size="24" />
           </div>
           <div>
             <h3 class="text-sm font-semibold text-ink-gray-8">No Module Selected</h3>
-            <p class="text-xs text-ink-gray-5 max-w-sm mt-1">Select a module from the sidebar or click "New Module" to define custom workflows.</p>
+            <p class="text-sm text-ink-gray-5 max-w-sm mt-1">Select a module from the sidebar or click "New Module" to define custom workflows.</p>
           </div>
           <Button
             theme="gray"
@@ -161,21 +161,21 @@
               </div>
               <div class="min-w-0">
                 <div class="flex items-center gap-2">
-                  <h2 class="font-semibold text-xs text-ink-gray-9 truncate">{{ selectedModule.module_name }}</h2>
+                  <h2 class="font-semibold text-sm text-ink-gray-9 truncate">{{ selectedModule.module_name }}</h2>
                   <span
                     v-if="isCustomModule(selectedModule)"
-                    class="text-[10px] px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 font-medium border border-blue-200/60"
+                    class="text-xs px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 font-medium border border-blue-200/60"
                   >
                     Custom Module
                   </span>
                   <span
                     v-else
-                    class="text-[10px] px-2 py-0.5 rounded-full bg-surface-gray-2 text-ink-gray-6 font-medium"
+                    class="text-xs px-2 py-0.5 rounded-full bg-surface-gray-2 text-ink-gray-6 font-medium"
                   >
                     Standard Module
                   </span>
                 </div>
-                <p class="text-[11px] text-ink-gray-5 truncate max-w-xl">
+                <p class="text-xs text-ink-gray-5 truncate max-w-xl">
                   {{ selectedModule.description || 'No description provided for this module.' }}
                 </p>
               </div>
@@ -223,7 +223,7 @@
           <!-- Tasks Table -->
           <div class="flex-1 overflow-auto">
             <table class="w-full text-left border-collapse">
-              <thead class="bg-surface-gray-1 border-b border-outline-gray-1 text-[11px] font-semibold text-ink-gray-5 uppercase tracking-wider sticky top-0 z-10 select-none">
+              <thead class="bg-surface-gray-1 border-b border-outline-gray-1 text-xs font-semibold text-ink-gray-5 uppercase tracking-wider sticky top-0 z-10 select-none">
                 <tr>
                   <th class="py-2.5 px-4 w-12 text-center">#</th>
                   <th class="py-2.5 px-3">Task Subject</th>
@@ -234,7 +234,7 @@
                   <th class="py-2.5 px-4 w-12 text-right"></th>
                 </tr>
               </thead>
-              <tbody class="divide-y divide-outline-gray-1 text-xs">
+              <tbody class="divide-y divide-outline-gray-1 text-sm">
                 <tr v-if="!selectedModule.tasks || selectedModule.tasks.length === 0">
                   <td colspan="7" class="py-12 text-center text-ink-gray-4">
                     No task templates defined. Click "Add Template Task" to create one.
@@ -246,18 +246,18 @@
                   :key="idx"
                   class="hover:bg-surface-gray-1 transition"
                 >
-                  <td class="py-2.5 px-4 text-center text-[11px] font-mono text-ink-gray-4">{{ idx + 1 }}</td>
+                  <td class="py-2.5 px-4 text-center text-xs font-mono text-ink-gray-4">{{ idx + 1 }}</td>
                   <td class="py-2.5 px-3">
                     <input
                       v-model="task.subject"
                       type="text"
-                      class="w-full px-2.5 py-1 text-xs rounded-xl border border-transparent hover:border-outline-gray-2 focus:border-outline-gray-3 bg-transparent focus:bg-white text-ink-gray-9 focus:outline-none transition"
+                      class="w-full px-2.5 py-1 text-sm rounded-xl border border-transparent hover:border-outline-gray-2 focus:border-outline-gray-3 bg-transparent focus:bg-white text-ink-gray-9 focus:outline-none transition"
                     />
                   </td>
                   <td class="py-2.5 px-3">
                     <select
                       v-model="task.priority"
-                      class="px-2.5 py-1 text-xs rounded-xl border border-outline-gray-2 bg-white text-ink-gray-8 focus:outline-none transition cursor-pointer"
+                      class="px-2.5 py-1 text-sm rounded-xl border border-outline-gray-2 bg-white text-ink-gray-8 focus:outline-none transition cursor-pointer"
                     >
                       <option value="Low">Low</option>
                       <option value="Medium">Medium</option>
@@ -270,7 +270,7 @@
                       v-model.number="task.day_offset"
                       type="number"
                       min="0"
-                      class="w-16 px-2.5 py-1 text-xs rounded-xl border border-outline-gray-2 text-ink-gray-8 focus:outline-none transition"
+                      class="w-16 px-2.5 py-1 text-sm rounded-xl border border-outline-gray-2 text-ink-gray-8 focus:outline-none transition"
                     />
                   </td>
                   <td class="py-2.5 px-3">
@@ -278,7 +278,7 @@
                       v-model.number="task.duration_days"
                       type="number"
                       min="1"
-                      class="w-16 px-2.5 py-1 text-xs rounded-xl border border-outline-gray-2 text-ink-gray-8 focus:outline-none transition"
+                      class="w-16 px-2.5 py-1 text-sm rounded-xl border border-outline-gray-2 text-ink-gray-8 focus:outline-none transition"
                     />
                   </td>
                   <td class="py-2.5 px-3 text-center">

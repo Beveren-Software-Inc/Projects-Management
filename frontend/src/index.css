@@ -48,8 +48,12 @@
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  /* Same typeface as Helpdesk / frappe-ui (Inter variable font, loaded via frappe-ui/style.css) */
+  font-family: InterVar, Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-optical-sizing: auto;
+  font-feature-settings: "cv11" 1;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   background-color: var(--surface-base);
   color: var(--ink-gray-9);
   margin: 0;
@@ -148,4 +152,67 @@ textarea {
 }
 ::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
+}
+
+/* Rendered HTML of notes / emails in the task activity timeline */
+.timeline-html {
+  overflow-wrap: anywhere;
+}
+.timeline-html .ql-editor {
+  padding: 0;
+}
+.timeline-html p,
+.timeline-html div {
+  margin: 0;
+}
+.timeline-html p + p,
+.timeline-html ul,
+.timeline-html ol,
+.timeline-html blockquote,
+.timeline-html pre,
+.timeline-html table {
+  margin-top: 0.5em;
+}
+.timeline-html ul {
+  list-style: disc;
+  padding-left: 1.25em;
+}
+.timeline-html ol {
+  list-style: decimal;
+  padding-left: 1.25em;
+}
+.timeline-html a {
+  color: #2563eb;
+  text-decoration: underline;
+}
+.timeline-html blockquote {
+  border-left: 2px solid var(--outline-gray-2);
+  padding-left: 0.75em;
+  color: var(--ink-gray-6);
+}
+.timeline-html pre,
+.timeline-html code {
+  background: var(--surface-gray-2);
+  border-radius: 6px;
+  font-size: 0.95em;
+}
+.timeline-html pre {
+  padding: 0.5em 0.75em;
+  white-space: pre-wrap;
+}
+.timeline-html img {
+  max-width: 100%;
+  height: auto;
+}
+.timeline-html table {
+  border-collapse: collapse;
+}
+.timeline-html td,
+.timeline-html th {
+  border: 1px solid var(--outline-gray-2);
+  padding: 0.25em 0.5em;
+}
+.timeline-html strong,
+.timeline-html b {
+  font-weight: 600;
 }

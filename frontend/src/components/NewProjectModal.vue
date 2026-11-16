@@ -9,7 +9,7 @@
       <div class="flex items-center justify-between w-full">
         <div>
           <h2 class="text-base font-semibold text-ink-gray-9">Create Implementation Project</h2>
-          <p class="text-xs text-ink-gray-5 mt-0.5">Configure project details and select modules to automatically generate implementation tasks.</p>
+          <p class="text-sm text-ink-gray-5 mt-0.5">Configure project details and select modules to automatically generate implementation tasks.</p>
         </div>
       </div>
     </template>
@@ -75,7 +75,7 @@
 
         <!-- Client Details Section -->
         <div class="p-4 rounded-2xl border border-outline-gray-2 bg-surface-gray-1 space-y-3">
-          <div class="text-xs font-semibold text-ink-gray-8 flex items-center gap-2">
+          <div class="text-sm font-semibold text-ink-gray-8 flex items-center gap-2">
             <div class="w-6 h-6 rounded-lg bg-surface-blue-2 text-ink-blue-7 flex items-center justify-center shrink-0">
               <Icon name="user" size="13" />
             </div>
@@ -165,7 +165,7 @@
         />
 
         <div class="flex items-center justify-between">
-          <div class="text-xs text-ink-gray-6">
+          <div class="text-sm text-ink-gray-6">
             Select which ERPNext modules are in scope for this client:
           </div>
           <div class="flex gap-2">
@@ -213,11 +213,11 @@
                 </div>
               </div>
 
-              <div class="font-semibold text-xs text-ink-gray-9 mb-1">{{ mod.module_name }}</div>
-              <p class="text-[11px] text-ink-gray-5 line-clamp-2 leading-relaxed">{{ mod.description }}</p>
+              <div class="font-semibold text-sm text-ink-gray-9 mb-1">{{ mod.module_name }}</div>
+              <p class="text-xs text-ink-gray-5 line-clamp-2 leading-relaxed">{{ mod.description }}</p>
             </div>
 
-            <div class="mt-3 pt-2 border-t border-outline-gray-2/60 flex items-center justify-between text-[11px] text-ink-gray-5">
+            <div class="mt-3 pt-2 border-t border-outline-gray-2/60 flex items-center justify-between text-xs text-ink-gray-5">
               <span>{{ mod.task_count || mod.tasks?.length || 0 }} standard tasks</span>
               <Badge
                 v-if="isModuleSelected(mod.module_code)"
@@ -233,14 +233,14 @@
 
       <!-- TAB 3: TASK PREVIEW -->
       <div v-show="activeTab === 'preview'" class="space-y-4 pt-2 max-h-[60vh] overflow-y-auto px-1">
-        <div class="p-3 bg-surface-blue-2 rounded-xl border border-outline-blue-3 flex items-center justify-between text-xs text-ink-blue-7">
+        <div class="p-3 bg-surface-blue-2 rounded-xl border border-outline-blue-3 flex items-center justify-between text-sm text-ink-blue-7">
           <span>
             Total <b>{{ totalPreviewTasks }} tasks</b> will be generated starting from <b>{{ form.expected_start_date }}</b>.
           </span>
-          <span class="text-[11px]">Calculated based on module lead days</span>
+          <span class="text-xs">Calculated based on module lead days</span>
         </div>
 
-        <div v-if="previewModules.length === 0" class="py-12 text-center text-xs text-ink-gray-5">
+        <div v-if="previewModules.length === 0" class="py-12 text-center text-sm text-ink-gray-5">
           No modules selected. Please go to "2. Select Modules" and pick at least one module.
         </div>
 
@@ -260,7 +260,7 @@
                 >
                   <Icon :name="mod.icon || 'package'" size="14" />
                 </div>
-                <span class="text-xs font-semibold text-ink-gray-9">{{ mod.module_name }}</span>
+                <span class="text-sm font-semibold text-ink-gray-9">{{ mod.module_name }}</span>
               </div>
               <Badge theme="gray" variant="subtle" size="sm" :label="(mod.tasks?.length || 0) + ' tasks'" />
             </div>
@@ -269,13 +269,13 @@
               <div
                 v-for="(task, idx) in mod.tasks"
                 :key="idx"
-                class="px-4 py-2 flex items-center justify-between text-xs hover:bg-surface-gray-1/50 transition"
+                class="px-4 py-2 flex items-center justify-between text-sm hover:bg-surface-gray-1/50 transition"
               >
                 <div class="flex items-center gap-2.5">
-                  <span class="text-[11px] text-ink-gray-4 font-mono w-4">{{ idx + 1 }}</span>
+                  <span class="text-xs text-ink-gray-4 font-mono w-4">{{ idx + 1 }}</span>
                   <div>
                     <div class="font-medium text-ink-gray-8">{{ task.subject }}</div>
-                    <div class="text-[11px] text-ink-gray-5 line-clamp-1">{{ task.description }}</div>
+                    <div class="text-xs text-ink-gray-5 line-clamp-1">{{ task.description }}</div>
                   </div>
                 </div>
                 <div class="flex items-center gap-2 shrink-0">
@@ -292,7 +292,7 @@
                     size="sm"
                     :label="task.priority || 'Medium'"
                   />
-                  <span class="text-[11px] text-ink-gray-5 font-mono">+{{ task.day_offset }}d</span>
+                  <span class="text-xs text-ink-gray-5 font-mono">+{{ task.day_offset }}d</span>
                 </div>
               </div>
             </div>

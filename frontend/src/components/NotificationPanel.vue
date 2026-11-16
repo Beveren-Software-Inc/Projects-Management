@@ -78,7 +78,7 @@
             <span class="lucide-bell-off size-5 text-ink-gray-4" />
           </div>
           <div class="text-sm font-medium text-ink-gray-8">No notifications</div>
-          <div class="text-xs text-ink-gray-5 mt-1">
+          <div class="text-sm text-ink-gray-5 mt-1">
             {{ readFilter === 'unread' ? 'You have caught up with all updates!' : 'No notification history found.' }}
           </div>
         </div>
@@ -107,7 +107,7 @@
               v-html="cleanSubject(item.subject)"
             ></div>
 
-            <div class="flex items-center gap-2 mt-1 text-xs text-ink-gray-5">
+            <div class="flex items-center gap-2 mt-1 text-sm text-ink-gray-5">
               <span>{{ item.pretty_time || formatDate(item.creation) }}</span>
               <template v-if="item.type">
                 <span class="text-ink-gray-3">•</span>

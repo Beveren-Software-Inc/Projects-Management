@@ -12,7 +12,7 @@
         </div>
         <div>
           <h2 class="text-base font-semibold text-ink-gray-9">Attach Governance Document</h2>
-          <p class="text-xs text-ink-gray-5 mt-0.5">
+          <p class="text-sm text-ink-gray-5 mt-0.5">
             Attach official Scope docs, Discussion notes/MoM, or governed Google Drive links to {{ projectName }}.
           </p>
         </div>
@@ -36,7 +36,7 @@
         />
 
         <div class="space-y-1.5">
-          <label class="block text-xs font-medium text-ink-gray-7">Attachment Method</label>
+          <label class="block text-sm font-medium text-ink-gray-7">Attachment Method</label>
           <TabButtons
             :options="[
               { label: 'File Upload', value: 'file' },
@@ -57,7 +57,7 @@
 
       <!-- File Upload Section -->
       <div v-if="docType === 'file'" class="space-y-1">
-        <label class="block text-xs font-medium text-ink-gray-7">Choose File *</label>
+        <label class="block text-sm font-medium text-ink-gray-7">Choose File *</label>
         <div
           class="border-2 border-dashed rounded-xl p-4 text-center transition cursor-pointer"
           :class="selectedFile ? 'border-outline-green-3 bg-surface-green-2/30' : 'border-outline-gray-3 hover:border-outline-gray-4 bg-surface-gray-1'"
@@ -69,14 +69,14 @@
             class="hidden"
             @change="handleFileChange"
           />
-          <div v-if="selectedFile" class="flex items-center justify-center gap-2 text-ink-green-7 font-medium text-xs">
+          <div v-if="selectedFile" class="flex items-center justify-center gap-2 text-ink-green-7 font-medium text-sm">
             <Icon name="check-circle" :size="16" />
             <span>{{ selectedFile.name }} ({{ formatSize(selectedFile.size) }})</span>
           </div>
-          <div v-else class="space-y-1 text-ink-gray-5 text-xs">
+          <div v-else class="space-y-1 text-ink-gray-5 text-sm">
             <Icon name="upload-cloud" :size="22" class="mx-auto text-ink-gray-4" />
             <p class="font-medium text-ink-gray-7">Click to upload document</p>
-            <p class="text-[11px] text-ink-gray-4">PDF, Word, Excel, Images up to 25MB</p>
+            <p class="text-xs text-ink-gray-4">PDF, Word, Excel, Images up to 25MB</p>
           </div>
         </div>
       </div>
@@ -121,7 +121,7 @@
 
       <!-- Notes / Description -->
       <div class="space-y-1">
-        <label class="block text-xs font-medium text-ink-gray-7">Description / Summary of Scope & Notes</label>
+        <label class="block text-sm font-medium text-ink-gray-7">Description / Summary of Scope & Notes</label>
         <Textarea
           v-model="form.notes"
           rows="2"

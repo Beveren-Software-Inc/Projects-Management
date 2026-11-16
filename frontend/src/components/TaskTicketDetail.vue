@@ -3,7 +3,7 @@
     <!-- 1. Layout Header (Matching Frappe Helpdesk TicketHeader) -->
     <div class="h-11 px-5 border-b border-outline-gray-1 flex items-center justify-between shrink-0 bg-surface-white">
       <!-- Left Breadcrumbs -->
-      <div class="flex items-center gap-1.5 min-w-0 flex-1 text-sm">
+      <div class="flex items-center gap-1.5 min-w-0 flex-1 text-lg">
         <Button
           v-if="showBack"
           variant="ghost"
@@ -81,7 +81,7 @@
       <div class="flex gap-4">
         <button
           @click="activeTab = 'activity'"
-          class="flex items-center gap-1.5 py-2.5 text-xs font-medium border-b-2 transition cursor-pointer"
+          class="flex items-center gap-1.5 py-2.5 text-sm font-medium border-b-2 transition cursor-pointer"
           :class="activeTab === 'activity' ? 'border-ink-gray-9 text-ink-gray-9 font-semibold' : 'border-transparent text-ink-gray-5 hover:text-ink-gray-8'"
         >
           <ActivityIcon class="size-3.5" :class="activeTab === 'activity' ? 'text-ink-gray-9' : 'text-ink-gray-5'" />
@@ -90,14 +90,14 @@
 
         <button
           @click="activeTab = 'emails'"
-          class="flex items-center gap-1.5 py-2.5 text-xs font-medium border-b-2 transition cursor-pointer"
+          class="flex items-center gap-1.5 py-2.5 text-sm font-medium border-b-2 transition cursor-pointer"
           :class="activeTab === 'emails' ? 'border-ink-gray-9 text-ink-gray-9 font-semibold' : 'border-transparent text-ink-gray-5 hover:text-ink-gray-8'"
         >
           <EmailIcon class="size-3.5" :class="activeTab === 'emails' ? 'text-ink-gray-9' : 'text-ink-gray-5'" />
           <span>Emails</span>
           <span
             v-if="emailCount > 0"
-            class="text-[10px] px-1.5 py-0.5 rounded-full font-medium"
+            class="text-xs px-1.5 py-0.5 rounded-full font-medium"
             :class="activeTab === 'emails' ? 'bg-surface-gray-3 text-ink-gray-9' : 'bg-surface-gray-2 text-ink-gray-6'"
           >
             {{ emailCount }}
@@ -106,14 +106,14 @@
 
         <button
           @click="activeTab = 'comments'"
-          class="flex items-center gap-1.5 py-2.5 text-xs font-medium border-b-2 transition cursor-pointer"
+          class="flex items-center gap-1.5 py-2.5 text-sm font-medium border-b-2 transition cursor-pointer"
           :class="activeTab === 'comments' ? 'border-ink-gray-9 text-ink-gray-9 font-semibold' : 'border-transparent text-ink-gray-5 hover:text-ink-gray-8'"
         >
           <CommentIcon class="size-3.5" :class="activeTab === 'comments' ? 'text-ink-gray-9' : 'text-ink-gray-5'" />
           <span>Comments</span>
           <span
             v-if="commentCount > 0"
-            class="text-[10px] px-1.5 py-0.5 rounded-full font-medium"
+            class="text-xs px-1.5 py-0.5 rounded-full font-medium"
             :class="activeTab === 'comments' ? 'bg-surface-gray-3 text-ink-gray-9' : 'bg-surface-gray-2 text-ink-gray-6'"
           >
             {{ commentCount }}
@@ -122,7 +122,7 @@
 
         <button
           @click="activeTab = 'analytics'"
-          class="flex items-center gap-1.5 py-2.5 text-xs font-medium border-b-2 transition cursor-pointer"
+          class="flex items-center gap-1.5 py-2.5 text-sm font-medium border-b-2 transition cursor-pointer"
           :class="activeTab === 'analytics' ? 'border-ink-gray-9 text-ink-gray-9 font-semibold' : 'border-transparent text-ink-gray-5 hover:text-ink-gray-8'"
         >
           <Icon name="chart-no-axes-column" size="14" :class="activeTab === 'analytics' ? 'text-ink-gray-9' : 'text-ink-gray-5'" />
@@ -134,324 +134,110 @@
     <!-- 3. Ticket Split Content (Left Feed & Right Sidebar) -->
     <div class="flex-1 flex overflow-hidden">
       
-      <!-- MAIN FEED COLUMN (Frappe Helpdesk Communication Area) -->
-      <div class="flex-1 flex flex-col overflow-hidden bg-[#fafafa]">
-        <!-- Scrollable Feed Area -->
-        <div class="flex-1 overflow-y-auto p-6 space-y-6">
-          <div class="flex items-center justify-between">
-            <h2 class="text-base font-bold text-ink-gray-9">
-              <span v-if="activeTab === 'activity'">Activity</span>
-              <span v-else-if="activeTab === 'emails'">Emails ({{ emailCount }})</span>
-              <span v-else-if="activeTab === 'comments'">Comments ({{ commentCount }})</span>
-              <span v-else-if="activeTab === 'analytics'">Performance & SLA Analytics</span>
-            </h2>
+      <!-- MAIN FEED COLUMN (Helpdesk TicketAgentActivities + pinned communication area) -->
+      <div class="flex-1 flex flex-col overflow-hidden bg-surface-white min-w-0">
+        <!-- Tab title row -->
+        <div class="flex items-center justify-between gap-2 px-5 sm:px-10 pt-4 pb-3 shrink-0">
+          <div class="flex items-center gap-2 min-w-0">
+            <h2 class="text-lg font-semibold text-ink-gray-9 truncate">{{ tabTitle }}</h2>
             <Badge
               v-if="task.is_milestone"
-              theme="amber"
+              theme="orange"
               variant="subtle"
               size="sm"
               label="Key Milestone"
-            >
-              <template #prefix>
-                <Icon name="flag" size="11" class="text-amber-600" />
-              </template>
-            </Badge>
+            />
           </div>
+          <Dropdown v-if="activeTab === 'activity'" :options="newActivityOptions" align="end">
+            <template #default="{ open }">
+              <Button variant="subtle" size="sm" label="New">
+                <template #prefix>
+                  <Icon name="plus" size="14" />
+                </template>
+                <template #suffix>
+                  <Icon name="chevron-down" size="12" class="transition-transform" :class="{ 'rotate-180': open }" />
+                </template>
+              </Button>
+            </template>
+          </Dropdown>
+          <Button
+            v-else-if="activeTab === 'emails'"
+            variant="subtle"
+            size="sm"
+            label="New Email"
+            @click="commAreaRef?.expandReply(task.client_poc_email)"
+          >
+            <template #prefix>
+              <Icon name="plus" size="14" />
+            </template>
+          </Button>
+          <Button
+            v-else-if="activeTab === 'comments'"
+            variant="subtle"
+            size="sm"
+            label="New Comment"
+            @click="commAreaRef?.expandComment()"
+          >
+            <template #prefix>
+              <Icon name="plus" size="14" />
+            </template>
+          </Button>
+        </div>
 
-          <!-- TAB 1: ACTIVITY -->
-          <template v-if="activeTab === 'activity'">
-            <!-- Overdue Alert -->
+        <!-- Scrollable feed -->
+        <div ref="feedRef" class="flex-1 overflow-y-auto">
+          <div v-if="activeTab !== 'analytics'" class="flex min-h-full flex-col px-5 sm:px-10 pb-4">
             <Alert
-              v-if="task.is_overdue"
+              v-if="task.is_overdue && activeTab === 'activity'"
+              class="mb-4"
               theme="red"
               title="Task Deadline Overdue"
               :description="'This implementation task was scheduled for completion by ' + formatDate(task.exp_end_date) + '.'"
             />
+            <TaskActivities
+              :activities="currentActivities"
+              :empty-text="emptyState.text"
+              :empty-icon="emptyState.icon"
+              @reply="onReplyToEmail"
+              @comment-updated="onCommentUpdated"
+              @comment-deleted="onCommentDeleted"
+            />
+          </div>
 
-            <!-- Primary Task Specification Card (Matching Helpdesk Ticket) -->
-            <div class="bg-surface-white rounded-2xl border border-outline-gray-1 p-5 shadow-2xs space-y-4">
-              <div class="flex items-center justify-between pb-3 border-b border-outline-gray-1">
-                <div class="flex items-center gap-2.5">
-                  <Avatar :label="task.owner || 'Administrator'" size="sm" />
-                  <div>
-                    <div class="font-medium text-xs text-ink-gray-9">{{ task.owner || 'Administrator' }}</div>
-                    <div class="text-[11px] text-ink-gray-5">Created {{ formatDate(task.creation) }}</div>
-                  </div>
-                </div>
-
-                <div class="flex items-center gap-1.5 text-xs">
-                  <Badge theme="gray" variant="subtle" size="sm" label="Task Specification" />
-                </div>
-              </div>
-
-              <!-- Task Description -->
-              <div class="text-xs text-ink-gray-8 leading-relaxed whitespace-pre-wrap font-sans">
-                {{ task.description || 'No detailed instructions entered yet for this implementation task.' }}
-              </div>
-            </div>
-
-            <!-- Connected Viewing Timeline (Matching Screenshot 1 & 2) -->
-            <div class="relative pl-6 space-y-3.5 my-2">
-              <!-- Vertical connecting line -->
-              <div class="absolute left-2 top-2 bottom-2 w-[1px] bg-outline-gray-2"></div>
-
-              <div
-                v-for="viewer in viewingHistory"
-                :key="viewer.id"
-                class="relative flex items-center justify-between text-xs text-ink-gray-6"
-              >
-                <div class="flex items-center gap-3 min-w-0">
-                  <span class="w-1.5 h-1.5 rounded-full bg-ink-gray-4 z-10 -ml-[21px] ring-4 ring-[#fafafa]"></span>
-                  <span class="truncate">
-                    <span class="font-semibold text-ink-gray-9">{{ viewer.name }}</span> viewed this
-                  </span>
-                </div>
-                <span class="text-[11px] text-ink-gray-4 shrink-0 ps-2">{{ viewer.time }}</span>
-              </div>
-            </div>
-
-            <!-- Existing Activity Communications / Comments (Matching Screenshot 1) -->
-            <div v-for="item in task.activity_timeline" :key="item.id">
-              <!-- Email Communication Card -->
-              <div
-                v-if="item.type === 'communication'"
-                class="bg-surface-white rounded-2xl border border-outline-gray-1 p-5 shadow-2xs space-y-3"
-              >
-                <div class="flex items-start justify-between">
-                  <div class="flex items-center gap-3 min-w-0">
-                    <Avatar :label="item.sender_name || item.sender" size="md" />
-                    <div class="min-w-0">
-                      <div class="font-medium text-xs text-ink-gray-9 truncate">
-                        {{ item.sender_name || item.sender }}
-                        <span class="text-ink-gray-4 font-normal">&lt;{{ item.sender }}&gt;</span>
-                      </div>
-                      <div v-if="item.recipients" class="text-[11px] text-ink-gray-4 truncate">
-                        To: {{ item.recipients }}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="flex items-center gap-2 text-ink-gray-4 text-xs shrink-0">
-                    <span class="text-[11px]">{{ formatDate(item.timestamp) || '5 days ago' }}</span>
-                    <button
-                      type="button"
-                      @click="handleReplyTo(item.sender)"
-                      class="p-1 hover:text-ink-gray-7 hover:bg-surface-gray-2 rounded-lg cursor-pointer"
-                      title="Reply"
-                    >
-                      ↩
-                    </button>
-                    <button
-                      type="button"
-                      @click="handleReplyTo(item.sender)"
-                      class="p-1 hover:text-ink-gray-7 hover:bg-surface-gray-2 rounded-lg cursor-pointer"
-                      title="Reply all"
-                    >
-                      «
-                    </button>
-                    <button
-                      type="button"
-                      class="p-1 hover:text-ink-gray-7 hover:bg-surface-gray-2 rounded-lg cursor-pointer"
-                      title="More"
-                    >
-                      ···
-                    </button>
-                  </div>
-                </div>
-
-                <div class="text-xs text-ink-gray-8 leading-relaxed whitespace-pre-wrap font-sans">
-                  {{ item.content }}
-                </div>
-              </div>
-
-              <!-- Internal Comment Card -->
-              <div
-                v-else-if="item.type === 'comment'"
-                class="bg-amber-50/40 rounded-2xl border border-amber-200/60 p-4 shadow-2xs space-y-2"
-              >
-                <div class="flex items-center justify-between pb-2 border-b border-amber-100">
-                  <div class="flex items-center gap-2">
-                    <Avatar :label="item.sender_name || item.sender" size="sm" />
-                    <span class="text-xs font-semibold text-ink-gray-9">{{ item.sender_name || item.sender }}</span>
-                    <span class="text-[11px] text-amber-700 bg-amber-100/70 px-2 py-0.5 rounded-full font-medium">Internal Note</span>
-                  </div>
-                  <span class="text-[11px] text-ink-gray-4">{{ formatDate(item.timestamp) }}</span>
-                </div>
-                <div class="text-xs text-ink-gray-8 whitespace-pre-wrap">
-                  {{ item.content }}
-                </div>
-              </div>
-
-              <!-- System Event Log -->
-              <div
-                v-else-if="item.type === 'system'"
-                class="flex items-center gap-2 py-1 text-xs text-ink-gray-5"
-              >
-                <span class="w-1.5 h-1.5 rounded-full bg-ink-gray-4"></span>
-                <span>{{ item.content }}</span>
-                <span class="text-[11px] text-ink-gray-4 ml-auto">{{ formatDate(item.timestamp) }}</span>
-              </div>
-            </div>
-          </template>
-
-          <!-- TAB 2: EMAILS ONLY -->
-          <template v-else-if="activeTab === 'emails'">
-            <!-- Empty state if no emails -->
-            <div
-              v-if="emailCount === 0"
-              class="flex flex-col items-center justify-center py-14 text-center space-y-3 bg-surface-white rounded-2xl border border-outline-gray-1 p-8"
-            >
-              <div class="w-12 h-12 rounded-2xl bg-surface-gray-2 flex items-center justify-center text-ink-gray-4">
-                <EmailIcon class="size-6 text-ink-gray-5" />
-              </div>
-              <div>
-                <h3 class="text-sm font-semibold text-ink-gray-8">No emails yet</h3>
-                <p class="text-xs text-ink-gray-5 max-w-sm mt-1">Start email communication with the client point of contact using the compose area below.</p>
-              </div>
-              <button
-                type="button"
-                @click="commAreaRef?.expandReply(task.client_poc_email)"
-                class="px-3.5 py-1.5 text-xs font-medium rounded-xl bg-ink-gray-9 text-white hover:bg-ink-gray-8 transition cursor-pointer"
-              >
-                Compose Email
-              </button>
-            </div>
-
-            <!-- Email Cards List -->
-            <div v-else class="space-y-4">
-              <div
-                v-for="item in emailTimeline"
-                :key="item.id"
-                class="bg-surface-white rounded-2xl border border-outline-gray-1 p-5 shadow-2xs space-y-3"
-              >
-                <div class="flex items-start justify-between">
-                  <div class="flex items-center gap-3 min-w-0">
-                    <Avatar :label="item.sender_name || item.sender" size="md" />
-                    <div class="min-w-0">
-                      <div class="font-medium text-xs text-ink-gray-9 truncate">
-                        {{ item.sender_name || item.sender }}
-                        <span class="text-ink-gray-4 font-normal">&lt;{{ item.sender }}&gt;</span>
-                      </div>
-                      <div v-if="item.recipients" class="text-[11px] text-ink-gray-4 truncate">
-                        To: {{ item.recipients }}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="flex items-center gap-2 text-ink-gray-4 text-xs shrink-0">
-                    <span class="text-[11px]">{{ formatDate(item.timestamp) || '5 days ago' }}</span>
-                    <button
-                      type="button"
-                      @click="handleReplyTo(item.sender)"
-                      class="p-1 hover:text-ink-gray-7 hover:bg-surface-gray-2 rounded-lg cursor-pointer"
-                      title="Reply"
-                    >
-                      ↩
-                    </button>
-                    <button
-                      type="button"
-                      @click="handleReplyTo(item.sender)"
-                      class="p-1 hover:text-ink-gray-7 hover:bg-surface-gray-2 rounded-lg cursor-pointer"
-                      title="Reply all"
-                    >
-                      «
-                    </button>
-                    <button
-                      type="button"
-                      class="p-1 hover:text-ink-gray-7 hover:bg-surface-gray-2 rounded-lg cursor-pointer"
-                      title="More"
-                    >
-                      ···
-                    </button>
-                  </div>
-                </div>
-
-                <div class="text-xs text-ink-gray-8 leading-relaxed whitespace-pre-wrap font-sans">
-                  {{ item.content }}
-                </div>
-              </div>
-            </div>
-          </template>
-
-          <!-- TAB 3: COMMENTS ONLY -->
-          <template v-else-if="activeTab === 'comments'">
-            <!-- Empty state if no comments -->
-            <div
-              v-if="commentCount === 0"
-              class="flex flex-col items-center justify-center py-14 text-center space-y-3 bg-surface-white rounded-2xl border border-outline-gray-1 p-8"
-            >
-              <div class="w-12 h-12 rounded-2xl bg-amber-50 flex items-center justify-center text-amber-600">
-                <CommentIcon class="size-6 text-amber-600" />
-              </div>
-              <div>
-                <h3 class="text-sm font-semibold text-ink-gray-8">No internal notes yet</h3>
-                <p class="text-xs text-ink-gray-5 max-w-sm mt-1">Leave an internal note for your team. Internal notes are private and not visible to the client.</p>
-              </div>
-              <button
-                type="button"
-                @click="commAreaRef?.expandComment()"
-                class="px-3.5 py-1.5 text-xs font-medium rounded-xl bg-amber-600 text-white hover:bg-amber-700 transition cursor-pointer"
-              >
-                Add Internal Note
-              </button>
-            </div>
-
-            <!-- Comment Cards List -->
-            <div v-else class="space-y-4">
-              <div
-                v-for="item in commentTimeline"
-                :key="item.id"
-                class="bg-amber-50/40 rounded-2xl border border-amber-200/60 p-4 shadow-2xs space-y-2"
-              >
-                <div class="flex items-center justify-between pb-2 border-b border-amber-100">
-                  <div class="flex items-center gap-2">
-                    <Avatar :label="item.sender_name || item.sender" size="sm" />
-                    <span class="text-xs font-semibold text-ink-gray-9">{{ item.sender_name || item.sender }}</span>
-                    <span class="text-[11px] text-amber-700 bg-amber-100/70 px-2 py-0.5 rounded-full font-medium">Internal Note</span>
-                  </div>
-                  <span class="text-[11px] text-ink-gray-4">{{ formatDate(item.timestamp) }}</span>
-                </div>
-                <div class="text-xs text-ink-gray-8 whitespace-pre-wrap">
-                  {{ item.content }}
-                </div>
-              </div>
-            </div>
-          </template>
-
-          <!-- TAB 4: ANALYTICS -->
-          <template v-else-if="activeTab === 'analytics'">
+          <!-- ANALYTICS -->
+          <div v-else class="px-5 sm:px-10 pb-6">
             <div class="space-y-6">
               <!-- KPI Metric Cards Grid -->
               <div class="grid grid-cols-2 md:grid-cols-4 gap-3.5">
                 <div class="bg-surface-white rounded-2xl border border-outline-gray-1 p-4 shadow-2xs">
-                  <div class="text-[11px] font-medium text-ink-gray-5">Target Response</div>
+                  <div class="text-xs font-medium text-ink-gray-5">Target Response</div>
                   <div class="text-base font-bold text-emerald-600 mt-1">1h 38m</div>
-                  <div class="text-[10px] text-emerald-700 mt-0.5">✓ Target fulfilled</div>
+                  <div class="text-xs text-emerald-700 mt-0.5">✓ Target fulfilled</div>
                 </div>
 
                 <div class="bg-surface-white rounded-2xl border border-outline-gray-1 p-4 shadow-2xs">
-                  <div class="text-[11px] font-medium text-ink-gray-5">Delivery Target</div>
+                  <div class="text-xs font-medium text-ink-gray-5">Delivery Target</div>
                   <div class="text-base font-bold text-blue-600 mt-1">{{ task.status === 'Completed' ? 'Delivered' : 'On Schedule' }}</div>
-                  <div class="text-[10px] text-ink-gray-4 mt-0.5">Active milestone track</div>
+                  <div class="text-xs text-ink-gray-4 mt-0.5">Active milestone track</div>
                 </div>
 
                 <div class="bg-surface-white rounded-2xl border border-outline-gray-1 p-4 shadow-2xs">
-                  <div class="text-[11px] font-medium text-ink-gray-5">Total Emails</div>
+                  <div class="text-xs font-medium text-ink-gray-5">Total Emails</div>
                   <div class="text-base font-bold text-ink-gray-9 mt-1">{{ emailCount }}</div>
-                  <div class="text-[10px] text-ink-gray-4 mt-0.5">Client communications</div>
+                  <div class="text-xs text-ink-gray-4 mt-0.5">Client communications</div>
                 </div>
 
                 <div class="bg-surface-white rounded-2xl border border-outline-gray-1 p-4 shadow-2xs">
-                  <div class="text-[11px] font-medium text-ink-gray-5">Internal Notes</div>
+                  <div class="text-xs font-medium text-ink-gray-5">Internal Notes</div>
                   <div class="text-base font-bold text-amber-600 mt-1">{{ commentCount }}</div>
-                  <div class="text-[10px] text-ink-gray-4 mt-0.5">Team collaboration logs</div>
+                  <div class="text-xs text-ink-gray-4 mt-0.5">Team collaboration logs</div>
                 </div>
               </div>
 
               <!-- Lifecycle Details Card -->
               <div class="bg-surface-white rounded-2xl border border-outline-gray-1 p-5 shadow-2xs space-y-4">
-                <h3 class="text-xs font-semibold text-ink-gray-9">Task Lifecycle & Milestone Schedule</h3>
-                <div class="grid grid-cols-2 gap-4 text-xs">
+                <h3 class="text-sm font-semibold text-ink-gray-9">Task Lifecycle & Milestone Schedule</h3>
+                <div class="grid grid-cols-2 gap-4 text-sm">
                   <div class="space-y-2">
                     <div class="flex justify-between py-1 border-b border-outline-gray-1">
                       <span class="text-ink-gray-5">Created By</span>
@@ -485,8 +271,8 @@
 
               <!-- SLA Service Commitment Details -->
               <div class="bg-surface-white rounded-2xl border border-outline-gray-1 p-5 shadow-2xs space-y-3">
-                <h3 class="text-xs font-semibold text-ink-gray-9">SLA Service Level Agreement</h3>
-                <div class="space-y-2 text-xs text-ink-gray-7">
+                <h3 class="text-sm font-semibold text-ink-gray-9">SLA Service Level Agreement</h3>
+                <div class="space-y-2 text-sm text-ink-gray-7">
                   <div class="flex items-center justify-between p-2.5 rounded-xl bg-surface-gray-2">
                     <span class="font-medium">Response Target (4h)</span>
                     <span class="text-emerald-600 font-semibold">Fulfilled in 1h 38m</span>
@@ -502,11 +288,15 @@
                 </div>
               </div>
             </div>
-          </template>
+          </div>
+        </div>
 
-          <!-- Helpdesk Communication Area (Replicated from Screenshot 1, 2, 3) -->
+        <!-- Pinned communication area (Helpdesk TicketAgent bottom bar) -->
+        <div
+          v-if="activeTab !== 'analytics'"
+          class="shrink-0 max-h-[60vh] overflow-y-auto border-t border-outline-gray-1 px-5 sm:px-10 py-3"
+        >
           <CommunicationArea
-            v-if="activeTab !== 'analytics'"
             ref="commAreaRef"
             :task-id="task.name || taskId"
             :client-email="task.client_poc_email || ''"
@@ -528,7 +318,7 @@
               <p class="truncate text-sm font-medium text-ink-gray-8">
                 {{ task.client_poc_name || 'Client Point of Contact' }}
               </p>
-              <div class="flex items-center gap-1.5 text-xs text-ink-gray-5">
+              <div class="flex items-center gap-1.5 text-sm text-ink-gray-5">
                 <span class="font-mono">#{{ task.name?.split('-')?.pop() || '0202' }}</span>
                 <span>•</span>
                 <span>via Portal</span>
@@ -537,13 +327,13 @@
           </div>
 
           <!-- TaskSLA / Delivery Target -->
-          <div class="space-y-1.5 text-xs pt-1">
+          <div class="space-y-1.5 text-sm pt-1">
             <!-- Target Response -->
             <div class="flex items-center justify-between">
               <span class="w-[106px] shrink-0 text-ink-gray-5">Target Response</span>
               <div class="flex min-w-0 flex-1 items-center gap-1 ps-2">
                 <span class="text-emerald-600 font-medium truncate">Fulfilled in 1h 38m</span>
-                <span class="text-ink-gray-4 text-[11px] cursor-pointer" title="Response Target Met">ⓘ</span>
+                <span class="text-ink-gray-4 text-xs cursor-pointer" title="Response Target Met">ⓘ</span>
               </div>
             </div>
 
@@ -557,7 +347,7 @@
                 >
                   {{ task.status === 'Completed' ? 'Delivered' : task.is_overdue ? 'Overdue Deadline' : 'On Schedule' }}
                 </span>
-                <span class="text-ink-gray-4 text-[11px] cursor-pointer" title="Delivery Status">ⓘ</span>
+                <span class="text-ink-gray-4 text-xs cursor-pointer" title="Delivery Status">ⓘ</span>
               </div>
             </div>
           </div>
@@ -571,7 +361,7 @@
               class="flex items-center justify-between cursor-pointer select-none"
               @click="overviewOpen = !overviewOpen"
             >
-              <span class="text-xs font-semibold text-ink-gray-9">Overview</span>
+              <span class="text-sm font-semibold text-ink-gray-9">Overview</span>
               <Icon
                 name="chevron-down"
                 size="13"
@@ -580,7 +370,7 @@
               />
             </div>
 
-            <div v-show="overviewOpen" class="space-y-2.5 text-xs pt-1">
+            <div v-show="overviewOpen" class="space-y-2.5 text-sm pt-1">
               <!-- 1. Assignee Row with Interactive Picker -->
               <div class="flex items-center gap-2 relative">
                 <span class="w-[106px] shrink-0 text-ink-gray-5">Assignee</span>
@@ -595,7 +385,7 @@
                         <span class="font-medium text-ink-gray-8 truncate">
                           {{ task.assignees[0].full_name || task.assignees[0].email }}
                         </span>
-                        <span v-if="task.assignees.length > 1" class="text-[10px] text-ink-gray-5 font-mono">
+                        <span v-if="task.assignees.length > 1" class="text-xs text-ink-gray-5 font-mono">
                           +{{ task.assignees.length - 1 }}
                         </span>
                       </template>
@@ -617,7 +407,7 @@
                         v-model="assigneeSearch"
                         type="text"
                         placeholder="Search users..."
-                        class="w-full px-3 py-1.5 text-xs rounded-xl border border-outline-gray-2 bg-surface-gray-1 focus:outline-none focus:bg-surface-white transition shadow-2xs"
+                        class="w-full px-3 py-1.5 text-sm rounded-xl border border-outline-gray-2 bg-surface-gray-1 focus:outline-none focus:bg-surface-white transition shadow-2xs"
                         @click.stop
                       />
                     </div>
@@ -628,13 +418,13 @@
                         v-for="u in filteredUsers"
                         :key="u.name"
                         @click.stop="toggleAssignee(u)"
-                        class="px-2.5 py-1.5 rounded-xl flex items-center justify-between hover:bg-surface-gray-2 cursor-pointer transition text-xs"
+                        class="px-2.5 py-1.5 rounded-xl flex items-center justify-between hover:bg-surface-gray-2 cursor-pointer transition text-sm"
                       >
                         <div class="flex items-center gap-2 min-w-0">
                           <Avatar :label="u.full_name || u.name" size="sm" />
                           <div class="truncate">
                             <div class="font-medium text-ink-gray-9 truncate">{{ u.full_name || u.name }}</div>
-                            <div class="text-[10px] text-ink-gray-4 truncate">{{ u.name }}</div>
+                            <div class="text-xs text-ink-gray-4 truncate">{{ u.name }}</div>
                           </div>
                         </div>
 
@@ -704,10 +494,10 @@
                       v-model="customerText"
                       @keydown.enter="saveCustomerEdit"
                       @keydown.escape="editingCustomer = false"
-                      class="flex-1 px-3 py-1.5 text-xs rounded-xl border border-outline-gray-3 bg-surface-white focus:outline-none transition shadow-2xs"
+                      class="flex-1 px-3 py-1.5 text-sm rounded-xl border border-outline-gray-3 bg-surface-white focus:outline-none transition shadow-2xs"
                     />
-                    <button @click="saveCustomerEdit" class="text-xs text-emerald-600 font-bold px-2 py-1 rounded-lg hover:bg-emerald-50">✓</button>
-                    <button @click="editingCustomer = false" class="text-xs text-ink-gray-4 px-2 py-1 rounded-lg hover:bg-surface-gray-2">✕</button>
+                    <button @click="saveCustomerEdit" class="text-sm text-emerald-600 font-bold px-2 py-1 rounded-lg hover:bg-emerald-50">✓</button>
+                    <button @click="editingCustomer = false" class="text-sm text-ink-gray-4 px-2 py-1 rounded-lg hover:bg-surface-gray-2">✕</button>
                   </div>
                 </div>
               </div>
@@ -736,10 +526,10 @@
                   <span
                     v-for="tag in (task.tags || [])"
                     :key="tag"
-                    class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] bg-surface-gray-2 text-ink-gray-7 border border-outline-gray-2"
+                    class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs bg-surface-gray-2 text-ink-gray-7 border border-outline-gray-2"
                   >
                     <span>{{ tag }}</span>
-                    <button @click.stop="handleRemoveTag(tag)" class="text-ink-gray-4 hover:text-ink-gray-9 text-xs font-bold leading-none">×</button>
+                    <button @click.stop="handleRemoveTag(tag)" class="text-ink-gray-4 hover:text-ink-gray-9 text-sm font-bold leading-none">×</button>
                   </span>
 
                   <!-- Inline Add Tag Input -->
@@ -750,10 +540,10 @@
                       @keydown.enter.prevent="handleAddTag"
                       @keydown.escape="showTagInput = false"
                       placeholder="Tag..."
-                      class="w-24 px-2.5 py-1 text-[11px] rounded-xl border border-outline-gray-3 bg-surface-white focus:outline-none transition shadow-2xs"
+                      class="w-24 px-2.5 py-1 text-xs rounded-xl border border-outline-gray-3 bg-surface-white focus:outline-none transition shadow-2xs"
                     />
-                    <button @click="handleAddTag" class="text-[11px] text-ink-gray-8 font-medium px-2 py-0.5 rounded-lg hover:bg-surface-gray-2">Add</button>
-                    <button @click="showTagInput = false" class="text-[11px] text-ink-gray-4 px-1.5 py-0.5 rounded-lg hover:bg-surface-gray-2">✕</button>
+                    <button @click="handleAddTag" class="text-xs text-ink-gray-8 font-medium px-2 py-0.5 rounded-lg hover:bg-surface-gray-2">Add</button>
+                    <button @click="showTagInput = false" class="text-xs text-ink-gray-4 px-1.5 py-0.5 rounded-lg hover:bg-surface-gray-2">✕</button>
                   </div>
                   <Button
                     v-else
@@ -774,7 +564,7 @@
               class="flex items-center justify-between cursor-pointer select-none"
               @click="moreDetailsOpen = !moreDetailsOpen"
             >
-              <span class="text-xs font-semibold text-ink-gray-9">More Details</span>
+              <span class="text-sm font-semibold text-ink-gray-9">More Details</span>
               <Icon
                 name="chevron-down"
                 size="13"
@@ -783,7 +573,7 @@
               />
             </div>
 
-            <div v-show="moreDetailsOpen" class="space-y-2.5 text-xs pt-1">
+            <div v-show="moreDetailsOpen" class="space-y-2.5 text-sm pt-1">
               <!-- Due Date -->
               <div class="flex items-center gap-2">
                 <span class="w-[106px] shrink-0 text-ink-gray-5">Due Date</span>
@@ -791,7 +581,7 @@
                   type="date"
                   :value="cleanDate(task.exp_end_date)"
                   @change="e => handleGenericUpdate('exp_end_date', e.target.value)"
-                  class="flex-1 px-2.5 py-1 text-xs rounded-xl border border-outline-gray-2 bg-surface-white text-ink-gray-8 focus:outline-none focus:border-outline-gray-4"
+                  class="flex-1 px-2.5 py-1 text-sm rounded-xl border border-outline-gray-2 bg-surface-white text-ink-gray-8 focus:outline-none focus:border-outline-gray-4"
                 />
               </div>
 
@@ -802,7 +592,7 @@
                   type="date"
                   :value="cleanDate(task.exp_start_date)"
                   @change="e => handleGenericUpdate('exp_start_date', e.target.value)"
-                  class="flex-1 px-2.5 py-1 text-xs rounded-xl border border-outline-gray-2 bg-surface-white text-ink-gray-8 focus:outline-none focus:border-outline-gray-4"
+                  class="flex-1 px-2.5 py-1 text-sm rounded-xl border border-outline-gray-2 bg-surface-white text-ink-gray-8 focus:outline-none focus:border-outline-gray-4"
                 />
               </div>
 
@@ -813,7 +603,7 @@
                   type="number"
                   :value="task.expected_time || 0"
                   @change="e => handleGenericUpdate('expected_time', parseFloat(e.target.value) || 0)"
-                  class="w-20 px-2.5 py-1 text-xs rounded-xl border border-outline-gray-2 bg-surface-white text-ink-gray-8 focus:outline-none"
+                  class="w-20 px-2.5 py-1 text-sm rounded-xl border border-outline-gray-2 bg-surface-white text-ink-gray-8 focus:outline-none"
                 />
               </div>
 
@@ -847,7 +637,7 @@
               class="flex items-center justify-between cursor-pointer select-none"
               @click="recentTicketsOpen = !recentTicketsOpen"
             >
-              <span class="text-xs font-semibold text-ink-gray-9">Recent Tasks</span>
+              <span class="text-sm font-semibold text-ink-gray-9">Recent Tasks</span>
               <Icon
                 name="chevron-down"
                 size="13"
@@ -864,7 +654,7 @@
                 class="p-2.5 rounded-xl hover:bg-surface-gray-2 cursor-pointer transition space-y-1"
               >
                 <div class="flex items-start justify-between gap-1">
-                  <div class="font-medium text-xs text-ink-gray-9 truncate leading-snug">
+                  <div class="font-medium text-sm text-ink-gray-9 truncate leading-snug">
                     {{ item.subject }}
                   </div>
                   <Badge
@@ -874,7 +664,7 @@
                     :label="item.status === 'Working' ? 'Replied' : item.status"
                   />
                 </div>
-                <div class="text-[11px] text-ink-gray-4">
+                <div class="text-xs text-ink-gray-4">
                   {{ formatDate(item.exp_end_date) || '22-10-2026' }} • #{{ item.name?.split('-')?.pop() || '0200' }}
                 </div>
               </div>
@@ -896,6 +686,7 @@ import CommentIcon from './icons/CommentIcon.vue'
 import IndicatorIcon from './icons/IndicatorIcon.vue'
 import TicketPriority from './TicketPriority.vue'
 import CommunicationArea from './CommunicationArea.vue'
+import TaskActivities from './TaskActivities.vue'
 import {
   getTask,
   updateTask,
@@ -941,14 +732,143 @@ const commentTimeline = computed(() => {
 const emailCount = computed(() => emailTimeline.value.length)
 const commentCount = computed(() => commentTimeline.value.length)
 
-function handleReplyTo(senderEmail) {
-  activeTab.value = 'emails'
-  commAreaRef.value?.expandReply(senderEmail)
+// ---------------------------------------------------------------------------
+// Helpdesk-style activity feed (oldest first, newest at the bottom)
+// ---------------------------------------------------------------------------
+const feedRef = ref(null)
+
+const allActivities = computed(() => {
+  const t = task.value || {}
+  if (!t.name) return []
+  const items = []
+
+  // Task description = the opening entry (like a ticket's first message)
+  items.push({
+    key: 'description',
+    type: 'description',
+    user: t.owner,
+    userName: t.owner_name || t.owner,
+    userImage: t.owner_image,
+    content: t.description_html,
+    timestamp: t.creation,
+  })
+
+  for (const item of t.activity_timeline || []) {
+    if (item.type === 'communication') {
+      items.push({
+        key: 'email-' + item.id,
+        id: item.id,
+        type: 'email',
+        user: item.sender,
+        userName: item.sender_name || item.sender,
+        userImage: item.sender_image,
+        recipients: item.recipients,
+        subject: item.subject,
+        content: item.content,
+        timestamp: item.timestamp,
+      })
+    } else if (item.type === 'comment') {
+      items.push({
+        key: 'comment-' + item.id,
+        id: item.id,
+        type: 'comment',
+        user: item.sender,
+        userName: item.sender_name || item.sender,
+        userImage: item.sender_image,
+        content: item.content,
+        timestamp: item.timestamp,
+      })
+    } else if (item.type === 'system' && item.action !== 'created') {
+      // "<Name> assigned bala: demo" -> name + action
+      const name = item.sender_name || item.sender || ''
+      const text = item.content || ''
+      items.push({
+        key: 'history-' + item.id,
+        type: 'history',
+        kind: item.action,
+        user: item.sender,
+        userName: name,
+        action: name && text.startsWith(name) ? text.slice(name.length).trim() : text,
+        timestamp: item.timestamp,
+      })
+    }
+  }
+
+  for (const v of t.viewers || []) {
+    items.push({
+      key: 'view-' + v.user,
+      type: 'history',
+      kind: 'view',
+      user: v.user,
+      userName: v.full_name || v.user,
+      action: 'viewed this',
+      timestamp: v.last_viewed,
+    })
+  }
+
+  return items.sort((x, y) => String(x.timestamp || '').localeCompare(String(y.timestamp || '')))
+})
+
+const currentActivities = computed(() => {
+  if (activeTab.value === 'emails') return allActivities.value.filter((a) => a.type === 'email')
+  if (activeTab.value === 'comments') return allActivities.value.filter((a) => a.type === 'comment')
+  // Activity tab: emails, comments, assignment changes and views
+  return allActivities.value.filter(
+    (a) =>
+      a.type === 'email' ||
+      a.type === 'comment' ||
+      (a.type === 'history' && ACTIVITY_KINDS.includes(a.kind))
+  )
+})
+
+const ACTIVITY_KINDS = ['assigned', 'assignment completed', 'view']
+
+const tabTitle = computed(() => {
+  if (activeTab.value === 'emails') return 'Emails'
+  if (activeTab.value === 'comments') return 'Comments'
+  if (activeTab.value === 'analytics') return 'Analytics'
+  return 'Activity'
+})
+
+const emptyState = computed(() => {
+  if (activeTab.value === 'emails') return { text: 'No emails', icon: 'email' }
+  if (activeTab.value === 'comments') return { text: 'No comments', icon: 'comment' }
+  return { text: 'No activities', icon: 'activity' }
+})
+
+const newActivityOptions = computed(() => [
+  { label: 'Email', onClick: () => commAreaRef.value?.expandReply(task.value.client_poc_email) },
+  { label: 'Comment', onClick: () => commAreaRef.value?.expandComment() },
+])
+
+function scrollFeedToBottom() {
+  nextTick(() => {
+    if (feedRef.value) feedRef.value.scrollTop = feedRef.value.scrollHeight
+  })
 }
 
-function handleAddComment() {
-  activeTab.value = 'comments'
-  commAreaRef.value?.expandComment()
+watch(activeTab, () => scrollFeedToBottom())
+
+function onReplyToEmail(activity, replyAll) {
+  const me = window.session_user || ''
+  let recipients = [activity.user]
+  if (replyAll && activity.recipients) {
+    recipients.push(...String(activity.recipients).split(',').map((r) => r.trim()))
+  }
+  recipients = [...new Set(recipients.filter((r) => r && r !== me))]
+  if (!recipients.length) recipients = [activity.user]
+  recipients.forEach((r) => commAreaRef.value?.expandReply(r))
+}
+
+function onCommentUpdated(commentId, html) {
+  const item = (task.value.activity_timeline || []).find((i) => i.type === 'comment' && i.id === commentId)
+  if (item && html !== undefined) item.content = html
+}
+
+function onCommentDeleted(commentId) {
+  task.value.activity_timeline = (task.value.activity_timeline || []).filter(
+    (i) => !(i.type === 'comment' && i.id === commentId)
+  )
 }
 
 const availableUsers = ref([])
@@ -970,15 +890,6 @@ const newTagText = ref('')
 const tagInputRef = ref(null)
 
 const recentTasksList = ref([])
-
-const viewingHistory = computed(() => {
-  return [
-    { id: 'v1', name: 'Abid Khan', time: '6 days ago' },
-    { id: 'v2', name: 'Balachandar S', time: '6 days ago' },
-    { id: 'v3', name: 'Abdullah', time: '6 days ago' },
-    { id: 'v4', name: 'Saiyoni', time: '5 days ago' },
-  ]
-})
 
 const statusOptions = computed(() => [
   { label: 'Open', onClick: () => updateStatus('Open') },
@@ -1056,6 +967,7 @@ async function loadTask() {
     const data = await getTask(props.taskId)
     task.value = data
     customerText.value = data.client_poc_name || ''
+    scrollFeedToBottom()
   } catch (e) {
     console.error('Failed to load task', e)
   }

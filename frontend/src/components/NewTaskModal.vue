@@ -68,7 +68,7 @@
       />
 
       <div class="space-y-1">
-        <label class="block text-xs font-medium text-ink-gray-7">Description / Checklist</label>
+        <label class="block text-sm font-medium text-ink-gray-7">Description / Checklist</label>
         <Textarea
           v-model="form.description"
           rows="3"

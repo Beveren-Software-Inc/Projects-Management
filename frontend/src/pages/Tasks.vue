@@ -18,7 +18,7 @@
           <div class="flex items-center">
             <router-link
               to="/tasks"
-              class="text-sm font-semibold text-ink-gray-5 hover:text-ink-gray-8 transition"
+              class="text-lg font-semibold text-ink-gray-5 hover:text-ink-gray-8 transition"
             >
               Tasks
             </router-link>
@@ -29,7 +29,7 @@
               <template #default="{ open }">
                 <Button
                   variant="ghost"
-                  class="font-semibold text-sm text-ink-gray-9 !bg-transparent hover:!bg-surface-gray-2 rounded-xl transition"
+                  class="font-semibold text-lg text-ink-gray-9 !bg-transparent hover:!bg-surface-gray-2 rounded-xl transition"
                 >
                   <template #prefix>
                     <Icon :name="currentViewIcon" size="14" class="text-ink-gray-7" />
@@ -95,7 +95,7 @@
       <!-- Main Tasks Content -->
       <div class="flex-1 overflow-hidden relative">
         <div v-if="loading && tasks.length === 0" class="h-full flex items-center justify-center">
-          <div class="flex items-center gap-2 text-xs text-ink-gray-5">
+          <div class="flex items-center gap-2 text-sm text-ink-gray-5">
             <Icon name="refresh" size="16" class="animate-spin text-ink-gray-7" />
             <span>Loading tasks...</span>
           </div>

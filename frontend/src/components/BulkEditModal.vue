@@ -6,7 +6,7 @@
     size="lg"
   >
     <div class="space-y-4 pt-1 max-h-[65vh] overflow-y-auto px-1">
-      <div class="p-2.5 rounded-xl bg-surface-gray-1 border border-outline-gray-2 text-[11px] text-ink-gray-6 flex items-center justify-between">
+      <div class="p-2.5 rounded-xl bg-surface-gray-1 border border-outline-gray-2 text-xs text-ink-gray-6 flex items-center justify-between">
         <span>Selected Tasks:</span>
         <Badge theme="gray" variant="subtle" size="sm" :label="taskIds.length + ' tasks'" />
       </div>
@@ -125,11 +125,11 @@
         </div>
 
         <div v-if="fieldsToUpdate.is_milestone" class="flex items-center gap-4 pt-1">
-          <label class="flex items-center gap-2 cursor-pointer text-xs">
+          <label class="flex items-center gap-2 cursor-pointer text-sm">
             <input type="radio" :value="1" v-model="formData.is_milestone" />
             <span>Yes, Key Milestone</span>
           </label>
-          <label class="flex items-center gap-2 cursor-pointer text-xs">
+          <label class="flex items-center gap-2 cursor-pointer text-sm">
             <input type="radio" :value="0" v-model="formData.is_milestone" />
             <span>No, Standard Task</span>
           </label>

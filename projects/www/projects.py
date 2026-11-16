@@ -23,6 +23,18 @@ def get_context_for_dev():
 	return get_boot()
 
 
+def get_company_name():
+	"""Company shown as the sidebar brand: user's default company, else the global default, else the first company."""
+	if not frappe.db.table_exists("Company"):
+		return frappe.db.get_single_value("Website Settings", "app_name") or "Projects"
+	company = (
+		frappe.defaults.get_user_default("Company")
+		or frappe.db.get_single_value("Global Defaults", "default_company")
+		or frappe.db.get_value("Company", {}, "name", order_by="creation asc")
+	)
+	return company or "Projects"
+
+
 def get_boot():
 	user = frappe.session.user
 	user_doc = frappe.get_doc("User", user) if user != "Guest" else None
@@ -34,6 +46,7 @@ def get_boot():
 		"site_name": frappe.local.site,
 		"csrf_token": csrf_token,
 		"session_user": user,
+		"company_name": get_company_name(),
 		"user_info": {
 			"email": user,
 			"full_name": user_doc.full_name if user_doc else user,

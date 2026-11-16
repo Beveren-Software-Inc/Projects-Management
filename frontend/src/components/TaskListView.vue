@@ -58,11 +58,20 @@
           />
         </div>
 
+        <!-- Assigned To Select (also set by clicking a user in the Assigned To column) -->
+        <div class="w-44">
+          <Select
+            v-model="selectedAssignee"
+            :options="assigneeFilterOptions"
+            size="sm"
+          />
+        </div>
+
         <!-- Clear filters button if active -->
         <button
           v-if="hasActiveFilters"
           @click="clearFilters"
-          class="text-xs text-ink-gray-5 hover:text-ink-gray-9 px-2 py-1 rounded-lg hover:bg-surface-gray-2 transition flex items-center gap-1 shrink-0 cursor-pointer"
+          class="text-sm text-ink-gray-5 hover:text-ink-gray-9 px-2 py-1 rounded-lg hover:bg-surface-gray-2 transition flex items-center gap-1 shrink-0 cursor-pointer"
         >
           <span>✕</span>
           <span>Clear</span>
@@ -89,7 +98,7 @@
         <Button
           variant="ghost"
           size="sm"
-          class="!rounded-xl border border-outline-gray-2 text-xs shadow-2xs transition cursor-pointer"
+          class="!rounded-xl border border-outline-gray-2 text-sm shadow-2xs transition cursor-pointer"
           :class="showAdvancedFilter || activeAdvanceFilterCount > 0 ? '!bg-surface-gray-3 !border-outline-gray-4 text-ink-gray-9 font-semibold' : 'bg-surface-gray-1 hover:bg-surface-gray-2 text-ink-gray-7 hover:text-ink-gray-9'"
           :label="activeAdvanceFilterCount > 0 ? `Filter (${activeAdvanceFilterCount})` : 'Filter'"
           @click="showAdvancedFilter = !showAdvancedFilter"
@@ -105,7 +114,7 @@
             <Button
               variant="ghost"
               size="sm"
-              class="!rounded-xl border border-outline-gray-2 bg-surface-gray-1 hover:bg-surface-gray-2 text-ink-gray-7 hover:text-ink-gray-9 text-xs flex items-center gap-1 shadow-2xs cursor-pointer"
+              class="!rounded-xl border border-outline-gray-2 bg-surface-gray-1 hover:bg-surface-gray-2 text-ink-gray-7 hover:text-ink-gray-9 text-sm flex items-center gap-1 shadow-2xs cursor-pointer"
             >
               <template #prefix>
                 <Icon name="arrow-up-down" size="13" class="text-ink-gray-5" />
@@ -124,7 +133,7 @@
             <Button
               variant="ghost"
               size="sm"
-              class="!rounded-xl border border-outline-gray-2 bg-surface-gray-1 hover:bg-surface-gray-2 text-ink-gray-7 hover:text-ink-gray-9 text-xs shadow-2xs cursor-pointer"
+              class="!rounded-xl border border-outline-gray-2 bg-surface-gray-1 hover:bg-surface-gray-2 text-ink-gray-7 hover:text-ink-gray-9 text-sm shadow-2xs cursor-pointer"
               label="Columns"
             >
               <template #prefix>
@@ -139,7 +148,7 @@
     <!-- 1b. Advance Filter Panel (Opens when clicking Filter) -->
     <div
       v-if="showAdvancedFilter"
-      class="px-5 py-3 border-b border-outline-gray-2 bg-surface-gray-1/80 flex flex-wrap items-center justify-between gap-3 shrink-0 animate-in fade-in duration-150 text-xs"
+      class="px-5 py-3 border-b border-outline-gray-2 bg-surface-gray-1/80 flex flex-wrap items-center justify-between gap-3 shrink-0 animate-in fade-in duration-150 text-sm"
     >
       <div class="flex flex-wrap items-center gap-3">
         <!-- Milestone Filter -->
@@ -147,7 +156,7 @@
           <span class="text-ink-gray-5 font-medium">Milestone:</span>
           <select
             v-model="advMilestone"
-            class="px-2.5 py-1 text-xs rounded-xl border border-outline-gray-2 bg-white text-ink-gray-8 focus:outline-none cursor-pointer"
+            class="px-2.5 py-1 text-sm rounded-xl border border-outline-gray-2 bg-white text-ink-gray-8 focus:outline-none cursor-pointer"
           >
             <option value="all">All Tasks</option>
             <option value="milestone_only">Key Milestones Only</option>
@@ -160,7 +169,7 @@
           <span class="text-ink-gray-5 font-medium">Deadline:</span>
           <select
             v-model="advOverdue"
-            class="px-2.5 py-1 text-xs rounded-xl border border-outline-gray-2 bg-white text-ink-gray-8 focus:outline-none cursor-pointer"
+            class="px-2.5 py-1 text-sm rounded-xl border border-outline-gray-2 bg-white text-ink-gray-8 focus:outline-none cursor-pointer"
           >
             <option value="all">All Deadlines</option>
             <option value="overdue_only">Overdue Tasks Only</option>
@@ -173,7 +182,7 @@
           <span class="text-ink-gray-5 font-medium">Assignee:</span>
           <select
             v-model="advAssignee"
-            class="px-2.5 py-1 text-xs rounded-xl border border-outline-gray-2 bg-white text-ink-gray-8 focus:outline-none cursor-pointer"
+            class="px-2.5 py-1 text-sm rounded-xl border border-outline-gray-2 bg-white text-ink-gray-8 focus:outline-none cursor-pointer"
           >
             <option value="all">All Assignees</option>
             <option value="unassigned">Unassigned Only</option>
@@ -187,14 +196,14 @@
           v-if="activeAdvanceFilterCount > 0"
           type="button"
           @click="clearAdvanceFilters"
-          class="text-xs text-ink-gray-5 hover:text-ink-gray-9 font-medium px-2 py-1 rounded-lg hover:bg-surface-gray-2 cursor-pointer transition"
+          class="text-sm text-ink-gray-5 hover:text-ink-gray-9 font-medium px-2 py-1 rounded-lg hover:bg-surface-gray-2 cursor-pointer transition"
         >
           Reset Filters
         </button>
         <button
           type="button"
           @click="showAdvancedFilter = false"
-          class="text-xs text-ink-gray-4 hover:text-ink-gray-7 px-1.5 py-1 cursor-pointer"
+          class="text-sm text-ink-gray-4 hover:text-ink-gray-7 px-1.5 py-1 cursor-pointer"
           title="Close filter panel"
         >
           ✕
@@ -206,7 +215,7 @@
     <div class="flex-1 overflow-auto">
       <table class="w-full text-left border-collapse">
         <!-- Table Header -->
-        <thead class="bg-surface-gray-1 sticky top-0 z-10 border-b border-outline-gray-1 text-[11px] font-semibold text-ink-gray-5 uppercase tracking-wider select-none">
+        <thead class="bg-surface-gray-1 sticky top-0 z-10 border-b border-outline-gray-1 text-sm font-medium text-ink-gray-5 select-none">
           <tr>
             <th class="py-3 px-4 w-10 text-center">
               <div class="flex items-center justify-center">
@@ -220,7 +229,7 @@
             <th class="py-3 px-3 min-w-[280px]">Subject</th>
             <th class="py-3 px-3 w-32">Status</th>
             <th class="py-3 px-3 w-28">Priority</th>
-            <th class="py-3 px-3 w-40">Assigned To</th>
+            <th class="py-3 px-3 w-52">Assigned To</th>
             <th class="py-3 px-3 w-48">Project</th>
             <!-- Ample width for Due Date so it never wraps onto multiple lines -->
             <th class="py-3 px-3 w-40 min-w-[140px] whitespace-nowrap">Due Date</th>
@@ -230,13 +239,13 @@
         </thead>
 
         <!-- Table Body -->
-        <tbody class="divide-y divide-outline-gray-1 text-xs">
+        <tbody class="divide-y divide-outline-gray-1 text-base">
           <!-- Empty State -->
           <tr v-if="paginatedTasks.length === 0">
-            <td colspan="9" class="py-20 text-center text-ink-gray-4 text-xs">
+            <td colspan="9" class="py-20 text-center text-ink-gray-4 text-sm">
               <Icon name="ticket" size="28" class="mx-auto text-ink-gray-3 mb-2" />
               <div class="font-medium text-ink-gray-6">No tasks found</div>
-              <div class="text-[11px] text-ink-gray-4 mt-0.5">Try adjusting your filter search criteria.</div>
+              <div class="text-xs text-ink-gray-4 mt-0.5">Try adjusting your filter search criteria.</div>
             </td>
           </tr>
 
@@ -259,7 +268,7 @@
             </td>
 
             <!-- 1. ID Column (Bold like Helpdesk e.g. 0198) -->
-            <td class="py-3 px-3 w-20 font-semibold text-ink-gray-9 text-xs">
+            <td class="py-3 px-3 w-20 font-semibold text-ink-gray-9 text-base">
               {{ cleanId(task.name) }}
             </td>
 
@@ -281,7 +290,7 @@
             <td class="py-3 px-3 w-32" @click.stop>
               <Dropdown :options="getStatusOptions(task.name)" align="start">
                 <template #default="{ open }">
-                  <div class="inline-flex items-center gap-1.5 px-2 py-1 -ms-2 rounded-lg hover:bg-surface-gray-2 cursor-pointer transition text-xs text-ink-gray-8">
+                  <div class="inline-flex items-center gap-1.5 px-2 py-1 -ms-2 rounded-lg hover:bg-surface-gray-2 cursor-pointer transition text-base text-ink-gray-8">
                     <span class="w-2 h-2 rounded-full shrink-0" :class="statusDotClass(task.status)"></span>
                     <span class="font-medium">{{ task.status || 'Open' }}</span>
                   </div>
@@ -290,32 +299,72 @@
             </td>
 
             <!-- 4. Priority Column (3-bar signal icon + clean label without duplication) -->
-            <td class="py-3 px-3 w-28">
-              <TicketPriority :priority="task.priority || 'Medium'" />
-            </td>
-
-            <!-- 5. Assigned To Column (Helpdesk Avatar + Full Name) -->
-            <td class="py-3 px-3 w-40">
-              <div v-if="task.assignees?.length > 0" class="flex items-center gap-2 min-w-0">
-                <Avatar
-                  size="sm"
-                  :label="task.assignees[0].full_name || task.assignees[0].email"
-                />
-                <span class="text-xs text-ink-gray-8 truncate max-w-[110px]">
-                  {{ task.assignees[0].full_name || task.assignees[0].email }}
-                </span>
+            <td class="py-3 px-3 w-28" @click.stop="applyCellFilter('priority', task.priority || 'Medium')">
+              <div
+                class="inline-flex px-2 py-1 -ms-2 rounded-lg hover:bg-surface-gray-2 transition"
+                :title="`Filter by priority: ${task.priority || 'Medium'}`"
+              >
+                <TicketPriority :priority="task.priority || 'Medium'" />
               </div>
-              <span v-else class="text-xs text-ink-gray-4 italic">Unassigned</span>
             </td>
 
-            <!-- 6. Project Column (Client Rollout Name) -->
-            <td class="py-3 px-3 w-48 text-ink-gray-7 text-xs truncate max-w-[190px]">
-              {{ task.project_title || task.project }}
+            <!-- 5. Assigned To Column (Helpdesk Avatar + Full Name) - click a user to filter by them -->
+            <td class="py-3 px-3 w-52 max-w-[208px]" @click.stop>
+              <!-- Single assignee: avatar + name (click to filter) -->
+              <div
+                v-if="task.assignees?.length === 1"
+                class="inline-flex items-center gap-2 min-w-0 max-w-full px-1.5 py-1 -ms-1.5 rounded-lg hover:bg-surface-gray-2 transition cursor-pointer"
+                :class="{ 'bg-surface-gray-2': selectedAssignee === task.assignees[0].email }"
+                :title="`Filter by assignee: ${userLabel(task.assignees[0])}`"
+                @click="applyCellFilter('assignee', task.assignees[0].email)"
+              >
+                <Avatar size="sm" :image="task.assignees[0].user_image" :label="userLabel(task.assignees[0])" />
+                <span class="text-base text-ink-gray-8 truncate">{{ userLabel(task.assignees[0]) }}</span>
+              </div>
+
+              <!-- Multiple assignees: Helpdesk-style avatar stack + "Name +N"; click to choose whom to filter by -->
+              <Dropdown v-else-if="task.assignees?.length > 1" :options="assigneeMenu(task)" align="start">
+                <template #default>
+                  <div
+                    class="inline-flex items-center gap-2 min-w-0 max-w-full px-1.5 py-1 -ms-1.5 rounded-lg hover:bg-surface-gray-2 transition cursor-pointer"
+                    :class="{ 'bg-surface-gray-2': isFilteredAssignee(task) }"
+                    :title="orderedAssignees(task).map(userLabel).join(', ')"
+                  >
+                    <div class="flex -space-x-1.5 shrink-0">
+                      <Avatar
+                        v-for="a in orderedAssignees(task).slice(0, 3)"
+                        :key="a.email"
+                        size="sm"
+                        class="rounded-full ring-2 ring-white"
+                        :image="a.user_image"
+                        :label="userLabel(a)"
+                      />
+                    </div>
+                    <span class="text-base text-ink-gray-8 truncate">{{ userLabel(orderedAssignees(task)[0]) }}</span>
+                    <span class="text-sm text-ink-gray-5 shrink-0">+{{ task.assignees.length - 1 }}</span>
+                  </div>
+                </template>
+              </Dropdown>
+              <span
+                v-else
+                class="text-base text-ink-gray-4 italic px-1.5 py-1 -ms-1.5 rounded-lg hover:bg-surface-gray-2 transition"
+                title="Filter: unassigned tasks"
+                @click="applyCellFilter('assignee', UNASSIGNED)"
+              >Unassigned</span>
+            </td>
+
+            <!-- 6. Project Column (Client Rollout Name) - click to filter by project -->
+            <td class="py-3 px-3 w-48 text-ink-gray-7 text-base max-w-[190px]" @click.stop="applyCellFilter('project', task.project)">
+              <span
+                v-if="task.project"
+                class="inline-block truncate max-w-full px-1.5 py-1 -ms-1.5 rounded-lg hover:bg-surface-gray-2 transition"
+                :title="`Filter by project: ${task.project_title || task.project}`"
+              >{{ task.project_title || task.project }}</span>
             </td>
 
             <!-- 7. Due Date Column (AMPLE WIDTH: NEVER WRAPS) -->
             <td class="py-3 px-3 w-40 min-w-[140px] whitespace-nowrap">
-              <div class="flex items-center gap-1.5 text-xs whitespace-nowrap" :class="task.is_overdue ? 'text-red-600 font-medium' : 'text-ink-gray-6'">
+              <div class="flex items-center gap-1.5 text-base whitespace-nowrap" :class="task.is_overdue ? 'text-red-600 font-medium' : 'text-ink-gray-6'">
                 <span>{{ formatDate(task.exp_end_date) }}</span>
                 <Badge
                   v-if="task.is_overdue"
@@ -328,10 +377,11 @@
             </td>
 
             <!-- 8. Module Column (MOVED TO LAST WITH ROUND FULL CAPSULE PILL CORNERS) -->
-            <td class="py-3 px-4 w-44">
+            <td class="py-3 px-4 w-44" @click.stop="applyCellFilter('module', task.implementation_module || task.module_code)">
               <span
                 v-if="task.module_title"
-                class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-medium border"
+                :title="`Filter by module: ${task.module_title}`"
+                class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border hover:brightness-95 transition"
                 :style="{
                   backgroundColor: (task.module_color || '#3B82F6') + '15',
                   borderColor: (task.module_color || '#3B82F6') + '30',
@@ -341,7 +391,7 @@
                 <Icon :name="task.module_icon || 'package'" size="11" />
                 <span class="truncate max-w-[120px]">{{ task.module_title }}</span>
               </span>
-              <span v-else class="text-xs text-ink-gray-4">-</span>
+              <span v-else class="text-base text-ink-gray-4">-</span>
             </td>
           </tr>
         </tbody>
@@ -349,14 +399,14 @@
     </div>
 
     <!-- 3. Table Footer (Matching Helpdesk Ticket List Pagination: 20 50 100 & Load More) -->
-    <div class="px-5 py-3 border-t border-outline-gray-1 bg-surface-white flex items-center justify-between shrink-0 select-none text-xs">
+    <div class="px-5 py-3 border-t border-outline-gray-1 bg-surface-white flex items-center justify-between shrink-0 select-none text-sm">
       <!-- Left: Page length selector [ 20 ] [ 50 ] [ 100 ] -->
       <div class="flex items-center gap-1 p-0.5 rounded-xl bg-surface-gray-2 border border-outline-gray-2">
         <button
           v-for="size in [20, 50, 100]"
           :key="size"
           @click="pageSize = size"
-          class="px-2.5 py-1 rounded-lg text-xs font-medium transition"
+          class="px-2.5 py-1 rounded-lg text-sm font-medium transition"
           :class="pageSize === size ? 'bg-white shadow-2xs text-ink-gray-9 font-semibold' : 'text-ink-gray-6 hover:text-ink-gray-9'"
         >
           {{ size }}
@@ -373,7 +423,7 @@
           label="Load More"
           @click="loadMore"
         />
-        <span class="text-ink-gray-5 text-xs">
+        <span class="text-ink-gray-5 text-sm">
           {{ Math.min(pageSize, filteredTasks.length) }} of {{ filteredTasks.length }}
         </span>
       </div>
@@ -428,6 +478,8 @@ const selectedProject = ref('All')
 const selectedModule = ref('All')
 const selectedStatus = ref('All')
 const selectedPriority = ref('All')
+const UNASSIGNED = '__unassigned__'
+const selectedAssignee = ref('All')
 const sortKey = ref('exp_end_date')
 const sortOrder = ref('asc')
 const pageSize = ref(20)
@@ -457,6 +509,69 @@ const priorityFilterOptions = [
   { label: 'Medium', value: 'Medium' },
   { label: 'Low', value: 'Low' },
 ]
+
+// Unique assignees across loaded tasks (for the Assigned To quick filter)
+const assigneeFilterOptions = computed(() => {
+  const users = new Map()
+  for (const task of props.tasks) {
+    for (const a of task.assignees || []) {
+      if (a?.email && !users.has(a.email)) users.set(a.email, a.full_name || a.email)
+    }
+  }
+  // Keep the currently selected user visible even if no loaded task has them anymore
+  if (selectedAssignee.value !== 'All' && selectedAssignee.value !== UNASSIGNED && !users.has(selectedAssignee.value)) {
+    users.set(selectedAssignee.value, selectedAssignee.value)
+  }
+  const sorted = [...users.entries()].sort((a, b) => a[1].localeCompare(b[1]))
+  return [
+    { label: 'All Assignees', value: 'All' },
+    { label: 'Unassigned', value: UNASSIGNED },
+    ...sorted.map(([email, name]) => ({ label: name, value: email })),
+  ]
+})
+
+function userLabel(a) {
+  return a?.full_name || a?.email || ''
+}
+
+// Filtered user first, so the row shows who matched the filter
+function orderedAssignees(task) {
+  const list = [...(task.assignees || [])]
+  const idx = list.findIndex((a) => a.email === selectedAssignee.value)
+  if (idx > 0) list.unshift(list.splice(idx, 1)[0])
+  return list
+}
+
+function isFilteredAssignee(task) {
+  return (task.assignees || []).some((a) => a.email === selectedAssignee.value)
+}
+
+function assigneeMenu(task) {
+  return [
+    {
+      group: 'Filter by assignee',
+      options: orderedAssignees(task).map((a) => ({
+        label: selectedAssignee.value === a.email ? `${userLabel(a)}  ✓` : userLabel(a),
+        onClick: () => applyCellFilter('assignee', a.email),
+      })),
+    },
+  ]
+}
+
+// Helpdesk-style "click a cell value to filter by it"
+function applyCellFilter(field, value) {
+  if (!value) return
+  const target = {
+    assignee: selectedAssignee,
+    priority: selectedPriority,
+    project: selectedProject,
+    module: selectedModule,
+    status: selectedStatus,
+  }[field]
+  if (!target) return
+  // Clicking the value that is already filtered toggles the filter off
+  target.value = target.value === value ? 'All' : value
+}
 
 // Advanced filter panel toggle & states
 const showAdvancedFilter = ref(false)
@@ -488,6 +603,7 @@ function loadSavedFilters() {
       if (saved.selectedModule !== undefined) selectedModule.value = saved.selectedModule
       if (saved.selectedStatus !== undefined) selectedStatus.value = saved.selectedStatus
       if (saved.selectedPriority !== undefined) selectedPriority.value = saved.selectedPriority
+      if (saved.selectedAssignee !== undefined) selectedAssignee.value = saved.selectedAssignee
       if (saved.advMilestone !== undefined) advMilestone.value = saved.advMilestone
       if (saved.advOverdue !== undefined) advOverdue.value = saved.advOverdue
       if (saved.advAssignee !== undefined) advAssignee.value = saved.advAssignee
@@ -509,6 +625,7 @@ function persistFilters() {
       selectedModule: selectedModule.value,
       selectedStatus: selectedStatus.value,
       selectedPriority: selectedPriority.value,
+      selectedAssignee: selectedAssignee.value,
       advMilestone: advMilestone.value,
       advOverdue: advOverdue.value,
       advAssignee: advAssignee.value,
@@ -528,6 +645,7 @@ watch(
     selectedModule,
     selectedStatus,
     selectedPriority,
+    selectedAssignee,
     advMilestone,
     advOverdue,
     advAssignee,
@@ -556,6 +674,7 @@ const hasActiveFilters = computed(() => {
     selectedModule.value !== 'All' ||
     selectedStatus.value !== 'All' ||
     selectedPriority.value !== 'All' ||
+    selectedAssignee.value !== 'All' ||
     activeAdvanceFilterCount.value > 0
   )
 })
@@ -573,6 +692,7 @@ function clearFilters() {
   selectedModule.value = 'All'
   selectedStatus.value = 'All'
   selectedPriority.value = 'All'
+  selectedAssignee.value = 'All'
   clearAdvanceFilters()
   try {
     sessionStorage.removeItem(SAVED_FILTERS_KEY)
@@ -621,7 +741,17 @@ const filteredTasks = computed(() => {
 
     // 6. Priority Filter
     if (selectedPriority.value !== 'All') {
-      if (task.priority !== selectedPriority.value) return false
+      if ((task.priority || 'Medium') !== selectedPriority.value) return false
+    }
+
+    // 6b. Assigned To Filter
+    if (selectedAssignee.value !== 'All') {
+      const emails = (task.assignees || []).map((a) => a.email)
+      if (selectedAssignee.value === UNASSIGNED) {
+        if (emails.length > 0) return false
+      } else if (!emails.includes(selectedAssignee.value)) {
+        return false
+      }
     }
 
     // 7. Advance Filters

@@ -30,7 +30,7 @@
         <rect x="8" y="0" width="2.5" height="12" rx="0.5" :class="barClass(0)" />
       </svg>
     </span>
-    <span v-if="!iconOnly" :title="priority" class="truncate font-medium text-xs text-ink-gray-8">
+    <span v-if="!iconOnly" :title="priority" class="truncate font-medium text-sm text-ink-gray-8">
       {{ priority }}
     </span>
   </span>

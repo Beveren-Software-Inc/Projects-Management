@@ -3,15 +3,15 @@
     <!-- Top Filter Bar -->
     <div class="px-6 py-2.5 bg-white border-b border-outline-gray-2 flex items-center justify-between shrink-0">
       <div class="flex items-center gap-2">
-        <span class="text-xs font-semibold text-ink-gray-7">Kanban Board</span>
-        <span class="text-xs text-ink-gray-4">({{ tasks.length }} total tasks)</span>
+        <span class="text-sm font-semibold text-ink-gray-7">Kanban Board</span>
+        <span class="text-sm text-ink-gray-4">({{ tasks.length }} total tasks)</span>
       </div>
 
-      <div class="flex items-center gap-2 text-xs">
+      <div class="flex items-center gap-2 text-sm">
         <select
           v-model="selectedModule"
           @change="$emit('filter-change', { module: selectedModule, priority: selectedPriority })"
-          class="px-3 py-1.5 text-xs rounded-xl border border-outline-gray-2 bg-surface-gray-1 hover:bg-surface-gray-2 focus:bg-white text-ink-gray-7 focus:outline-none transition shadow-2xs cursor-pointer"
+          class="px-3 py-1.5 text-sm rounded-xl border border-outline-gray-2 bg-surface-gray-1 hover:bg-surface-gray-2 focus:bg-white text-ink-gray-7 focus:outline-none transition shadow-2xs cursor-pointer"
         >
           <option value="All">All Modules</option>
           <option v-for="m in modules" :key="m.module_code" :value="m.module_code">
@@ -22,7 +22,7 @@
         <select
           v-model="selectedPriority"
           @change="$emit('filter-change', { module: selectedModule, priority: selectedPriority })"
-          class="px-3 py-1.5 text-xs rounded-xl border border-outline-gray-2 bg-surface-gray-1 hover:bg-surface-gray-2 focus:bg-white text-ink-gray-7 focus:outline-none transition shadow-2xs cursor-pointer"
+          class="px-3 py-1.5 text-sm rounded-xl border border-outline-gray-2 bg-surface-gray-1 hover:bg-surface-gray-2 focus:bg-white text-ink-gray-7 focus:outline-none transition shadow-2xs cursor-pointer"
         >
           <option value="All">All Priorities</option>
           <option value="Urgent">Urgent</option>
@@ -44,9 +44,9 @@
         <div class="px-4 py-3 border-b border-outline-gray-2 bg-white flex items-center justify-between shrink-0 rounded-t-2xl">
           <div class="flex items-center gap-2">
             <span class="w-2.5 h-2.5 rounded-full" :class="col.dotClass"></span>
-            <span class="font-semibold text-xs text-ink-gray-9">{{ col.title }}</span>
+            <span class="font-semibold text-sm text-ink-gray-9">{{ col.title }}</span>
           </div>
-          <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-surface-gray-2 text-ink-gray-6">
+          <span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-surface-gray-2 text-ink-gray-6">
             {{ getTasksByStatus(col.id).length }}
           </span>
         </div>
@@ -55,7 +55,7 @@
         <div class="flex-1 p-3 overflow-y-auto space-y-3">
           <div
             v-if="getTasksByStatus(col.id).length === 0"
-            class="py-12 text-center text-xs text-ink-gray-4 border border-dashed border-outline-gray-2 rounded-xl"
+            class="py-12 text-center text-sm text-ink-gray-4 border border-dashed border-outline-gray-2 rounded-xl"
           >
             No tasks in {{ col.title }}
           </div>
@@ -71,13 +71,13 @@
             <div class="flex items-center justify-between">
               <span
                 v-if="task.module_title"
-                class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-semibold"
+                class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold"
                 :style="{ backgroundColor: (task.module_color || '#3B82F6') + '18', color: task.module_color || '#3B82F6' }"
               >
                 <Icon :name="task.module_icon || 'package'" size="10" />
                 <span>{{ task.module_title }}</span>
               </span>
-              <span v-else class="text-[10px] text-ink-gray-4">General</span>
+              <span v-else class="text-xs text-ink-gray-4">General</span>
 
               <div class="flex items-center gap-1">
                 <span
@@ -88,7 +88,7 @@
                   <Icon name="flag" size="12" />
                 </span>
                 <span
-                  class="px-2 py-0.5 rounded-md text-[10px] font-semibold"
+                  class="px-2 py-0.5 rounded-md text-xs font-semibold"
                   :class="priorityBadgeClass(task.priority)"
                 >
                   {{ task.priority }}
@@ -98,11 +98,11 @@
 
             <!-- Card Body: Subject -->
             <div>
-              <div class="text-[11px] font-mono text-ink-gray-4 mb-0.5">{{ task.name }}</div>
-              <h4 class="font-medium text-xs text-ink-gray-9 leading-snug group-hover:text-blue-600 transition">
+              <div class="text-xs font-mono text-ink-gray-4 mb-0.5">{{ task.name }}</div>
+              <h4 class="font-medium text-sm text-ink-gray-9 leading-snug group-hover:text-blue-600 transition">
                 {{ task.subject }}
               </h4>
-              <div class="text-[11px] text-ink-gray-5 mt-1 font-medium truncate">
+              <div class="text-xs text-ink-gray-5 mt-1 font-medium truncate">
                 {{ task.project_title || task.project }}
               </div>
             </div>
@@ -110,7 +110,7 @@
             <!-- Card Bottom: Dates, Progress, Assignees -->
             <div class="pt-2 border-t border-outline-gray-1 flex items-center justify-between">
               <!-- Due date -->
-              <div class="flex items-center gap-1 text-[11px]" :class="task.is_overdue ? 'text-red-600 font-semibold' : 'text-ink-gray-5'">
+              <div class="flex items-center gap-1 text-xs" :class="task.is_overdue ? 'text-red-600 font-semibold' : 'text-ink-gray-5'">
                 <Icon name="clock" size="11" />
                 <span>{{ task.exp_end_date ? formatDate(task.exp_end_date) : 'No due date' }}</span>
               </div>
@@ -131,13 +131,13 @@
             </div>
 
             <!-- Quick Move Controls -->
-            <div class="pt-2 flex items-center justify-between border-t border-dashed border-outline-gray-1 text-[11px]" @click.stop>
+            <div class="pt-2 flex items-center justify-between border-t border-dashed border-outline-gray-1 text-xs" @click.stop>
               <span class="text-ink-gray-4">Move:</span>
               <div class="flex gap-1">
                 <button
                   v-if="col.id !== 'Open'"
                   @click="$emit('update-status', task.name, 'Open')"
-                  class="px-2 py-0.5 text-[10px] rounded-md hover:bg-surface-gray-2 text-ink-gray-6 transition"
+                  class="px-2 py-0.5 text-xs rounded-md hover:bg-surface-gray-2 text-ink-gray-6 transition"
                   title="Move to Open"
                 >
                   ← Open
@@ -145,7 +145,7 @@
                 <button
                   v-if="col.id !== 'Working'"
                   @click="$emit('update-status', task.name, 'Working')"
-                  class="px-2 py-0.5 text-[10px] rounded-md hover:bg-blue-50 text-blue-600 font-medium transition"
+                  class="px-2 py-0.5 text-xs rounded-md hover:bg-blue-50 text-blue-600 font-medium transition"
                   title="Move to Working"
                 >
                   Working
@@ -153,7 +153,7 @@
                 <button
                   v-if="col.id !== 'Pending Review'"
                   @click="$emit('update-status', task.name, 'Pending Review')"
-                  class="px-2 py-0.5 text-[10px] rounded-md hover:bg-amber-50 text-amber-600 font-medium transition"
+                  class="px-2 py-0.5 text-xs rounded-md hover:bg-amber-50 text-amber-600 font-medium transition"
                   title="Move to Review"
                 >
                   Review
@@ -161,7 +161,7 @@
                 <button
                   v-if="col.id !== 'Completed'"
                   @click="$emit('update-status', task.name, 'Completed')"
-                  class="px-2 py-0.5 text-[10px] rounded-md hover:bg-emerald-50 text-emerald-600 font-medium transition"
+                  class="px-2 py-0.5 text-xs rounded-md hover:bg-emerald-50 text-emerald-600 font-medium transition"
                   title="Mark Completed"
                 >
                   Done ✓
