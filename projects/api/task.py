@@ -1,11 +1,14 @@
 # Copyright (c) 2026, Beveren Software and contributors
 # For license information, please see license.txt
 
+import html
 import json
+import re
 import frappe
 from frappe import _
 from frappe.desk.form.assign_to import add as add_assignment, remove as remove_assignment
-from frappe.utils import getdate, nowdate, flt, cint
+from frappe.utils import getdate, nowdate, flt, cint, add_to_date, now_datetime, is_html, escape_html, strip_html_tags
+from frappe.utils.html_utils import sanitize_html, clean_email_html
 
 
 @frappe.whitelist()
@@ -206,15 +209,29 @@ def get_task(task_id):
 		order_by="creation desc",
 	)
 	for c in comments:
+		sender_name = c.comment_by or frappe.db.get_value("User", c.comment_email, "full_name") or c.comment_email
+		if c.comment_type != "Comment":
+			# Frappe's automatic activity (Assigned, Attachment, Edit, Info, ...) -> one-line activity row
+			timeline.append({
+				"type": "system",
+				"id": c.name,
+				"action": (c.comment_type or "").lower(),
+				"sender": c.comment_email,
+				"sender_name": sender_name,
+				"content": _system_comment_text(c.comment_type, c.content, sender_name),
+				"timestamp": c.creation,
+			})
+			continue
+
 		user_img = frappe.db.get_value("User", c.comment_email, "user_image")
 		timeline.append({
 			"type": "comment",
 			"id": c.name,
 			"comment_type": c.comment_type,
 			"sender": c.comment_email,
-			"sender_name": c.comment_by or c.comment_email,
+			"sender_name": sender_name,
 			"sender_image": user_img,
-			"content": c.content,
+			"content": _to_display_html(c.content),
 			"timestamp": c.creation,
 		})
 
@@ -248,7 +265,7 @@ def get_task(task_id):
 			"sender_image": user_img,
 			"recipients": cm.recipients,
 			"subject": cm.subject,
-			"content": cm.content,
+			"content": _to_display_html(cm.content, email=True),
 			"timestamp": cm.creation,
 		})
 
@@ -267,7 +284,119 @@ def get_task(task_id):
 	timeline.sort(key=lambda x: str(x["timestamp"]), reverse=True)
 	task_data["activity_timeline"] = timeline
 
+	task_data["owner_name"] = frappe.db.get_value("User", doc.owner, "full_name") or doc.owner
+	task_data["owner_image"] = frappe.db.get_value("User", doc.owner, "user_image")
+	task_data["description_html"] = _to_display_html(doc.description)
+
+	# Real "viewed by" history (Frappe View Log)
+	_log_task_view(doc)
+	viewers = _get_task_viewers(task_id)
+	# The View Log insert is committed after the response, so add the current view directly
+	user = frappe.session.user
+	if user != "Guest":
+		viewers = [v for v in viewers if v["user"] != user]
+		viewers.insert(0, {
+			"user": user,
+			"full_name": frappe.db.get_value("User", user, "full_name") or user,
+			"user_image": frappe.db.get_value("User", user, "user_image"),
+			"last_viewed": now_datetime(),
+		})
+		viewers = viewers[:5]
+	task_data["viewers"] = viewers
+
 	return task_data
+
+
+BLOCK_TAG_RE = re.compile(r"<(p|div|br|ul|ol|li|table|blockquote|pre|h[1-6])\b", re.IGNORECASE)
+
+
+def _to_display_html(content, email=False):
+	"""Safe HTML for the activity timeline.
+
+	Notes typed in this app are plain text (keep line breaks); notes from Desk and
+	emails are HTML (sanitize to prevent XSS)."""
+	if not content:
+		return ""
+	if not is_html(content):
+		return escape_html(content).replace("\n", "<br>")
+	cleaned = clean_email_html(content) if email else sanitize_html(
+		content, always_sanitize=True, disallowed_tags=["html", "head", "meta", "link", "body", "style"]
+	)
+	# Plain text with a few inline tags (typed in the composer) -> keep its line breaks
+	if not BLOCK_TAG_RE.search(cleaned):
+		cleaned = cleaned.strip().replace("\n", "<br>")
+	return cleaned
+
+
+def _system_comment_text(comment_type, content, sender_name):
+	"""Readable one-liner for Frappe activity comments, always mentioning who did it."""
+	text = _to_plain_text(content)
+	if comment_type == "Assigned":
+		# "X assigned Y: <document title/name>" -> "X assigned Y"
+		text = text.split(":", 1)[0].strip()
+	elif comment_type == "Assignment Completed":
+		# "Assignment of Y removed by X" -> "X removed assignment of Y"
+		match = re.match(r"^Assignment of (.+) removed by (.+?)\.?$", text)
+		if match:
+			text = f"{match.group(2)} removed assignment of {match.group(1)}"
+	elif comment_type == "Attachment":
+		text = f"attached {text}"
+	elif comment_type == "Attachment Removed":
+		text = f"removed attachment {text}"
+	if sender_name and not text.startswith(sender_name):
+		text = f"{sender_name} {text[:1].lower()}{text[1:]}" if text else sender_name
+	return text
+
+
+def _to_plain_text(content):
+	"""Collapse HTML into a single readable line, e.g. 'Administrator assigned bala: demo2'."""
+	if not content:
+		return ""
+	return " ".join(html.unescape(strip_html_tags(content)).split())
+
+
+VIEW_LOG_THROTTLE_MINUTES = 30
+
+
+def _log_task_view(doc):
+	"""Record a View Log for the current user, at most once per throttle window."""
+	user = frappe.session.user
+	if user == "Guest":
+		return
+	recent = frappe.db.exists(
+		"View Log",
+		{
+			"reference_doctype": doc.doctype,
+			"reference_name": doc.name,
+			"viewed_by": user,
+			"creation": [">", add_to_date(now_datetime(), minutes=-VIEW_LOG_THROTTLE_MINUTES)],
+		},
+	)
+	if not recent:
+		doc.add_viewed(user=user, force=True)
+
+
+def _get_task_viewers(task_id, limit=5):
+	"""Latest view per user for a task, newest first."""
+	rows = frappe.get_all(
+		"View Log",
+		filters={"reference_doctype": "Task", "reference_name": task_id},
+		fields=["viewed_by", {"MAX": "creation", "as": "last_viewed"}],
+		group_by="viewed_by",
+		order_by="last_viewed desc",
+		limit=limit,
+		ignore_permissions=True,
+	)
+	viewers = []
+	for row in rows:
+		user_info = frappe.db.get_value("User", row.viewed_by, ["full_name", "user_image"], as_dict=True) or {}
+		viewers.append({
+			"user": row.viewed_by,
+			"full_name": user_info.get("full_name") or row.viewed_by,
+			"user_image": user_info.get("user_image"),
+			"last_viewed": row.last_viewed,
+		})
+	return viewers
 
 
 def _ensure_project_dates_accommodate_task(project, exp_start_date=None, exp_end_date=None):
@@ -584,9 +713,38 @@ def add_comment(task_id, content):
 		"sender": doc.comment_email,
 		"sender_name": doc.comment_by,
 		"sender_image": frappe.db.get_value("User", frappe.session.user, "user_image"),
-		"content": doc.content,
+		"content": _to_display_html(doc.content),
 		"timestamp": doc.creation,
 	}
+
+
+def _get_own_comment(comment_id):
+	"""Return a task Comment the current user may change (author or System Manager)."""
+	comment = frappe.get_doc("Comment", comment_id)
+	if comment.reference_doctype != "Task" or comment.comment_type != "Comment":
+		frappe.throw(_("Only task comments can be changed"), frappe.PermissionError)
+	if comment.comment_email != frappe.session.user and "System Manager" not in frappe.get_roles():
+		frappe.throw(_("You can only change your own comments"), frappe.PermissionError)
+	return comment
+
+
+@frappe.whitelist(methods=["POST"])
+def edit_comment(comment_id, content):
+	"""Edit the text of the current user's task comment."""
+	if not content or not content.strip():
+		frappe.throw(_("Comment cannot be empty"))
+	comment = _get_own_comment(comment_id)
+	comment.content = content
+	comment.save(ignore_permissions=True)
+	return {"id": comment.name, "content": _to_display_html(comment.content)}
+
+
+@frappe.whitelist(methods=["POST"])
+def delete_comment(comment_id):
+	"""Delete the current user's task comment."""
+	comment = _get_own_comment(comment_id)
+	frappe.delete_doc("Comment", comment.name, ignore_permissions=True)
+	return {"id": comment_id}
 
 
 @frappe.whitelist()

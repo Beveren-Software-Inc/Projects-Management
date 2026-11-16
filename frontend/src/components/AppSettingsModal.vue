@@ -59,26 +59,21 @@
                 <Icon :name="settings.brandIcon" size="20" color="#ffffff" />
               </div>
               <div class="truncate">
-                <div class="font-semibold text-xs text-ink-gray-9 truncate">{{ settings.brandName || 'Beveren Software' }}</div>
-                <div class="text-[11px] text-ink-gray-5 truncate">{{ settings.brandSubtitle || 'Abid Khan' }}</div>
+                <div class="font-semibold text-xs text-ink-gray-9 truncate">{{ companyName }}</div>
+                <div class="text-[11px] text-ink-gray-5 truncate">{{ currentUserName }}</div>
               </div>
             </div>
           </div>
 
           <!-- Inputs -->
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <TextInput
-              v-model="settings.brandName"
-              label="Brand / Company Name"
-              placeholder="e.g. Beveren Software"
-              size="sm"
-            />
-            <TextInput
-              v-model="settings.brandSubtitle"
-              label="Subtitle / User Name"
-              placeholder="e.g. Abid Khan"
-              size="sm"
-            />
+            <div class="space-y-1">
+              <label class="block text-xs font-medium text-ink-gray-7">Brand / Company Name</label>
+              <div class="px-2.5 py-1.5 rounded-xl bg-surface-gray-2 text-ink-gray-8 text-xs truncate">{{ companyName }}</div>
+            </div>
+            <div class="text-[11px] text-ink-gray-5 self-end pb-1.5">
+              The name comes from your default Company, and the subtitle shows the logged-in user.
+            </div>
           </div>
 
           <!-- Brand Color Theme -->
@@ -297,8 +292,6 @@ const ICON_OPTIONS = [
 const activeTab = ref('branding')
 
 const defaultSettings = {
-  brandName: 'Beveren Software',
-  brandSubtitle: 'Abid Khan',
   brandColor: '#DC2626',
   brandIcon: 'check-square',
   emailNotifications: true,
@@ -314,6 +307,14 @@ const defaultSettings = {
 
 const settings = reactive({ ...defaultSettings })
 
+// Company name and logged-in user's name, provided by the page boot (projects/www/projects.py -> user_info)
+const companyName = window.company_name || 'Projects'
+const currentUserName =
+  window.user_info?.full_name ||
+  window.user_info?.email ||
+  window.session_user ||
+  ''
+
 onMounted(() => {
   loadSettings()
 })
@@ -323,6 +324,9 @@ function loadSettings() {
     const raw = localStorage.getItem(SETTINGS_KEY)
     if (raw) {
       const parsed = JSON.parse(raw)
+      // Drop the old hardcoded per-user subtitle that earlier versions saved
+      delete parsed.brandSubtitle
+      delete parsed.brandName
       Object.assign(settings, parsed)
     }
   } catch (e) {

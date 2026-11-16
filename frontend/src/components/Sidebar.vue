@@ -3,10 +3,10 @@
     v-model:collapsed="isCollapsed"
     class="select-none border-r border-outline-gray-2 bg-surface-white"
   >
-    <!-- 1. Header: Beveren Software + User/Subtitle with Beveren Logo -->
+    <!-- 1. Header: Company name + logged-in user with brand logo -->
     <SidebarHeader
-      :title="brandSettings.brandName || 'Beveren Software'"
-      :subtitle="brandSettings.brandSubtitle || 'Projects'"
+      :title="companyName"
+      :subtitle="currentUserName"
       :menu-items="workspaceMenu"
     >
       <template #prefix>
@@ -112,7 +112,6 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import {
   Sidebar,
@@ -151,28 +150,13 @@ const emit = defineEmits([
 
 const route = useRoute()
 
-const brandSettings = ref({
-  brandName: 'Beveren Software',
-  brandSubtitle: 'Abid Khan',
-})
-
-onMounted(() => {
-  loadBrandSettings()
-  window.addEventListener('storage', loadBrandSettings)
-})
-
-function loadBrandSettings() {
-  try {
-    const raw = localStorage.getItem('projects_app_settings')
-    if (raw) {
-      const parsed = JSON.parse(raw)
-      brandSettings.value.brandName = parsed.brandName || 'Beveren Software'
-      brandSettings.value.brandSubtitle = parsed.brandSubtitle || 'Abid Khan'
-    } else if (window.frappe?.session?.user_fullname) {
-      brandSettings.value.brandSubtitle = window.frappe.session.user_fullname
-    }
-  } catch (e) {}
-}
+// Brand = company name and subtitle = logged-in user, both from the page boot (projects/www/projects.py)
+const companyName = window.company_name || 'Projects'
+const currentUserName =
+  window.user_info?.full_name ||
+  window.user_info?.email ||
+  window.session_user ||
+  ''
 
 const workspaceMenu = [
   { label: 'App Settings', icon: 'lucide-settings', onClick: () => emit('open-settings') },

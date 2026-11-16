@@ -199,6 +199,14 @@ export async function addTaskComment(taskId, content) {
   return request('POST', 'projects.api.task.add_comment', { task_id: taskId, content })
 }
 
+export async function editTaskComment(commentId, content) {
+  return request('POST', 'projects.api.task.edit_comment', { comment_id: commentId, content })
+}
+
+export async function deleteTaskComment(commentId) {
+  return request('POST', 'projects.api.task.delete_comment', { comment_id: commentId })
+}
+
 export async function sendTaskEmail(taskId, recipients, subject, message) {
   return request('POST', 'projects.api.task.send_task_email', {
     task_id: taskId,

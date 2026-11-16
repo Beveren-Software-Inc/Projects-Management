@@ -498,21 +498,15 @@ const mentionFilter = ref('')
 const mentionActiveIndex = ref(0)
 const teamUsers = ref([])
 
-const defaultMembers = [
-  { name: 'abdullah@beverensoftware.com', full_name: 'Abdullah', email: 'abdullah@beverensoftware.com' },
-  { name: 'abid@beverensoftware.com', full_name: 'Abid Khan', email: 'abid@beverensoftware.com' },
-  { name: 'balachandar@beverensoftware.com', full_name: 'Balachandar S', email: 'balachandar@beverensoftware.com' },
-  { name: 'saiyoni@beverensoftware.com', full_name: 'Saiyoni', email: 'saiyoni@beverensoftware.com' },
-  { name: 'shakir@beverensoftware.com', full_name: 'Shakir', email: 'shakir@beverensoftware.com' },
-]
 
 onMounted(async () => {
   initRecipients()
   try {
     const list = await getUsers()
-    teamUsers.value = list?.length ? list : defaultMembers
+    teamUsers.value = list || []
   } catch (e) {
-    teamUsers.value = defaultMembers
+    console.error('Failed to load team users for mentions', e)
+    teamUsers.value = []
   }
 })
 
