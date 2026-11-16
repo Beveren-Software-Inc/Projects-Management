@@ -58,6 +58,15 @@
           />
         </div>
 
+        <!-- Assigned To Select (also set by clicking a user in the Assigned To column) -->
+        <div class="w-44">
+          <Select
+            v-model="selectedAssignee"
+            :options="assigneeFilterOptions"
+            size="sm"
+          />
+        </div>
+
         <!-- Clear filters button if active -->
         <button
           v-if="hasActiveFilters"
@@ -290,27 +299,60 @@
             </td>
 
             <!-- 4. Priority Column (3-bar signal icon + clean label without duplication) -->
-            <td class="py-3 px-3 w-28">
-              <TicketPriority :priority="task.priority || 'Medium'" />
-            </td>
-
-            <!-- 5. Assigned To Column (Helpdesk Avatar + Full Name) -->
-            <td class="py-3 px-3 w-40">
-              <div v-if="task.assignees?.length > 0" class="flex items-center gap-2 min-w-0">
-                <Avatar
-                  size="sm"
-                  :label="task.assignees[0].full_name || task.assignees[0].email"
-                />
-                <span class="text-xs text-ink-gray-8 truncate max-w-[110px]">
-                  {{ task.assignees[0].full_name || task.assignees[0].email }}
-                </span>
+            <td class="py-3 px-3 w-28" @click.stop="applyCellFilter('priority', task.priority || 'Medium')">
+              <div
+                class="inline-flex px-2 py-1 -ms-2 rounded-lg hover:bg-surface-gray-2 transition"
+                :title="`Filter by priority: ${task.priority || 'Medium'}`"
+              >
+                <TicketPriority :priority="task.priority || 'Medium'" />
               </div>
-              <span v-else class="text-xs text-ink-gray-4 italic">Unassigned</span>
             </td>
 
-            <!-- 6. Project Column (Client Rollout Name) -->
-            <td class="py-3 px-3 w-48 text-ink-gray-7 text-xs truncate max-w-[190px]">
-              {{ task.project_title || task.project }}
+            <!-- 5. Assigned To Column (Helpdesk Avatar + Full Name) - click a user to filter by them -->
+            <td class="py-3 px-3 w-40" @click.stop>
+              <div v-if="task.assignees?.length > 0" class="flex items-center gap-1 min-w-0">
+                <div
+                  class="flex items-center gap-2 min-w-0 px-1.5 py-1 -ms-1.5 rounded-lg hover:bg-surface-gray-2 transition"
+                  :class="{ 'bg-surface-gray-2': selectedAssignee === task.assignees[0].email }"
+                  :title="`Filter by assignee: ${task.assignees[0].full_name || task.assignees[0].email}`"
+                  @click="applyCellFilter('assignee', task.assignees[0].email)"
+                >
+                  <Avatar
+                    size="sm"
+                    :image="task.assignees[0].user_image"
+                    :label="task.assignees[0].full_name || task.assignees[0].email"
+                  />
+                  <span class="text-xs text-ink-gray-8 truncate max-w-[110px]">
+                    {{ task.assignees[0].full_name || task.assignees[0].email }}
+                  </span>
+                </div>
+                <!-- Additional assignees: each avatar filters by that user -->
+                <div
+                  v-for="a in task.assignees.slice(1)"
+                  :key="a.email"
+                  class="shrink-0 rounded-full p-0.5 hover:bg-surface-gray-3 transition"
+                  :class="{ 'ring-1 ring-outline-gray-4': selectedAssignee === a.email }"
+                  :title="`Filter by assignee: ${a.full_name || a.email}`"
+                  @click="applyCellFilter('assignee', a.email)"
+                >
+                  <Avatar size="xs" :image="a.user_image" :label="a.full_name || a.email" />
+                </div>
+              </div>
+              <span
+                v-else
+                class="text-xs text-ink-gray-4 italic px-1.5 py-1 -ms-1.5 rounded-lg hover:bg-surface-gray-2 transition"
+                title="Filter: unassigned tasks"
+                @click="applyCellFilter('assignee', UNASSIGNED)"
+              >Unassigned</span>
+            </td>
+
+            <!-- 6. Project Column (Client Rollout Name) - click to filter by project -->
+            <td class="py-3 px-3 w-48 text-ink-gray-7 text-xs max-w-[190px]" @click.stop="applyCellFilter('project', task.project)">
+              <span
+                v-if="task.project"
+                class="inline-block truncate max-w-full px-1.5 py-1 -ms-1.5 rounded-lg hover:bg-surface-gray-2 transition"
+                :title="`Filter by project: ${task.project_title || task.project}`"
+              >{{ task.project_title || task.project }}</span>
             </td>
 
             <!-- 7. Due Date Column (AMPLE WIDTH: NEVER WRAPS) -->
@@ -328,10 +370,11 @@
             </td>
 
             <!-- 8. Module Column (MOVED TO LAST WITH ROUND FULL CAPSULE PILL CORNERS) -->
-            <td class="py-3 px-4 w-44">
+            <td class="py-3 px-4 w-44" @click.stop="applyCellFilter('module', task.implementation_module || task.module_code)">
               <span
                 v-if="task.module_title"
-                class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-medium border"
+                :title="`Filter by module: ${task.module_title}`"
+                class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-medium border hover:brightness-95 transition"
                 :style="{
                   backgroundColor: (task.module_color || '#3B82F6') + '15',
                   borderColor: (task.module_color || '#3B82F6') + '30',
@@ -428,6 +471,8 @@ const selectedProject = ref('All')
 const selectedModule = ref('All')
 const selectedStatus = ref('All')
 const selectedPriority = ref('All')
+const UNASSIGNED = '__unassigned__'
+const selectedAssignee = ref('All')
 const sortKey = ref('exp_end_date')
 const sortOrder = ref('asc')
 const pageSize = ref(20)
@@ -457,6 +502,41 @@ const priorityFilterOptions = [
   { label: 'Medium', value: 'Medium' },
   { label: 'Low', value: 'Low' },
 ]
+
+// Unique assignees across loaded tasks (for the Assigned To quick filter)
+const assigneeFilterOptions = computed(() => {
+  const users = new Map()
+  for (const task of props.tasks) {
+    for (const a of task.assignees || []) {
+      if (a?.email && !users.has(a.email)) users.set(a.email, a.full_name || a.email)
+    }
+  }
+  // Keep the currently selected user visible even if no loaded task has them anymore
+  if (selectedAssignee.value !== 'All' && selectedAssignee.value !== UNASSIGNED && !users.has(selectedAssignee.value)) {
+    users.set(selectedAssignee.value, selectedAssignee.value)
+  }
+  const sorted = [...users.entries()].sort((a, b) => a[1].localeCompare(b[1]))
+  return [
+    { label: 'All Assignees', value: 'All' },
+    { label: 'Unassigned', value: UNASSIGNED },
+    ...sorted.map(([email, name]) => ({ label: name, value: email })),
+  ]
+})
+
+// Helpdesk-style "click a cell value to filter by it"
+function applyCellFilter(field, value) {
+  if (!value) return
+  const target = {
+    assignee: selectedAssignee,
+    priority: selectedPriority,
+    project: selectedProject,
+    module: selectedModule,
+    status: selectedStatus,
+  }[field]
+  if (!target) return
+  // Clicking the value that is already filtered toggles the filter off
+  target.value = target.value === value ? 'All' : value
+}
 
 // Advanced filter panel toggle & states
 const showAdvancedFilter = ref(false)
@@ -488,6 +568,7 @@ function loadSavedFilters() {
       if (saved.selectedModule !== undefined) selectedModule.value = saved.selectedModule
       if (saved.selectedStatus !== undefined) selectedStatus.value = saved.selectedStatus
       if (saved.selectedPriority !== undefined) selectedPriority.value = saved.selectedPriority
+      if (saved.selectedAssignee !== undefined) selectedAssignee.value = saved.selectedAssignee
       if (saved.advMilestone !== undefined) advMilestone.value = saved.advMilestone
       if (saved.advOverdue !== undefined) advOverdue.value = saved.advOverdue
       if (saved.advAssignee !== undefined) advAssignee.value = saved.advAssignee
@@ -509,6 +590,7 @@ function persistFilters() {
       selectedModule: selectedModule.value,
       selectedStatus: selectedStatus.value,
       selectedPriority: selectedPriority.value,
+      selectedAssignee: selectedAssignee.value,
       advMilestone: advMilestone.value,
       advOverdue: advOverdue.value,
       advAssignee: advAssignee.value,
@@ -528,6 +610,7 @@ watch(
     selectedModule,
     selectedStatus,
     selectedPriority,
+    selectedAssignee,
     advMilestone,
     advOverdue,
     advAssignee,
@@ -556,6 +639,7 @@ const hasActiveFilters = computed(() => {
     selectedModule.value !== 'All' ||
     selectedStatus.value !== 'All' ||
     selectedPriority.value !== 'All' ||
+    selectedAssignee.value !== 'All' ||
     activeAdvanceFilterCount.value > 0
   )
 })
@@ -573,6 +657,7 @@ function clearFilters() {
   selectedModule.value = 'All'
   selectedStatus.value = 'All'
   selectedPriority.value = 'All'
+  selectedAssignee.value = 'All'
   clearAdvanceFilters()
   try {
     sessionStorage.removeItem(SAVED_FILTERS_KEY)
@@ -621,7 +706,17 @@ const filteredTasks = computed(() => {
 
     // 6. Priority Filter
     if (selectedPriority.value !== 'All') {
-      if (task.priority !== selectedPriority.value) return false
+      if ((task.priority || 'Medium') !== selectedPriority.value) return false
+    }
+
+    // 6b. Assigned To Filter
+    if (selectedAssignee.value !== 'All') {
+      const emails = (task.assignees || []).map((a) => a.email)
+      if (selectedAssignee.value === UNASSIGNED) {
+        if (emails.length > 0) return false
+      } else if (!emails.includes(selectedAssignee.value)) {
+        return false
+      }
     }
 
     // 7. Advance Filters
